@@ -64,7 +64,7 @@ def read_txt(file):
 
 def summarize_chunk(chunk):
     max_retries = 5
-    retry_delay = 5  # initial delay in seconds
+    retry_delay = 20  # initial delay in seconds
 
     for attempt in range(max_retries):
         try:
@@ -102,7 +102,6 @@ def summarize_text(text):
             futures = [executor.submit(summarize_chunk, chunk) for chunk in chunks]
             for future in futures:
                 summaries.append(future.result())
-                time.sleep(5)  # Wait for 5 seconds to avoid rate limit issues
         
         # Combine all chunk summaries into a final summary
         final_summary = " ".join(summaries)
