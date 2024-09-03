@@ -25,8 +25,7 @@ def get_legal_advice(query, document_text=None):
             messages.append({"role": "user", "content": f"Here is the content of the uploaded document: {document_text}"})
         
         # Add chat history to messages
-        for chat in st.session_state.chat_history:
-            messages.append(chat)
+        messages.extend(st.session_state.chat_history)
         
         response = openai.ChatCompletion.create(
             model="gpt-4",
@@ -45,18 +44,11 @@ def get_legal_advice(query, document_text=None):
 
 def read_docx(file):
     doc = Document(file)
-    full_text = []
-    for para in doc.paragraphs:
-        full_text.append(para.text)
-    return '\n'.join(full_text)
+    return '\n'.join(para.text for para in doc.paragraphs)
 
 def read_pdf(file):
     pdf_document = fitz.open(stream=file.read(), filetype="pdf")
-    full_text = []
-    for page_num in range(len(pdf_document)):
-        page = pdf_document.load_page(page_num)
-        full_text.append(page.get_text())
-    return '\n'.join(full_text)
+    return '\n'.join(page.get_text() for page in pdf_document)
 
 def read_txt(file):
     return file.read().decode("utf-8")
