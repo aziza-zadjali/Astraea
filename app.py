@@ -1,3 +1,4 @@
+import time
 import streamlit as st
 import openai
 from docx import Document
@@ -82,6 +83,9 @@ def summarize_text(text):
             if not summary.endswith('.'):
                 summary += '.'
             summaries.append(summary)
+            
+            # Wait for 20 seconds to avoid rate limit issues
+            time.sleep(20)
         
         # Combine all chunk summaries into a final summary
         final_summary = " ".join(summaries)
