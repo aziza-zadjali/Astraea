@@ -94,8 +94,8 @@ def summarize_chunk(chunk):
 
 def summarize_text(text):
     try:
-        # Split the text into chunks of 2000 characters each
-        chunks = [text[i:i + 2000] for i in range(0, len(text), 2000)]
+        # Split the text into larger chunks of 4000 characters each
+        chunks = [text[i:i + 4000] for i in range(0, len(text), 4000)]
         summaries = []
         
         with ThreadPoolExecutor() as executor:
@@ -168,6 +168,11 @@ if feature == 'Upload a document':
                 # Update chat history
                 st.session_state.chat_history.append({"role": "user", "content": user_query})
                 st.session_state.chat_history.append({"role": "assistant", "content": response})
+                
+                if "An error occurred" in response:
+                    if st.button("Search for more information on the web"):
+                        st.write("Searching for more information on the web...")
+                        # Implement web search functionality here
         else:
             st.warning("Please enter a legal question.")
 
