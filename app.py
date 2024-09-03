@@ -43,15 +43,24 @@ def get_legal_advice(query, document_text=None):
         return f"An error occurred: {str(e)}"
 
 def read_docx(file):
-    doc = Document(file)
-    return '\n'.join(para.text for para in doc.paragraphs)
+    try:
+        doc = Document(file)
+        return '\n'.join(para.text for para in doc.paragraphs)
+    except Exception as e:
+        return f"An error occurred while reading the DOCX file: {str(e)}"
 
 def read_pdf(file):
-    pdf_document = fitz.open(stream=file.read(), filetype="pdf")
-    return '\n'.join(page.get_text() for page in pdf_document)
+    try:
+        pdf_document = fitz.open(stream=file.read(), filetype="pdf")
+        return '\n'.join(page.get_text() for page in pdf_document)
+    except Exception as e:
+        return f"An error occurred while reading the PDF file: {str(e)}"
 
 def read_txt(file):
-    return file.read().decode("utf-8")
+    try:
+        return file.read().decode("utf-8")
+    except Exception as e:
+        return f"An error occurred while reading the TXT file: {str(e)}"
 
 def summarize_chunk(chunk):
     max_retries = 5
@@ -142,9 +151,12 @@ if feature == 'Upload a document':
             else:
                 document_text = "Unsupported file type."
             
-            summary = summarize_text(document_text)
-            st.write("Document Summary:")
-            st.write(summary)
+            if "An error occurred" in document_text:
+                st.error(document_text)
+            else:
+                summary = summarize_text(document_text)
+                st.write("Document Summary:")
+                st.write(summary)
 
     user_query = st.text_area("Enter your legal question:", height=100)
 
