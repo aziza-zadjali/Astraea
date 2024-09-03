@@ -2,6 +2,8 @@ import streamlit as st
 import openai
 from docx import Document
 import fitz  # PyMuPDF
+import requests
+from bs4 import BeautifulSoup
 
 # Display the logo image
 st.image("logo.png", width=100)
@@ -68,13 +70,25 @@ def summarize_text(text):
     except Exception as e:
         return f"An error occurred while summarizing: {str(e)}"
 
+def fetch_laws_from_qanoon():
+    url = "https://qanoon.om"
+    response = requests.get(url)
+    soup = BeautifulSoup(response.content, 'html.parser')
+    
+    # Example: Extracting titles of laws
+    laws = []
+    for item in soup.find_all('div', class_='law-title'):
+        laws.append(item.text.strip())
+    
+    return laws
+
 st.title("Legal Query Assistant")
 
 st.write("This assistant uses GPT-4 to provide general legal information. Please note that this is not a substitute for professional legal advice.")
 
 # Sidebar layout with dropdown menu
 st.sidebar.title("Astraea")
-feature = st.sidebar.selectbox("Select a feature", ["Enter your legal question", "Upload a document"])
+feature = st.sidebar.selectbox("Select a feature", ["Enter your legal question", "Upload a document", "Fetch laws from Qanoon.om"])
 
 # Page for entering a legal question
 if feature == 'Enter your legal question':
@@ -120,5 +134,14 @@ if feature == 'Upload a document':
                 st.write(response)
         else:
             st.warning("Please enter a legal question.")
+
+# Page for fetching laws from Qanoon.om
+if feature == 'Fetch laws from Qanoon.om':
+    if st.button("Fetch Laws"):
+        with st.spinner("Fetching laws..."):
+            laws = fetch_laws_from_qanoon()
+            st.write("Laws from Qanoon.om:")
+            for law in laws:
+                st.write(law)
 
 st.write("Disclaimer: This AI assistant provides general information only. For specific legal advice, please consult with a qualified attorney.")
