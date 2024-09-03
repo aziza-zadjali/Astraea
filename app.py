@@ -24,7 +24,7 @@ def get_legal_advice(query, document_text=None):
             max_tokens=500
         )
         response_content = response.choices[0].message['content']
-        source_link = "Source: [1](https://openai.com/research/gpt-4)"
+        source_link = "Source: 1"
         return f"{response_content}\n\n{source_link}"
     except Exception as e:
         return f"An error occurred: {str(e)}"
