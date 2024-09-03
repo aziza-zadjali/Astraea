@@ -61,22 +61,31 @@ def read_txt(file):
 
 def summarize_text(text):
     try:
-        response = openai.ChatCompletion.create(
-            model="gpt-4",
-            messages=[
-                {"role": "system", "content": "You are a summarization assistant."},
-                {"role": "user", "content": f"Summarize the following text in a maximum of 50 words, ensuring it ends with a complete sentence:\n\n{text}"}
-            ],
-            max_tokens=50,
-            n=1,
-            stop=None,
-            temperature=0.5,
-        )
-        summary = response.choices[0].message['content'].strip()
-        # Ensure the summary ends with a complete sentence
-        if not summary.endswith('.'):
-            summary += '.'
-        return summary
+        # Split the text into chunks of 2000 characters each
+        chunks = [text[i:i + 2000] for i in range(0, len(text), 2000)]
+        summaries = []
+        
+        for chunk in chunks:
+            response = openai.ChatCompletion.create(
+                model="gpt-4",
+                messages=[
+                    {"role": "system", "content": "You are a summarization assistant."},
+                    {"role": "user", "content": f"Summarize the following text in a maximum of 50 words, ensuring it ends with a complete sentence:\n\n{chunk}"}
+                ],
+                max_tokens=50,
+                n=1,
+                stop=None,
+                temperature=0.5,
+            )
+            summary = response.choices[0].message['content'].strip()
+            # Ensure the summary ends with a complete sentence
+            if not summary.endswith('.'):
+                summary += '.'
+            summaries.append(summary)
+        
+        # Combine all chunk summaries into a final summary
+        final_summary = " ".join(summaries)
+        return final_summary
     except Exception as e:
         return f"An error occurred while summarizing: {str(e)}"
 
