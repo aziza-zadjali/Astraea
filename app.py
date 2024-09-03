@@ -3,6 +3,7 @@ import streamlit as st
 import openai
 from docx import Document
 import fitz  # PyMuPDF
+from concurrent.futures import ThreadPoolExecutor
 
 # Display the logo image
 st.image("logo.png", width=100)
@@ -60,32 +61,34 @@ def read_pdf(file):
 def read_txt(file):
     return file.read().decode("utf-8")
 
+def summarize_chunk(chunk):
+    response = openai.ChatCompletion.create(
+        model="gpt-4",
+        messages=[
+            {"role": "system", "content": "You are a summarization assistant."},
+            {"role": "user", "content": f"Summarize the following text in a maximum of 50 words, ensuring it ends with a complete sentence:\n\n{chunk}"}
+        ],
+        max_tokens=50,
+        n=1,
+        stop=None,
+        temperature=0.5,
+    )
+    summary = response.choices[0].message['content'].strip()
+    if not summary.endswith('.'):
+        summary += '.'
+    return summary
+
 def summarize_text(text):
     try:
         # Split the text into chunks of 2000 characters each
         chunks = [text[i:i + 2000] for i in range(0, len(text), 2000)]
         summaries = []
         
-        for chunk in chunks:
-            response = openai.ChatCompletion.create(
-                model="gpt-4",
-                messages=[
-                    {"role": "system", "content": "You are a summarization assistant."},
-                    {"role": "user", "content": f"Summarize the following text in a maximum of 50 words, ensuring it ends with a complete sentence:\n\n{chunk}"}
-                ],
-                max_tokens=50,
-                n=1,
-                stop=None,
-                temperature=0.5,
-            )
-            summary = response.choices[0].message['content'].strip()
-            # Ensure the summary ends with a complete sentence
-            if not summary.endswith('.'):
-                summary += '.'
-            summaries.append(summary)
-            
-            # Wait for 20 seconds to avoid rate limit issues
-            time.sleep(20)
+        with ThreadPoolExecutor() as executor:
+            futures = [executor.submit(summarize_chunk, chunk) for chunk in chunks]
+            for future in futures:
+                summaries.append(future.result())
+                time.sleep(20)  # Wait for 20 seconds to avoid rate limit issues
         
         # Combine all chunk summaries into a final summary
         final_summary = " ".join(summaries)
