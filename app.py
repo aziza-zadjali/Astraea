@@ -62,21 +62,34 @@ def read_txt(file):
     return file.read().decode("utf-8")
 
 def summarize_chunk(chunk):
-    response = openai.ChatCompletion.create(
-        model="gpt-4",
-        messages=[
-            {"role": "system", "content": "You are a summarization assistant."},
-            {"role": "user", "content": f"Summarize the following text in a maximum of 50 words, ensuring it ends with a complete sentence:\n\n{chunk}"}
-        ],
-        max_tokens=50,
-        n=1,
-        stop=None,
-        temperature=0.5,
-    )
-    summary = response.choices[0].message['content'].strip()
-    if not summary.endswith('.'):
-        summary += '.'
-    return summary
+    max_retries = 5
+    retry_delay = 20  # initial delay in seconds
+
+    for attempt in range(max_retries):
+        try:
+            response = openai.ChatCompletion.create(
+                model="gpt-4",
+                messages=[
+                    {"role": "system", "content": "You are a summarization assistant."},
+                    {"role": "user", "content": f"Summarize the following text in a maximum of 50 words, ensuring it ends with a complete sentence:\n\n{chunk}"}
+                ],
+                max_tokens=50,
+                n=1,
+                stop=None,
+                temperature=0.5,
+            )
+            summary = response.choices[0].message['content'].strip()
+            if not summary.endswith('.'):
+                summary += '.'
+            return summary
+        except openai.error.RateLimitError:
+            if attempt < max_retries - 1:
+                time.sleep(retry_delay)
+                retry_delay *= 2  # exponential backoff
+            else:
+                return "An error occurred: Rate limit exceeded. Please try again later."
+        except Exception as e:
+            return f"An error occurred: {str(e)}"
 
 def summarize_text(text):
     try:
