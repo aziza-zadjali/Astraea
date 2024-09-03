@@ -4,6 +4,7 @@ import openai
 from docx import Document
 import fitz  # PyMuPDF
 from concurrent.futures import ThreadPoolExecutor
+from transformers import pipeline
 
 # Display the logo image
 st.image("logo.png", width=100)
@@ -62,50 +63,14 @@ def read_txt(file):
     except Exception as e:
         return f"An error occurred while reading the TXT file: {str(e)}"
 
-def summarize_chunk(chunk):
-    max_retries = 5
-    retry_delay = 20  # initial delay in seconds
-
-    for attempt in range(max_retries):
-        try:
-            response = openai.ChatCompletion.create(
-                model="gpt-4",
-                messages=[
-                    {"role": "system", "content": "You are a summarization assistant."},
-                    {"role": "user", "content": f"Summarize the following text in a maximum of 50 words, ensuring it ends with a complete sentence:\n\n{chunk}"}
-                ],
-                max_tokens=50,
-                n=1,
-                stop=None,
-                temperature=0.5,
-            )
-            summary = response.choices[0].message['content'].strip()
-            if not summary.endswith('.'):
-                summary += '.'
-            return summary
-        except openai.error.RateLimitError:
-            if attempt < max_retries - 1:
-                time.sleep(retry_delay)
-                retry_delay *= 2  # exponential backoff
-            else:
-                return "An error occurred: Rate limit exceeded. Please try again later."
-        except Exception as e:
-            return f"An error occurred: {str(e)}"
+# Initialize the summarization pipeline
+summarizer = pipeline("summarization")
 
 def summarize_text(text):
     try:
-        # Split the text into larger chunks of 4000 characters each
-        chunks = [text[i:i + 4000] for i in range(0, len(text), 4000)]
-        summaries = []
-        
-        with ThreadPoolExecutor() as executor:
-            futures = [executor.submit(summarize_chunk, chunk) for chunk in chunks]
-            for future in futures:
-                summaries.append(future.result())
-        
-        # Combine all chunk summaries into a final summary
-        final_summary = " ".join(summaries)
-        return final_summary
+        # Use the summarization pipeline to summarize the text
+        summary = summarizer(text, max_length=150, min_length=30, do_sample=False)
+        return summary[0]['summary_text']
     except Exception as e:
         return f"An error occurred while summarizing: {str(e)}"
 
