@@ -9,6 +9,10 @@ st.image("logo.png", width=100)
 # Initialize the OpenAI client
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 
+# Initialize chat history
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = []
+
 def get_legal_advice(query, document_text=None):
     try:
         messages = [
@@ -18,6 +22,10 @@ def get_legal_advice(query, document_text=None):
         if document_text:
             messages.append({"role": "user", "content": f"Here is the content of the uploaded document: {document_text}"})
         
+        # Add chat history to messages
+        for chat in st.session_state.chat_history:
+            messages.append(chat)
+        
         response = openai.ChatCompletion.create(
             model="gpt-4",
             messages=messages,
@@ -25,6 +33,10 @@ def get_legal_advice(query, document_text=None):
         )
         response_content = response.choices[0].message['content']
         source_link = "Source: 1"
+        
+        # Update chat history
+        st.session_state.chat_history.append({"role": "assistant", "content": response_content})
+        
         return f"{response_content}\n\n{source_link}"
     except Exception as e:
         return f"An error occurred: {str(e)}"
@@ -86,6 +98,9 @@ if feature == 'Enter your legal question':
                 response = get_legal_advice(user_query)
                 st.write("Response:")
                 st.write(response)
+                # Update chat history
+                st.session_state.chat_history.append({"role": "user", "content": user_query})
+                st.session_state.chat_history.append({"role": "assistant", "content": response})
         else:
             st.warning("Please enter a legal question.")
 
@@ -118,6 +133,9 @@ if feature == 'Upload a document':
                 response = get_legal_advice(user_query, document_text)
                 st.write("Response:")
                 st.write(response)
+                # Update chat history
+                st.session_state.chat_history.append({"role": "user", "content": user_query})
+                st.session_state.chat_history.append({"role": "assistant", "content": response})
         else:
             st.warning("Please enter a legal question.")
 
