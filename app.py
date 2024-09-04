@@ -64,13 +64,17 @@ def read_txt(file):
         return f"An error occurred while reading the TXT file: {str(e)}"
 
 # Initialize the summarization pipeline
-summarizer = pipeline("summarization")
+summarizer = pipeline("summarization", model="facebook/bart-large-cnn", revision="main")
+
+def chunk_text(text, max_length=1024):
+    # Split text into chunks of max_length
+    return [text[i:i+max_length] for i in range(0, len(text), max_length)]
 
 def summarize_text(text):
     try:
-        # Use the summarization pipeline to summarize the text
-        summary = summarizer(text, max_length=150, min_length=30, do_sample=False)
-        return summary[0]['summary_text']
+        chunks = chunk_text(text)
+        summaries = [summarizer(chunk, max_length=150, min_length=30, do_sample=False)[0]['summary_text'] for chunk in chunks]
+        return " ".join(summaries)
     except Exception as e:
         return f"An error occurred while summarizing: {str(e)}"
 
