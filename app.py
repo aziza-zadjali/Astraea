@@ -4,7 +4,6 @@ import openai
 from docx import Document
 import fitz  # PyMuPDF
 from concurrent.futures import ThreadPoolExecutor
-from transformers import pipeline
 
 # Display the logo image
 st.image("logo.png", width=100)
@@ -63,18 +62,22 @@ def read_txt(file):
     except Exception as e:
         return f"An error occurred while reading the TXT file: {str(e)}"
 
-# Initialize the summarization pipeline
-summarizer = pipeline("summarization", model="facebook/bart-large-cnn", revision="main")
-
-def chunk_text(text, max_length=1024):
-    # Split text into chunks of max_length
-    return [text[i:i+max_length] for i in range(0, len(text), max_length)]
-
 def summarize_text(text):
     try:
-        chunks = chunk_text(text)
-        summaries = [summarizer(chunk, max_length=150, min_length=30, do_sample=False)[0]['summary_text'] for chunk in chunks]
-        return " ".join(summaries)
+        messages = [
+            {"role": "system", "content": "You are Astraea, a knowledgeable legal assistant with access to extensive legal information. Your role is to assist lawyers, law firms, and the general public by providing general legal information. Please ensure to remind users that for specific legal issues, consulting a qualified attorney is recommended."},
+            {"role": "user", "content": f"Please summarize the following text: {text}"}
+        ]
+        
+        response = openai.ChatCompletion.create(
+            model="gpt-4",
+            messages=messages,
+            max_tokens=150
+        )
+        
+        summary = response.choices[0].message['content']
+        
+        return summary
     except Exception as e:
         return f"An error occurred while summarizing: {str(e)}"
 
