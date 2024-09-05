@@ -1,9 +1,9 @@
 import streamlit as st
 from PyPDF2 import PdfReader
 import openai
-from langchain.chat_models import ChatOpenAI
+from langchain_community.chat_models import ChatOpenAI
 from langchain.prompts import PromptTemplate
-from langchain.chains import LLMChain
+from langchain.chains import RunnableSequence
 
 # Set up Streamlit app layout
 st.title("Astraea GenAI Legal Assistant")
@@ -73,9 +73,9 @@ if openai.api_key:
     Answer:
     """
 
-    # Create a prompt template and LLM chain
+    # Create a prompt template and RunnableSequence chain
     prompt = PromptTemplate(input_variables=["question", "document"], template=template)
-    chain = LLMChain(llm=llm, prompt=prompt)
+    chain = prompt | llm
 
     # User input section for legal question
     question = st.text_area("Ask your legal question")
@@ -88,7 +88,7 @@ if openai.api_key:
                 selected_document = document_chunks[0] if len(document_chunks) > 0 else ""
                 
                 # Send the first chunk to the model
-                response = chain.run({"question": question, "document": selected_document})
+                response = chain.invoke({"question": question, "document": selected_document})
                 st.write(response)
             else:
                 st.error("Please upload a document first.")
