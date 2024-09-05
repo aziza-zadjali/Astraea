@@ -1,9 +1,9 @@
 import streamlit as st
+from langchain_openai import ChatOpenAI  # Updated import from langchain_openai
+from langchain.prompts import PromptTemplate
+from langchain.chains import LLMChain  # We will keep this for now as the best alternative
 from PyPDF2 import PdfReader
 import openai
-from langchain_community.chat_models import ChatOpenAI
-from langchain.prompts import PromptTemplate
-from langchain.chains import LLMChain
 
 # Set up Streamlit app layout
 st.title("Astraea GenAI Legal Assistant")
@@ -54,7 +54,7 @@ if uploaded_file:
 else:
     st.warning("Please upload a PDF legal document.")
 
-# Retrieve OpenAI API key from secrets and set it
+# Retrieve OpenAI API key from Streamlit secrets
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 # If the API key is provided, set up the Chat model and query function
@@ -73,8 +73,10 @@ if openai.api_key:
     Answer:
     """
 
-    # Create a prompt template and LLM chain
+    # Create a prompt template
     prompt = PromptTemplate(input_variables=["question", "document"], template=template)
+
+    # Use LLMChain for chaining prompt and model
     chain = LLMChain(llm=llm, prompt=prompt)
 
     # User input section for legal question
