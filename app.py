@@ -57,9 +57,9 @@ def read_pdf(file):
         return f"An error occurred while reading the PDF file: {str(e)}"
 
 # Add a dropdown button on the left side of the layout
-feature_option = st.sidebar.selectbox("Select a feature", ["Upload a Document", "Get Legal Advice"])
+feature_option = st.sidebar.selectbox("Select a feature", ["Upload a Document and Ask Questions"])
 
-if feature_option == "Upload a Document":
+if feature_option == "Upload a Document and Ask Questions":
     uploaded_file = st.file_uploader("Upload a document", type=["docx", "pdf", "txt"])
     if uploaded_file:
         if uploaded_file.type == "application/pdf":
@@ -70,28 +70,38 @@ if feature_option == "Upload a Document":
             document_text = uploaded_file.getvalue().decode("utf-8")
 
         if document_text:
-            st.write("Document Text:")
-            st.write(document_text)
+            user_query = st.text_area("Enter your question about the document:", height=100)
+            if st.button("Get Information"):
+                if user_query:
+                    with st.spinner("Analyzing your query..."):
+                        response = get_legal_advice(user_query, document_text=document_text)
+                        st.write("Response:")
+                        st.write(response)
+                        # Update chat history
+                        st.session_state.chat_history.append({"role": "user", "content": user_query})
+                        st.session_state.chat_history.append({"role": "assistant", "content": response})
+
+                        # Move the question input to the end of the last response
+                        user_query = st.text_area("Enter your question about the document:", height=100, key="new_question")
+                        if st.button("Get Information", key="new_button"):
+                            if user_query:
+                                with st.spinner("Analyzing your query..."):
+                                    response = get_legal_advice(user_query, document_text=document_text)
+                                    st.write("Response:")
+                                    st.write(response)
+                                    # Update chat history
+                                    st.session_state.chat_history.append({"role": "user", "content": user_query})
+                                    st.session_state.chat_history.append({"role": "assistant", "content": response})
+
+                                    if "An error occurred" in response:
+                                        if st.button("Search for more information on the web"):
+                                            st.write("Searching for more information on the web...")
+                                            # Implement web search functionality here
+                            else:
+                                st.warning("Please enter a question about the document.")
+                else:
+                    st.warning("Please enter a question about the document.")
         else:
             st.warning("Please upload a valid document.")
-
-elif feature_option == "Get Legal Advice":
-    user_query = st.text_area("Enter your legal question:", height=100)
-    if st.button("Get Legal Information"):
-        if user_query:
-            with st.spinner("Analyzing your query..."):
-                response = get_legal_advice(user_query)
-                st.write("Response:")
-                st.write(response)
-                # Update chat history
-                st.session_state.chat_history.append({"role": "user", "content": user_query})
-                st.session_state.chat_history.append({"role": "assistant", "content": response})
-
-                if "An error occurred" in response:
-                    if st.button("Search for more information on the web"):
-                        st.write("Searching for more information on the web...")
-                        # Implement web search functionality here
-        else:
-            st.warning("Please enter a legal question.")
 
 st.write("Disclaimer: This AI assistant provides general information only. For specific legal advice, please consult with a qualified attorney.")
