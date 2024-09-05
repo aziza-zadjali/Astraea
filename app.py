@@ -2,7 +2,7 @@ import time
 import streamlit as st
 import openai
 from docx import Document
-import fitz  # PyMuPDF
+from pdfminer.high_level import extract_text
 from concurrent.futures import ThreadPoolExecutor
 
 # Display the logo image
@@ -51,73 +51,47 @@ def read_docx(file):
 
 def read_pdf(file):
     try:
-        pdf_document = fitz.open(stream=file.read(), filetype='pdf')
-        text = ''
-        for page in pdf_document:
-            text += page.get_text()
+        text = extract_text(file)
         return text
     except Exception as e:
         return f"An error occurred while reading the PDF file: {str(e)}"
 
-def summarize_text(text):
-    # Placeholder for summarization logic or API call
-    return text[:500]  # Returning the first 500 characters for demonstration
+# Add a dropdown button on the left side of the layout
+feature_option = st.sidebar.selectbox("Select a feature", ["Upload a Document", "Get Legal Advice"])
 
-def read_and_summarize_document(file, file_type):
-    # Depending on file type, read the document
-    if file_type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-        document_text = read_docx(file)
-    elif file_type == "application/pdf":
-        document_text = read_pdf(file)
-    elif file_type == "text/plain":
-        document_text = file.getvalue().decode("utf-8")
-    else:
-        return "Unsupported file type.", None
+if feature_option == "Upload a Document":
+    uploaded_file = st.file_uploader("Upload a document", type=["docx", "pdf", "txt"])
+    if uploaded_file:
+        if uploaded_file.type == "application/pdf":
+            document_text = read_pdf(uploaded_file)
+        elif uploaded_file.type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+            document_text = read_docx(uploaded_file)
+        else:
+            document_text = uploaded_file.getvalue().decode("utf-8")
 
-    if "An error occurred" in document_text:
-        return document_text, None
+        if document_text:
+            st.write("Document Text:")
+            st.write(document_text)
+        else:
+            st.warning("Please upload a valid document.")
 
-    # Summarize the text
-    summary = summarize_text(document_text)
-    return document_text, summary
+elif feature_option == "Get Legal Advice":
+    user_query = st.text_area("Enter your legal question:", height=100)
+    if st.button("Get Legal Information"):
+        if user_query:
+            with st.spinner("Analyzing your query..."):
+                response = get_legal_advice(user_query)
+                st.write("Response:")
+                st.write(response)
+                # Update chat history
+                st.session_state.chat_history.append({"role": "user", "content": user_query})
+                st.session_state.chat_history.append({"role": "assistant", "content": response})
 
-def handle_document(uploaded_file):
-    if uploaded_file is not None:
-        file_type = uploaded_file.type
-        with ThreadPoolExecutor(max_workers=2) as executor:
-            future = executor.submit(read_and_summarize_document, uploaded_file, file_type)
-            document_text, summary = future.result()
-            return document_text, summary
-    else:
-        return "No file uploaded.", None
-
-uploaded_file = st.file_uploader("Upload a document", type=["docx", "pdf", "txt"])
-if uploaded_file:
-    document_text, summary = handle_document(uploaded_file)
-    if document_text and summary:
-        st.write("Document Summary:")
-        st.write(summary)
-    elif document_text:
-        st.error(document_text)
-    else:
-        st.warning("Please upload a valid document.")
-
-user_query = st.text_area("Enter your legal question:", height=100)
-if st.button("Get Legal Information"):
-    if user_query:
-        with st.spinner("Analyzing your query..."):
-            response = get_legal_advice(user_query, document_text)
-            st.write("Response:")
-            st.write(response)
-            # Update chat history
-            st.session_state.chat_history.append({"role": "user", "content": user_query})
-            st.session_state.chat_history.append({"role": "assistant", "content": response})
-
-            if "An error occurred" in response:
-                if st.button("Search for more information on the web"):
-                    st.write("Searching for more information on the web...")
-                    # Implement web search functionality here
-    else:
-        st.warning("Please enter a legal question.")
+                if "An error occurred" in response:
+                    if st.button("Search for more information on the web"):
+                        st.write("Searching for more information on the web...")
+                        # Implement web search functionality here
+        else:
+            st.warning("Please enter a legal question.")
 
 st.write("Disclaimer: This AI assistant provides general information only. For specific legal advice, please consult with a qualified attorney.")
