@@ -1,100 +1,111 @@
 import streamlit as st
-from langchain_openai import ChatOpenAI  # Updated import from langchain_openai
-from langchain.prompts import PromptTemplate
-from langchain.chains import LLMChain  # We will keep this for now as the best alternative
-from PyPDF2 import PdfReader
 import openai
+from docx import Document
+import fitz  # PyMuPDF
+import requests
+from bs4 import BeautifulSoup
 
-# Set up Streamlit app layout
-st.title("Astraea GenAI Legal Assistant")
-st.sidebar.header("Legal Query Assistant")
-
-# Function to read and extract text from the uploaded PDF file
-def read_pdf(file):
-    pdf = PdfReader(file)
-    text = ""
-    for page in pdf.pages:
-        text += page.extract_text()
-    return text
-
-# Function to split text into smaller chunks (for large documents)
-def split_text(text, max_tokens=3000):
-    sentences = text.split(". ")
-    chunks = []
-    current_chunk = []
-    current_chunk_tokens = 0
-
-    for sentence in sentences:
-        token_count = len(sentence.split())
-        if current_chunk_tokens + token_count > max_tokens:
-            chunks.append(". ".join(current_chunk))
-            current_chunk = [sentence]
-            current_chunk_tokens = token_count
-        else:
-            current_chunk.append(sentence)
-            current_chunk_tokens += token_count
-
-    # Add any remaining text
-    if current_chunk:
-        chunks.append(". ".join(current_chunk))
-
-    return chunks
-
-# Upload PDF document
-uploaded_file = st.sidebar.file_uploader("Upload a legal document", type=["pdf"])
-
-# If a document is uploaded, read and split it into chunks
-if uploaded_file:
-    document_text = read_pdf(uploaded_file)
-    st.write("Document uploaded and processed successfully!")
-    
-    # Split the document into smaller chunks
-    document_chunks = split_text(document_text, max_tokens=3000)
-    st.write(f"Document split into {len(document_chunks)} chunks.")
-else:
-    st.warning("Please upload a PDF legal document.")
-
-# Retrieve OpenAI API key from Streamlit secrets
+# Initialize the OpenAI client
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 
-# If the API key is provided, set up the Chat model and query function
-if openai.api_key:
-    # Initialize ChatOpenAI with the newer model like gpt-3.5-turbo
-    llm = ChatOpenAI(model="gpt-3.5-turbo", openai_api_key=openai.api_key)
+def get_legal_advice(query, document_text=None):
+    try:
+        messages = [
+            {"role": "system", "content": "You are a helpful legal assistant Astraea which has all the legal information in the world and is the best assistant for lawyers, law firms, and a common citizen. Provide general legal information and advice, but remind the user to consult with a qualified attorney for specific legal issues."},
+            {"role": "user", "content": query}
+        ]
+        if document_text:
+            messages.append({"role": "user", "content": f"Here is the content of the uploaded document: {document_text}"})
+        
+        response = openai.ChatCompletion.create(
+            model="gpt-4",
+            messages=messages,
+            max_tokens=500
+        )
+        return response.choices[0].message['content']
+    except Exception as e:
+        return f"An error occurred: {str(e)}"
 
-    # Define the prompt template
-    template = """
-    You are a legal assistant. Answer the following question based on the provided legal document.
-    
-    Question: {question}
-    
-    Legal Document: {document}
-    
-    Answer:
-    """
+def read_docx(file):
+    doc = Document(file)
+    full_text = []
+    for para in doc.paragraphs:
+        full_text.append(para.text)
+    return '\n'.join(full_text)
 
-    # Create a prompt template
-    prompt = PromptTemplate(input_variables=["question", "document"], template=template)
+def read_pdf(file):
+    pdf_document = fitz.open(stream=file.read(), filetype="pdf")
+    full_text = []
+    for page_num in range(len(pdf_document)):
+        page = pdf_document.load_page(page_num)
+        full_text.append(page.get_text())
+    return '\n'.join(full_text)
 
-    # Use LLMChain for chaining prompt and model
-    chain = LLMChain(llm=llm, prompt=prompt)
+def read_txt(file):
+    return file.read().decode("utf-8")
 
-    # User input section for legal question
-    question = st.text_area("Ask your legal question")
+st.title("Astraea - Legal Query Assistant")
 
-    # When the user submits the question
-    if st.button("Submit"):
-        if question:
-            if uploaded_file:
-                # Use the first chunk of the document to reduce token size
-                selected_document = document_chunks[0] if len(document_chunks) > 0 else ""
-                
-                # Send the first chunk to the model
-                response = chain.run({"question": question, "document": selected_document})
-                st.write(response)
+st.write("This assistant uses GPT-4 to provide general legal information. Please note that this is not a substitute for professional legal advice.")
+
+# Dropdown menu for selecting features
+option = st.selectbox(
+    'Choose a feature',
+    ('Query from Document', 'Get Legal Advice')
+)
+
+if option == 'Query from Document':
+    uploaded_file = st.file_uploader("Upload a document", type=["docx", "pdf", "txt"])
+
+    document_text = None
+    if uploaded_file is not None:
+        file_type = uploaded_file.type
+        with st.spinner("Reading document..."):
+            if file_type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+                document_text = read_docx(uploaded_file)
+            elif file_type == "application/pdf":
+                document_text = read_pdf(uploaded_file)
+            elif file_type == "text/plain":
+                document_text = read_txt(uploaded_file)
             else:
-                st.error("Please upload a document first.")
+                document_text = "Unsupported file type."
+
+    if document_text:
+        if 'chat_history' not in st.session_state:
+            st.session_state.chat_history = []
+
+        user_query = st.text_area("Enter your query:", height=100)
+
+        if st.button("Query Document"):
+            if user_query:
+                with st.spinner("Analyzing your query..."):
+                    response = get_legal_advice(user_query, document_text)
+                    st.session_state.chat_history.append({"query": user_query, "response": response})
+                    user_query = ""
+
+        if st.session_state.chat_history:
+            for i, chat in enumerate(st.session_state.chat_history):
+                st.write(f"**User:** {chat['query']}")
+                st.write(f"**Astraea:** {chat['response']}")
+                if i == len(st.session_state.chat_history) - 1:
+                    user_query = st.text_area("Enter your query:", height=100, key=f"query_{i}")
+                    if st.button("Query Document", key=f"button_{i}"):
+                        if user_query:
+                            with st.spinner("Analyzing your query..."):
+                                response = get_legal_advice(user_query, document_text)
+                                st.session_state.chat_history.append({"query": user_query, "response": response})
+                                user_query = ""
+
+elif option == 'Get Legal Advice':
+    user_query = st.text_area("Enter your legal question:", height=100)
+
+    if st.button("Get Legal Information"):
+        if user_query:
+            with st.spinner("Analyzing your query..."):
+                response = get_legal_advice(user_query)
+                st.write("Response:")
+                st.write(response)
         else:
-            st.error("Please enter a valid legal query.")
-else:
-    st.error("API key is not configured")
+            st.warning("Please enter a legal question.")
+
+st.write("Disclaimer: This AI assistant provides general information only. For specific legal advice, please consult with a qualified attorney.")
