@@ -1,107 +1,99 @@
-import time
 import streamlit as st
+import os
+from langchain.chat_models import ChatOpenAI
+from langchain.prompts import PromptTemplate
+from langchain.chains import LLMChain
+from PyPDF2 import PdfReader
 import openai
-from docx import Document
-from pdfminer.high_level import extract_text
-from concurrent.futures import ThreadPoolExecutor
 
-# Display the logo image
-st.image("logo.png", width=100)
+# Set up Streamlit app layout
+st.title("Astraea GenAI Legal Assistant")
+st.sidebar.header("Legal Query Assistant")
 
-# Initialize the OpenAI client
+# Function to read and extract text from the uploaded PDF file
+def read_pdf(file):
+    pdf = PdfReader(file)
+    text = ""
+    for page in pdf.pages:
+        text += page.extract_text()
+    return text
+
+# Function to split text into smaller chunks (for large documents)
+def split_text(text, max_tokens=3000):
+    sentences = text.split(". ")
+    chunks = []
+    current_chunk = []
+    current_chunk_tokens = 0
+
+    for sentence in sentences:
+        token_count = len(sentence.split())
+        if current_chunk_tokens + token_count > max_tokens:
+            chunks.append(". ".join(current_chunk))
+            current_chunk = [sentence]
+            current_chunk_tokens = token_count
+        else:
+            current_chunk.append(sentence)
+            current_chunk_tokens += token_count
+
+    # Add any remaining text
+    if current_chunk:
+        chunks.append(". ".join(current_chunk))
+
+    return chunks
+
+# Upload PDF document
+uploaded_file = st.sidebar.file_uploader("Upload a legal document", type=["pdf"])
+
+# If a document is uploaded, read and split it into chunks
+if uploaded_file:
+    document_text = read_pdf(uploaded_file)
+    st.write("Document uploaded and processed successfully!")
+    
+    # Split the document into smaller chunks
+    document_chunks = split_text(document_text, max_tokens=3000)
+    st.write(f"Document split into {len(document_chunks)} chunks.")
+else:
+    st.warning("Please upload a PDF legal document.")
+
+# Retrieve OpenAI API key from secrets and set it
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 
-# Initialize chat history
-if "chat_history" not in st.session_state:
-    st.session_state.chat_history = []
+# If the API key is provided, set up the Chat model and query function
+if openai.api_key:
+    # Initialize ChatOpenAI with the newer model like gpt-3.5-turbo
+    llm = ChatOpenAI(model="gpt-3.5-turbo", openai_api_key=openai.api_key)
 
-def get_legal_advice(query, document_text=None):
-    try:
-        messages = [
-            {"role": "system", "content": "You are Astraea, a knowledgeable legal assistant with access to extensive legal information. Your role is to assist lawyers, law firms, and the general public by providing general legal information. Please ensure to remind users that for specific legal issues, consulting a qualified attorney is recommended."},
-            {"role": "user", "content": query}
-        ]
-        if document_text:
-            messages.append({"role": "user", "content": f"Here is the content of the uploaded document: {document_text}"})
+    # Define the prompt template
+    template = """
+    You are a legal assistant. Answer the following question based on the provided legal document.
+    
+    Question: {question}
+    
+    Legal Document: {document}
+    
+    Answer:
+    """
 
-        # Add chat history to messages
-        messages.extend(st.session_state.chat_history)
+    # Create a prompt template and LLM chain
+    prompt = PromptTemplate(input_variables=["question", "document"], template=template)
+    chain = LLMChain(llm=llm, prompt=prompt)
 
-        response = openai.ChatCompletion.create(
-            model="gpt-4",
-            messages=messages,
-            max_tokens=500
-        )
-        response_content = response.choices[0].message['content']
-        source_link = "Source: 1"
+    # User input section for legal question
+    question = st.text_area("Ask your legal question")
 
-        # Update chat history
-        st.session_state.chat_history.append({"role": "assistant", "content": response_content})
-
-        return f"{response_content}\n\n{source_link}"
-    except Exception as e:
-        return f"An error occurred: {str(e)}"
-
-def read_docx(file):
-    try:
-        doc = Document(file)
-        return '\n'.join(para.text for para in doc.paragraphs)
-    except Exception as e:
-        return f"An error occurred while reading the DOCX file: {str(e)}"
-
-def read_pdf(file):
-    try:
-        text = extract_text(file)
-        return text
-    except Exception as e:
-        return f"An error occurred while reading the PDF file: {str(e)}"
-
-# Add a dropdown button on the left side of the layout
-feature_option = st.sidebar.selectbox("Select a feature", ["Upload a Document and Ask Questions"])
-
-if feature_option == "Upload a Document and Ask Questions":
-    uploaded_file = st.file_uploader("Upload a document", type=["docx", "pdf", "txt"])
-    if uploaded_file:
-        if uploaded_file.type == "application/pdf":
-            document_text = read_pdf(uploaded_file)
-        elif uploaded_file.type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-            document_text = read_docx(uploaded_file)
+    # When the user submits the question
+    if st.button("Submit"):
+        if question:
+            if uploaded_file:
+                # Use the first chunk of the document to reduce token size
+                selected_document = document_chunks[0] if len(document_chunks) > 0 else ""
+                
+                # Send the first chunk to the model
+                response = chain.run({"question": question, "document": selected_document})
+                st.write(response)
+            else:
+                st.error("Please upload a document first.")
         else:
-            document_text = uploaded_file.getvalue().decode("utf-8")
-
-        if document_text:
-            user_query = st.text_area("Enter your question about the document:", height=100)
-            if st.button("Get Information"):
-                if user_query:
-                    with st.spinner("Analyzing your query..."):
-                        response = get_legal_advice(user_query, document_text=document_text)
-                        st.write("Response:")
-                        st.write(response)
-                        # Update chat history
-                        st.session_state.chat_history.append({"role": "user", "content": user_query})
-                        st.session_state.chat_history.append({"role": "assistant", "content": response})
-
-                        # Move the question input to the end of the last response
-                        user_query = st.text_area("Enter your question about the document:", height=100, key="new_question")
-                        if st.button("Get Information", key="new_button"):
-                            if user_query:
-                                with st.spinner("Analyzing your query..."):
-                                    response = get_legal_advice(user_query, document_text=document_text)
-                                    st.write("Response:")
-                                    st.write(response)
-                                    # Update chat history
-                                    st.session_state.chat_history.append({"role": "user", "content": user_query})
-                                    st.session_state.chat_history.append({"role": "assistant", "content": response})
-
-                                    if "An error occurred" in response:
-                                        if st.button("Search for more information on the web"):
-                                            st.write("Searching for more information on the web...")
-                                            # Implement web search functionality here
-                            else:
-                                st.warning("Please enter a question about the document.")
-                else:
-                    st.warning("Please enter a question about the document.")
-        else:
-            st.warning("Please upload a valid document.")
-
-st.write("Disclaimer: This AI assistant provides general information only. For specific legal advice, please consult with a qualified attorney.")
+            st.error("Please enter a valid legal query.")
+else:
+    st.error("API key is not configured")
