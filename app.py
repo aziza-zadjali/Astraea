@@ -1,5 +1,4 @@
 import streamlit as st
-import os
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
@@ -55,7 +54,7 @@ if uploaded_file:
 else:
     st.warning("Please upload a PDF legal document.")
 
-# Retrieve OpenAI API key from secrets and set it
+# Retrieve OpenAI API key from Streamlit secrets
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 # If the API key is provided, set up the Chat model and query function
