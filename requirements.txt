@@ -1,6 +1,6 @@
 streamlit
-langchain-community
-langchain-openai
-PyPDF2
 openai
-pycryptodome
+python-docx
+pymupdf
+requests
+beautifulsoup4
