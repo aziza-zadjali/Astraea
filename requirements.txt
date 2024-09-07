@@ -4,3 +4,8 @@ python-docx
 pymupdf
 requests
 beautifulsoup4
+PyMuPDF
+pyarabic
+tenacity
+arabic-reshaper
+python-bidi
