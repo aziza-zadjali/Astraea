@@ -11,14 +11,12 @@ import io
 import sqlite3
 from functools import lru_cache
 import os
-from openai import OpenAI
 
 # Set page config at the very beginning
 st.set_page_config(page_title="Astraea - Legal Query Assistant", page_icon="⚖️", layout="wide")
 
 # Initialize the OpenAI client
 openai.api_key = st.secrets["OPENAI_API_KEY"]
-client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 # Define the path to your database directory
 DATABASE_DIR = "database"
@@ -61,29 +59,66 @@ def get_legal_advice(query, document_text=None, language="en"):
         ]
 
         if document_text:
-            context_prompt = {
-                "en": f"Document context: {document_text}\n\nProvide a detailed summary of the case, including the type of case, parties involved, main legal issues, and the court's decision if available.",
-                "ar": f"سياق الوثيقة: {document_text}\n\nقدم ملخصًا مفصلاً للقضية، بما في ذلك نوع القضية والأطراف المعنية والقضايا القانونية الرئيسية وقرار المحكمة إن وجد."
-            }
-            messages.append({"role": "user", "content": context_prompt[language]})
+            # Split the document into chunks of approximately 4000 tokens
+            chunk_size = 4000
+            chunks = [document_text[i:i+chunk_size] for i in range(0, len(document_text), chunk_size)]
+            
+            summaries = []
+            for i, chunk in enumerate(chunks):
+                context_prompt = {
+                    "en": f"Document context (Part {i+1}/{len(chunks)}): {chunk}\n\nProvide a brief summary of this part of the document, focusing on key legal aspects.",
+                    "ar": f"سياق الوثيقة (الجزء {i+1}/{len(chunks)}): {chunk}\n\nقدم ملخصًا موجزًا لهذا الجزء من الوثيقة، مع التركيز على الجوانب القانونية الرئيسية."
+                }
+                
+                chunk_messages = messages + [{"role": "user", "content": context_prompt[language]}]
+                
+                response = openai.ChatCompletion.create(
+                    model="gpt-3.5-turbo-16k",
+                    messages=chunk_messages,
+                    max_tokens=500,
+                    temperature=0.7
+                )
+                
+                summary = response.choices[0].message['content'].strip()
+                summaries.append(summary)
 
-        response = client.chat.completions.create(
+            # Combine summaries and use them for the final query
+            combined_summary = "\n\n".join(summaries)
+            final_prompt = {
+                "en": f"Based on the following document summaries, answer this question: {query}\n\nDocument summaries:\n{combined_summary}",
+                "ar": f"بناءً على ملخصات الوثيقة التالية، أجب على هذا السؤال: {query}\n\nملخصات الوثيقة:\n{combined_summary}"
+            }
+            messages.append({"role": "user", "content": final_prompt[language]})
+
+        response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo-16k",
             messages=messages,
             max_tokens=1000,
-            stream=True
+            temperature=0.7
         )
 
-        collected_messages = []
-        for chunk in response:
-            if chunk.choices[0].finish_reason is not None:
-                break
-            collected_messages.append(chunk.choices[0].delta.content or '')
-
-        full_response = ''.join(collected_messages).strip()
+        full_response = response.choices[0].message['content'].strip()
         return full_response
     except Exception as e:
         return f"An error occurred: {str(e)}"
+
+@st.cache_data
+def read_docx(file):
+    doc = Document(file)
+    return '\n'.join([para.text for para in doc.paragraphs])
+
+@st.cache_data
+def read_pdf(file):
+    try:
+        pdf_document = fitz.open(stream=file.read(), filetype="pdf")
+        full_text = []
+        for page in pdf_document:
+            text = page.get_text()
+            full_text.append(text)
+        return '\n'.join(full_text)
+    except Exception as e:
+        st.error(f"Error reading PDF: {str(e)}")
+        return None
 
 @st.cache_data
 def read_txt(file):
@@ -111,7 +146,7 @@ def generate_suggested_questions(document_text, language):
             "ar": f"بناءً على الوثيقة القانونية التالية، قم بإنشاء 5 أسئلة ذات صلة قد يطرحها المستخدم حول القضية:\n\n{document_text[:2000]}..."
         }
 
-        response = client.chat.completions.create(
+        response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "You are an AI assistant that generates relevant questions based on legal documents."},
@@ -120,7 +155,7 @@ def generate_suggested_questions(document_text, language):
             max_tokens=200
         )
 
-        suggested_questions = response.choices[0].message.content.strip().split('\n')
+        suggested_questions = response.choices[0].message['content'].strip().split('\n')
         return [q.strip('1234567890. ') for q in suggested_questions if q.strip()]
     except Exception as e:
         st.error(f"Error generating suggested questions: {str(e)}")
@@ -145,6 +180,7 @@ def read_oman_law(file_path):
     except Exception as e:
         st.error(f"Error reading PDF: {str(e)}")
         return None
+
 
 def main():
     language = st.sidebar.selectbox("Choose Language / اختر اللغة", ["English", "العربية"])
