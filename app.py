@@ -59,49 +59,29 @@ def get_legal_advice(query, document_text=None, language="en"):
         ]
 
         if document_text:
-            # Split the document into chunks of approximately 4000 tokens
-            chunk_size = 4000
-            chunks = [document_text[i:i+chunk_size] for i in range(0, len(document_text), chunk_size)]
-            
-            summaries = []
-            for i, chunk in enumerate(chunks):
-                context_prompt = {
-                    "en": f"Document context (Part {i+1}/{len(chunks)}): {chunk}\n\nProvide a brief summary of this part of the document, focusing on key legal aspects.",
-                    "ar": f"سياق الوثيقة (الجزء {i+1}/{len(chunks)}): {chunk}\n\nقدم ملخصًا موجزًا لهذا الجزء من الوثيقة، مع التركيز على الجوانب القانونية الرئيسية."
-                }
-                
-                chunk_messages = messages + [{"role": "user", "content": context_prompt[language]}]
-                
-                response = openai.ChatCompletion.create(
-                    model="gpt-3.5-turbo-16k",
-                    messages=chunk_messages,
-                    max_tokens=500,
-                    temperature=0.7
-                )
-                
-                summary = response.choices[0].message['content'].strip()
-                summaries.append(summary)
-
-            # Combine summaries and use them for the final query
-            combined_summary = "\n\n".join(summaries)
-            final_prompt = {
-                "en": f"Based on the following document summaries, answer this question: {query}\n\nDocument summaries:\n{combined_summary}",
-                "ar": f"بناءً على ملخصات الوثيقة التالية، أجب على هذا السؤال: {query}\n\nملخصات الوثيقة:\n{combined_summary}"
+            context_prompt = {
+                "en": f"Document context: {document_text}\n\nProvide a detailed summary of the case, including the type of case, parties involved, main legal issues, and the court's decision if available.",
+                "ar": f"سياق الوثيقة: {document_text}\n\nقدم ملخصًا مفصلاً للقضية، بما في ذلك نوع القضية والأطراف المعنية والقضايا القانونية الرئيسية وقرار المحكمة إن وجد."
             }
-            messages.append({"role": "user", "content": final_prompt[language]})
+            messages.append({"role": "user", "content": context_prompt[language]})
 
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-3.5-turbo-16k",
             messages=messages,
             max_tokens=1000,
-            temperature=0.7
+            stream=True
         )
 
-        full_response = response.choices[0].message['content'].strip()
+        collected_messages = []
+        for chunk in response:
+            if chunk.choices[0].finish_reason is not None:
+                break
+            collected_messages.append(chunk.choices[0].delta.content or '')
+
+        full_response = ''.join(collected_messages).strip()
         return full_response
     except Exception as e:
         return f"An error occurred: {str(e)}"
-
 @st.cache_data
 def read_docx(file):
     doc = Document(file)
