@@ -12,6 +12,7 @@ import sqlite3
 from functools import lru_cache
 import os
 
+
 # Set page config at the very beginning
 st.set_page_config(page_title="Astraea - Legal Query Assistant", page_icon="⚖️", layout="wide")
 
