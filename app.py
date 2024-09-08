@@ -195,6 +195,8 @@ def main():
         elif option == feature_options[lang_code][2]:  # Oman Laws
             # ... (rest of the code for this option remains the same)
 
+        
+
     # Display chat history
     if st.session_state.chat_history:
         st.markdown("## Chat History")
