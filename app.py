@@ -179,21 +179,21 @@ def main():
     if option == feature_options[lang_code][0]:  # Query from Document
         # ... (rest of the code for this option remains the same)
 
-    elif option == feature_options[lang_code][1]:  # Get Legal Advice
-        query = st.text_input("Enter your legal query:" if lang_code == "en" else "أدخل استفسارك القانوني:")
-        
-        if st.button("Submit" if lang_code == "en" else "إرسال"):
-            if query:
-                with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
-                    response = get_legal_advice(query, language=lang_code)
-                    st.markdown("### Response:")
-                    st.markdown(format_response(response))
-                    st.session_state.chat_history.append((query, response))
-            else:
-                st.warning("Please enter a query." if lang_code == "en" else "الرجاء إدخال استفسار.")
-
-    elif option == feature_options[lang_code][2]:  # Oman Laws
-        # ... (rest of the code for this option remains the same)
+        elif option == feature_options[lang_code][1]:  # Get Legal Advice
+            query = st.text_input("Enter your legal query:" if lang_code == "en" else "أدخل استفسارك القانوني:")
+            
+            if st.button("Submit" if lang_code == "en" else "إرسال"):
+                if query:
+                    with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
+                        response = get_legal_advice(query, language=lang_code)
+                        st.markdown("### Response:")
+                        st.markdown(format_response(response))
+                        st.session_state.chat_history.append((query, response))
+                else:
+                    st.warning("Please enter a query." if lang_code == "en" else "الرجاء إدخال استفسار.")
+    
+        elif option == feature_options[lang_code][2]:  # Oman Laws
+            # ... (rest of the code for this option remains the same)
 
     # Display chat history
     if st.session_state.chat_history:
