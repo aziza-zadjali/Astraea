@@ -82,23 +82,6 @@ def get_legal_advice(query, document_text=None, language="en"):
         return full_response
     except Exception as e:
         return f"An error occurred: {str(e)}"
-@st.cache_data
-def read_docx(file):
-    doc = Document(file)
-    return '\n'.join([para.text for para in doc.paragraphs])
-
-@st.cache_data
-def read_pdf(file):
-    try:
-        pdf_document = fitz.open(stream=file.read(), filetype="pdf")
-        full_text = []
-        for page in pdf_document:
-            text = page.get_text()
-            full_text.append(text)
-        return '\n'.join(full_text)
-    except Exception as e:
-        st.error(f"Error reading PDF: {str(e)}")
-        return None
 
 @st.cache_data
 def read_txt(file):
@@ -126,7 +109,7 @@ def generate_suggested_questions(document_text, language):
             "ar": f"بناءً على الوثيقة القانونية التالية، قم بإنشاء 5 أسئلة ذات صلة قد يطرحها المستخدم حول القضية:\n\n{document_text[:2000]}..."
         }
 
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "You are an AI assistant that generates relevant questions based on legal documents."},
@@ -135,7 +118,7 @@ def generate_suggested_questions(document_text, language):
             max_tokens=200
         )
 
-        suggested_questions = response.choices[0].message['content'].strip().split('\n')
+        suggested_questions = response.choices[0].message.content.strip().split('\n')
         return [q.strip('1234567890. ') for q in suggested_questions if q.strip()]
     except Exception as e:
         st.error(f"Error generating suggested questions: {str(e)}")
