@@ -7,14 +7,19 @@ from tenacity import retry, stop_after_attempt, wait_random_exponential
 import arabic_reshaper
 from bidi.algorithm import get_display
 import re
+import io
 import sqlite3
 from functools import lru_cache
 import os
 
+
+# Set page config at the very beginning
 st.set_page_config(page_title="Astraea - Legal Query Assistant", page_icon="⚖️", layout="wide")
 
+# Initialize the OpenAI client
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 
+# Define the path to your database directory
 DATABASE_DIR = "database"
 
 def init_db():
@@ -26,18 +31,22 @@ def init_db():
     conn.close()
 
 def add_to_chat_history(query, response, language):
-    conn = sqlite3.connect('chat_history.db')
-    c = conn.cursor()
-    c.execute("INSERT INTO chat_history (query, response, language) VALUES (?, ?, ?)", 
-              (query, response, language))
-    conn.commit()
-    conn.close()
+    conn = None
+    try:
+        conn = sqlite3.connect('chat_history.db')
+        c = conn.cursor()
+        c.execute("INSERT INTO chat_history (query, response, language) VALUES (?, ?, ?)", (query, response, language))
+        conn.commit()
+    except sqlite3.Error as e:
+        print(f"An error occurred: {e}")
+    finally:
+        if conn:
+            conn.close()
 
 def get_chat_history(language):
     conn = sqlite3.connect('chat_history.db')
     c = conn.cursor()
-    c.execute("SELECT query, response FROM chat_history WHERE language = ? ORDER BY id DESC", 
-              (language,))
+    c.execute("SELECT query, response FROM chat_history WHERE language = ? ORDER BY id DESC", (language,))
     results = c.fetchall()
     conn.close()
     return results
@@ -57,25 +66,30 @@ def get_legal_advice(query, document_text=None, language="en"):
         ]
 
         if document_text:
+            # Split the document into chunks of approximately 4000 tokens
             chunk_size = 4000
             chunks = [document_text[i:i+chunk_size] for i in range(0, len(document_text), chunk_size)]
+            
             summaries = []
-
             for i, chunk in enumerate(chunks):
                 context_prompt = {
                     "en": f"Document context (Part {i+1}/{len(chunks)}): {chunk}\n\nProvide a brief summary of this part of the document, focusing on key legal aspects.",
                     "ar": f"سياق الوثيقة (الجزء {i+1}/{len(chunks)}): {chunk}\n\nقدم ملخصًا موجزًا لهذا الجزء من الوثيقة، مع التركيز على الجوانب القانونية الرئيسية."
                 }
+                
                 chunk_messages = messages + [{"role": "user", "content": context_prompt[language]}]
+                
                 response = openai.ChatCompletion.create(
                     model="gpt-3.5-turbo-16k",
                     messages=chunk_messages,
                     max_tokens=500,
                     temperature=0.7
                 )
+                
                 summary = response.choices[0].message['content'].strip()
                 summaries.append(summary)
 
+            # Combine summaries and use them for the final query
             combined_summary = "\n\n".join(summaries)
             final_prompt = {
                 "en": f"Based on the following document summaries, answer this question: {query}\n\nDocument summaries:\n{combined_summary}",
@@ -89,6 +103,7 @@ def get_legal_advice(query, document_text=None, language="en"):
             max_tokens=1000,
             temperature=0.7
         )
+
         full_response = response.choices[0].message['content'].strip()
         return full_response
     except Exception as e:
@@ -137,6 +152,7 @@ def generate_suggested_questions(document_text, language):
             "en": f"Based on the following legal document, generate 5 relevant questions that a user might ask about the case:\n\n{document_text[:2000]}...",
             "ar": f"بناءً على الوثيقة القانونية التالية، قم بإنشاء 5 أسئلة ذات صلة قد يطرحها المستخدم حول القضية:\n\n{document_text[:2000]}..."
         }
+
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=[
@@ -145,6 +161,7 @@ def generate_suggested_questions(document_text, language):
             ],
             max_tokens=200
         )
+
         suggested_questions = response.choices[0].message['content'].strip().split('\n')
         return [q.strip('1234567890. ') for q in suggested_questions if q.strip()]
     except Exception as e:
@@ -166,49 +183,18 @@ def read_oman_law(file_path):
             for page in pdf_document:
                 text = page.get_text()
                 full_text.append(text)
-            return '\n'.join(full_text)
+        return '\n'.join(full_text)
     except Exception as e:
         st.error(f"Error reading PDF: {str(e)}")
         return None
 
-def process_queries(document_text, lang_code):
-    if 'chat_history' not in st.session_state:
-        st.session_state.chat_history = []
-
-    query = st.text_input("Enter your query:" if lang_code == "en" else "أدخل استفسارك:", 
-                          key=f"query_{len(st.session_state.chat_history)}")
-    
-    if st.button("Submit" if lang_code == "en" else "إرسال", 
-                 key=f"submit_{len(st.session_state.chat_history)}"):
-        if query:
-            with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
-                response = get_legal_advice(query, document_text, lang_code)
-                st.markdown("### Response:")
-                st.markdown(format_response(response))
-                add_to_chat_history(query, response, lang_code)
-                st.session_state.chat_history.append((query, response))
-        else:
-            st.warning("Please enter a query." if lang_code == "en" else "الرجاء إدخال استفسار.")
-
-    # Display chat history
-    for q, r in st.session_state.chat_history:
-        st.text(f"Q: {q}")
-        st.text(f"A: {r}")
-        st.text("---")
-
-    if st.button("Clear Chat History" if lang_code == "en" else "مسح سجل المحادثة", 
-                 key=f"clear_{len(st.session_state.chat_history)}"):
-        st.session_state.chat_history = []
-        st.experimental_rerun()
 
 def main():
-    init_db()
-    
     language = st.sidebar.selectbox("Choose Language / اختر اللغة", ["English", "العربية"])
     lang_code = "en" if language == "English" else "ar"
 
     if lang_code == "ar":
-        st.markdown('', unsafe_allow_html=True)
+        st.markdown('<style>body {direction: rtl;}</style>', unsafe_allow_html=True)
 
     title = "Astraea - Legal Query Assistant" if lang_code == "en" else "أسترايا - مساعد الاستفسارات القانونية"
     st.title(title)
@@ -230,40 +216,91 @@ def main():
     option = st.selectbox(option_text[lang_code], feature_options[lang_code])
 
     if option == feature_options[lang_code][0]:  # Query from Document
-        uploaded_file = st.file_uploader("Upload a document" if lang_code == "en" else "قم بتحميل وثيقة", 
-                                         type=["docx", "pdf", "txt"])
+        upload_text = "Upload a document" if lang_code == "en" else "قم بتحميل وثيقة"
+        uploaded_file = st.file_uploader(upload_text, type=["docx", "pdf", "txt"])
+
         if uploaded_file is not None:
-            document_text = process_uploaded_file(uploaded_file)
-            if document_text:
+            file_type = uploaded_file.type
+            spinner_text = "Reading document..." if lang_code == "en" else "جاري قراءة الوثيقة..."
+            with st.spinner(spinner_text):
+                if file_type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+                    document_text = read_docx(uploaded_file)
+                elif file_type == "application/pdf":
+                    document_text = read_pdf(uploaded_file)
+                elif file_type == "text/plain":
+                    document_text = read_txt(uploaded_file)
+                else:
+                    document_text = None
+                    st.error("Unsupported file type." if lang_code == "en" else "نوع الملف غير مدعوم.")
+
+            if document_text is None:
+                st.error("Failed to read the document. Please try uploading it again or use a different file." if lang_code == "en" else "فشل في قراءة الوثيقة. يرجى محاولة تحميلها مرة أخرى أو استخدام ملف مختلف.")
+            else:
                 st.success("Document uploaded successfully!" if lang_code == "en" else "تم تحميل الوثيقة بنجاح!")
-                process_queries(document_text, lang_code)
+                
+                suggested_questions = generate_suggested_questions(document_text, lang_code)
+                if suggested_questions:
+                    question_text = "Suggested questions:" if lang_code == "en" else "الأسئلة المقترحة:"
+                    selected_question = st.selectbox(question_text, [""] + suggested_questions, key="suggested_questions")
+                    
+                    if selected_question:
+                        query = selected_question
+                        st.write(f"**Selected question:** {query}")
+                        with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
+                            response = get_legal_advice(query, document_text, lang_code)
+                            st.markdown("### Response:")
+                            st.markdown(format_response(response))
+                            add_to_chat_history(query, response, lang_code)
+                
+                custom_query = st.text_input("Enter your custom query:" if lang_code == "en" else "أدخل استفسارك الخاص:", key="custom_query")
+                if st.button("Submit Custom Query" if lang_code == "en" else "إرسال الاستفسار الخاص"):
+                    if custom_query:
+                        with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
+                            response = get_legal_advice(custom_query, document_text, lang_code)
+                            st.markdown("### Response:")
+                            st.markdown(format_response(response))
+                            add_to_chat_history(custom_query, response, lang_code)
+                    else:
+                        st.warning("Please enter a query." if lang_code == "en" else "الرجاء إدخال استفسار.")
 
     elif option == feature_options[lang_code][1]:  # Get Legal Advice
-        process_queries(None, lang_code)
+        query = st.text_input("Enter your legal query:" if lang_code == "en" else "أدخل استفسارك القانوني:")
+        
+        if st.button("Submit" if lang_code == "en" else "إرسال"):
+            if query:
+                with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
+                    response = get_legal_advice(query, language=lang_code)
+                    st.markdown("### Response:")
+                    st.markdown(format_response(response))
+                    add_to_chat_history(query, response, lang_code)
+            else:
+                st.warning("Please enter a query." if lang_code == "en" else "الرجاء إدخال استفسار.")
 
     elif option == feature_options[lang_code][2]:  # Oman Laws
         laws = get_oman_laws()
         if laws:
-            selected_law = st.selectbox("Select a law:" if lang_code == "en" else "اختر قانونًا:", 
-                                        list(laws.keys()))
+            law_select_text = "Select a law:" if lang_code == "en" else "اختر قانونًا:"
+            selected_law = st.selectbox(law_select_text, list(laws.keys()))
+            
             if selected_law:
                 law_text = read_oman_law(laws[selected_law])
                 if law_text:
-                    process_queries(law_text, lang_code)
+                    query_text = "Enter your query about this law:" if lang_code == "en" else "أدخل استفسارك حول هذا القانون:"
+                    query = st.text_input(query_text)
+                    
+                    if st.button("Submit" if lang_code == "en" else "إرسال"):
+                        if query:
+                            with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
+                                response = get_legal_advice(query, law_text, lang_code)
+                                st.markdown("### Response:")
+                                st.markdown(format_response(response))
+                                add_to_chat_history(query, response, lang_code)
+                        else:
+                            st.warning("Please enter a query." if lang_code == "en" else "الرجاء إدخال استفسار.")
+                else:
+                    st.error("Failed to read the selected law. Please try again or choose a different law." if lang_code == "en" else "فشل في قراءة القانون المحدد. يرجى المحاولة مرة أخرى أو اختيار قانون آخر.")
         else:
             st.error("No laws found in the database directory." if lang_code == "en" else "لم يتم العثور على قوانين في دليل قاعدة البيانات.")
-
-def process_uploaded_file(uploaded_file):
-    file_type = uploaded_file.type
-    if file_type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-        return read_docx(uploaded_file)
-    elif file_type == "application/pdf":
-        return read_pdf(uploaded_file)
-    elif file_type == "text/plain":
-        return read_txt(uploaded_file)
-    else:
-        st.error("Unsupported file type." if lang_code == "en" else "نوع الملف غير مدعوم.")
-        return None
 
 if __name__ == "__main__":
     main()
