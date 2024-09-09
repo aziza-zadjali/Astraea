@@ -7,18 +7,14 @@ from tenacity import retry, stop_after_attempt, wait_random_exponential
 import arabic_reshaper
 from bidi.algorithm import get_display
 import re
-import io
 import sqlite3
 from functools import lru_cache
 import os
 
-# Set page config at the very beginning
 st.set_page_config(page_title="Astraea - Legal Query Assistant", page_icon="⚖️", layout="wide")
 
-# Initialize the OpenAI client
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 
-# Define the path to your database directory
 DATABASE_DIR = "database"
 
 def init_db():
@@ -61,7 +57,6 @@ def get_legal_advice(query, document_text=None, language="en"):
         ]
 
         if document_text:
-            # Split the document into chunks of approximately 4000 tokens
             chunk_size = 4000
             chunks = [document_text[i:i+chunk_size] for i in range(0, len(document_text), chunk_size)]
             summaries = []
@@ -81,7 +76,6 @@ def get_legal_advice(query, document_text=None, language="en"):
                 summary = response.choices[0].message['content'].strip()
                 summaries.append(summary)
 
-            # Combine summaries and use them for the final query
             combined_summary = "\n\n".join(summaries)
             final_prompt = {
                 "en": f"Based on the following document summaries, answer this question: {query}\n\nDocument summaries:\n{combined_summary}",
@@ -178,37 +172,34 @@ def read_oman_law(file_path):
         return None
 
 def process_queries(document_text, lang_code):
-    st.session_state.setdefault('chat_history', [])
+    if 'chat_history' not in st.session_state:
+        st.session_state.chat_history = []
+
+    query = st.text_input("Enter your query:" if lang_code == "en" else "أدخل استفسارك:", 
+                          key=f"query_{len(st.session_state.chat_history)}")
     
-    while True:
-        query = st.text_input("Enter your query:" if lang_code == "en" else "أدخل استفسارك:", 
-                              key=f"query_{len(st.session_state.chat_history)}")
-        
-        if st.button("Submit" if lang_code == "en" else "إرسال", 
-                     key=f"submit_{len(st.session_state.chat_history)}"):
-            if query:
-                with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
-                    response = get_legal_advice(query, document_text, lang_code)
-                    st.markdown("### Response:")
-                    st.markdown(format_response(response))
-                    add_to_chat_history(query, response, lang_code)
-                    st.session_state.chat_history.append((query, response))
-            else:
-                st.warning("Please enter a query." if lang_code == "en" else "الرجاء إدخال استفسار.")
+    if st.button("Submit" if lang_code == "en" else "إرسال", 
+                 key=f"submit_{len(st.session_state.chat_history)}"):
+        if query:
+            with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
+                response = get_legal_advice(query, document_text, lang_code)
+                st.markdown("### Response:")
+                st.markdown(format_response(response))
+                add_to_chat_history(query, response, lang_code)
+                st.session_state.chat_history.append((query, response))
+        else:
+            st.warning("Please enter a query." if lang_code == "en" else "الرجاء إدخال استفسار.")
 
-        # Display chat history
-        for q, r in st.session_state.chat_history:
-            st.text(f"Q: {q}")
-            st.text(f"A: {r}")
-            st.text("---")
+    # Display chat history
+    for q, r in st.session_state.chat_history:
+        st.text(f"Q: {q}")
+        st.text(f"A: {r}")
+        st.text("---")
 
-        if st.button("New Query" if lang_code == "en" else "استفسار جديد", 
-                     key=f"new_{len(st.session_state.chat_history)}"):
-            continue
-        
-        if st.button("Exit" if lang_code == "en" else "خروج", 
-                     key=f"exit_{len(st.session_state.chat_history)}"):
-            break
+    if st.button("Clear Chat History" if lang_code == "en" else "مسح سجل المحادثة", 
+                 key=f"clear_{len(st.session_state.chat_history)}"):
+        st.session_state.chat_history = []
+        st.experimental_rerun()
 
 def main():
     init_db()
