@@ -31,11 +31,17 @@ def init_db():
     conn.close()
 
 def add_to_chat_history(query, response, language):
-    conn = sqlite3.connect('chat_history.db')
-    c = conn.cursor()
-    c.execute("INSERT INTO chat_history (query, response, language) VALUES (?, ?, ?)", (query, response, language))
-    conn.commit()
-    conn.close()
+    conn = None
+    try:
+        conn = sqlite3.connect('chat_history.db')
+        c = conn.cursor()
+        c.execute("INSERT INTO chat_history (query, response, language) VALUES (?, ?, ?)", (query, response, language))
+        conn.commit()
+    except sqlite3.Error as e:
+        print(f"An error occurred: {e}")
+    finally:
+        if conn:
+            conn.close()
 
 def get_chat_history(language):
     conn = sqlite3.connect('chat_history.db')
