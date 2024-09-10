@@ -188,8 +188,9 @@ def read_oman_law(file_path):
         st.error(f"Error reading PDF: {str(e)}")
         return None
 
+
 def main():
-    language = st.sidebar.selectbox("Choose Language / اختر اللغة", ["English", "العربية"], key="language_select")
+    language = st.sidebar.selectbox("Choose Language / اختر اللغة", ["English", "العربية"])
     lang_code = "en" if language == "English" else "ar"
 
     if lang_code == "ar":
@@ -212,11 +213,11 @@ def main():
         "en": ('Query from Document', 'Get Legal Advice', 'Oman Laws'),
         "ar": ('استعلام من وثيقة', 'الحصول على استشارة قانونية', 'قوانين عمان')
     }
-    option = st.selectbox(option_text[lang_code], feature_options[lang_code], key="feature_select")
+    option = st.selectbox(option_text[lang_code], feature_options[lang_code])
 
     if option == feature_options[lang_code][0]:  # Query from Document
         upload_text = "Upload a document" if lang_code == "en" else "قم بتحميل وثيقة"
-        uploaded_file = st.file_uploader(upload_text, type=["docx", "pdf", "txt"], key="file_uploader")
+        uploaded_file = st.file_uploader(upload_text, type=["docx", "pdf", "txt"])
 
         if uploaded_file is not None:
             file_type = uploaded_file.type
@@ -237,93 +238,65 @@ def main():
             else:
                 st.success("Document uploaded successfully!" if lang_code == "en" else "تم تحميل الوثيقة بنجاح!")
                 
-                chat_counter = 0
-                while True:
-                    chat_counter += 1
-                    suggested_questions = generate_suggested_questions(document_text, lang_code)
-                    if suggested_questions:
-                        question_text = "Suggested questions:" if lang_code == "en" else "الأسئلة المقترحة:"
-                        selected_question = st.selectbox(question_text, [""] + suggested_questions, key=f"suggested_questions_{chat_counter}")
-                        
-                        if selected_question:
-                            query = selected_question
-                            st.write(f"**Selected question:** {query}")
-                            with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
-                                response = get_legal_advice(query, document_text, lang_code)
-                                st.markdown("### Response:")
-                                st.markdown(format_response(response))
-                                add_to_chat_history(query, response, lang_code)
+                suggested_questions = generate_suggested_questions(document_text, lang_code)
+                if suggested_questions:
+                    question_text = "Suggested questions:" if lang_code == "en" else "الأسئلة المقترحة:"
+                    selected_question = st.selectbox(question_text, [""] + suggested_questions, key="suggested_questions")
                     
-                    custom_query = st.text_input("Enter your custom query:" if lang_code == "en" else "أدخل استفسارك الخاص:", key=f"custom_query_{chat_counter}")
-                    if st.button("Submit Custom Query" if lang_code == "en" else "إرسال الاستفسار الخاص", key=f"submit_custom_query_{chat_counter}"):
-                        if custom_query:
-                            with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
-                                response = get_legal_advice(custom_query, document_text, lang_code)
-                                st.markdown("### Response:")
-                                st.markdown(format_response(response))
-                                add_to_chat_history(custom_query, response, lang_code)
-                        else:
-                            st.warning("Please enter a query." if lang_code == "en" else "الرجاء إدخال استفسار.")
-                    
-                    if st.button("End Chat" if lang_code == "en" else "إنهاء الدردشة", key=f"end_chat_{chat_counter}"):
-                        break
+                    if selected_question:
+                        query = selected_question
+                        st.write(f"**Selected question:** {query}")
+                        with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
+                            response = get_legal_advice(query, document_text, lang_code)
+                            st.markdown("### Response:")
+                            st.markdown(format_response(response))
+                            add_to_chat_history(query, response, lang_code)
+                
+                custom_query = st.text_input("Enter your custom query:" if lang_code == "en" else "أدخل استفسارك الخاص:", key="custom_query")
+                if st.button("Submit Custom Query" if lang_code == "en" else "إرسال الاستفسار الخاص"):
+                    if custom_query:
+                        with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
+                            response = get_legal_advice(custom_query, document_text, lang_code)
+                            st.markdown("### Response:")
+                            st.markdown(format_response(response))
+                            add_to_chat_history(custom_query, response, lang_code)
+                    else:
+                        st.warning("Please enter a query." if lang_code == "en" else "الرجاء إدخال استفسار.")
 
     elif option == feature_options[lang_code][1]:  # Get Legal Advice
-        chat_counter = 0
-        while True:
-            chat_counter += 1
-            query = st.text_input("Enter your legal query:" if lang_code == "en" else "أدخل استفسارك القانوني:", key=f"legal_query_{chat_counter}")
-            
-            if st.button("Submit" if lang_code == "en" else "إرسال", key=f"submit_legal_query_{chat_counter}"):
-                if query:
-                    with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
-                        response = get_legal_advice(query, language=lang_code)
-                        st.markdown("### Response:")
-                        st.markdown(format_response(response))
-                        add_to_chat_history(query, response, lang_code)
-                    
-                    # Display the next query box only after the response
-                    query = st.text_input("Enter your next legal query:" if lang_code == "en" else "أدخل استفسارك القانوني التالي:", key=f"next_legal_query_{chat_counter}")
-                    if st.button("Submit Next Query" if lang_code == "en" else "إرسال الاستفسار التالي", key=f"submit_next_legal_query_{chat_counter}"):
-                        continue
-                else:
-                    st.warning("Please enter a query." if lang_code == "en" else "الرجاء إدخال استفسار.")
-            
-            if st.button("End Chat" if lang_code == "en" else "إنهاء الدردشة", key=f"end_chat_legal_{chat_counter}"):
-                break
+        query = st.text_input("Enter your legal query:" if lang_code == "en" else "أدخل استفسارك القانوني:")
+        
+        if st.button("Submit" if lang_code == "en" else "إرسال"):
+            if query:
+                with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
+                    response = get_legal_advice(query, language=lang_code)
+                    st.markdown("### Response:")
+                    st.markdown(format_response(response))
+                    add_to_chat_history(query, response, lang_code)
+            else:
+                st.warning("Please enter a query." if lang_code == "en" else "الرجاء إدخال استفسار.")
 
     elif option == feature_options[lang_code][2]:  # Oman Laws
         laws = get_oman_laws()
         if laws:
             law_select_text = "Select a law:" if lang_code == "en" else "اختر قانونًا:"
-            selected_law = st.selectbox(law_select_text, list(laws.keys()), key="select_law")
+            selected_law = st.selectbox(law_select_text, list(laws.keys()))
             
             if selected_law:
                 law_text = read_oman_law(laws[selected_law])
                 if law_text:
-                    chat_counter = 0
-                    while True:
-                        chat_counter += 1
-                        query_text = "Enter your query about this law:" if lang_code == "en" else "أدخل استفسارك حول هذا القانون:"
-                        query = st.text_input(query_text, key=f"law_query_{chat_counter}")
-                        
-                        if st.button("Submit" if lang_code == "en" else "إرسال", key=f"submit_law_query_{chat_counter}"):
-                            if query:
-                                with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
-                                    response = get_legal_advice(query, law_text, lang_code)
-                                    st.markdown("### Response:")
-                                    st.markdown(format_response(response))
-                                    add_to_chat_history(query, response, lang_code)
-                                
-                                # Display the next query box only after the response
-                                query = st.text_input("Enter your next query about this law:" if lang_code == "en" else "أدخل استفسارك التالي حول هذا القانون:", key=f"next_law_query_{chat_counter}")
-                                if st.button("Submit Next Query" if lang_code == "en" else "إرسال الاستفسار التالي", key=f"submit_next_law_query_{chat_counter}"):
-                                    continue
-                            else:
-                                st.warning("Please enter a query." if lang_code == "en" else "الرجاء إدخال استفسار.")
-                        
-                        if st.button("End Chat" if lang_code == "en" else "إنهاء الدردشة", key=f"end_chat_law_{chat_counter}"):
-                            break
+                    query_text = "Enter your query about this law:" if lang_code == "en" else "أدخل استفسارك حول هذا القانون:"
+                    query = st.text_input(query_text)
+                    
+                    if st.button("Submit" if lang_code == "en" else "إرسال"):
+                        if query:
+                            with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
+                                response = get_legal_advice(query, law_text, lang_code)
+                                st.markdown("### Response:")
+                                st.markdown(format_response(response))
+                                add_to_chat_history(query, response, lang_code)
+                        else:
+                            st.warning("Please enter a query." if lang_code == "en" else "الرجاء إدخال استفسار.")
                 else:
                     st.error("Failed to read the selected law. Please try again or choose a different law." if lang_code == "en" else "فشل في قراءة القانون المحدد. يرجى المحاولة مرة أخرى أو اختيار قانون آخر.")
         else:
