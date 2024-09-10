@@ -281,6 +281,11 @@ def main():
                         st.markdown("### Response:")
                         st.markdown(format_response(response))
                         add_to_chat_history(query, response, lang_code)
+                    
+                    # Display the next query box only after the response
+                    query = st.text_input("Enter your next legal query:" if lang_code == "en" else "أدخل استفسارك القانوني التالي:", key=f"next_legal_query_{chat_counter}")
+                    if st.button("Submit Next Query" if lang_code == "en" else "إرسال الاستفسار التالي", key=f"submit_next_legal_query_{chat_counter}"):
+                        continue
                 else:
                     st.warning("Please enter a query." if lang_code == "en" else "الرجاء إدخال استفسار.")
             
@@ -309,6 +314,11 @@ def main():
                                     st.markdown("### Response:")
                                     st.markdown(format_response(response))
                                     add_to_chat_history(query, response, lang_code)
+                                
+                                # Display the next query box only after the response
+                                query = st.text_input("Enter your next query about this law:" if lang_code == "en" else "أدخل استفسارك التالي حول هذا القانون:", key=f"next_law_query_{chat_counter}")
+                                if st.button("Submit Next Query" if lang_code == "en" else "إرسال الاستفسار التالي", key=f"submit_next_law_query_{chat_counter}"):
+                                    continue
                             else:
                                 st.warning("Please enter a query." if lang_code == "en" else "الرجاء إدخال استفسار.")
                         
@@ -321,4 +331,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
