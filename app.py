@@ -4,6 +4,13 @@ from utils.legal_advice import get_legal_advice, generate_suggested_questions
 from utils.oman_laws import get_oman_laws, read_oman_law, add_to_chat_history
 
 def main():
+    # Initialize session state
+    if 'chat_history' not in st.session_state:
+        st.session_state.chat_history = []
+
+    if 'law_queries' not in st.session_state:
+        st.session_state.law_queries = []
+
     language = st.sidebar.selectbox("Choose Language / اختر اللغة", ["English", "العربية"], key="language_select")
     lang_code = "en" if language == "English" else "ar"
     
