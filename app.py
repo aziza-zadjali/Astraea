@@ -283,7 +283,7 @@ def main():
                         while True:
                             query_text_again = "Enter your query about this law:" if lang_code == "en" else "أدخل استفسارك حول هذا القانون:"
                             query_again = st.text_input(query_text_again, key=f"oman_law_query_again_{len(st.session_state.chat_history)}")
-                            if st.button("Submit Again" if lang_code == "en" else "إرسال مرة أخرى", key=f"submit_oman_law_query_again_{len(st.session_state.chat_history)}"):
+                            if st.button("Submit" if lang_code == "en" else "إرسال", key=f"submit_oman_law_query_again_{len(st.session_state.chat_history)}"):
                                 if query_again:
                                     with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
                                         response_again = get_legal_advice(query_again, law_text, lang_code)
