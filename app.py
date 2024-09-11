@@ -93,19 +93,20 @@ def main():
                         st.warning("Please enter a query." if lang_code == "en" else "الرجاء إدخال استفسار.")
     
     elif option == feature_options[lang_code][1]:  # Get Legal Advice
-        query = st.text_input("Enter your legal query:" if lang_code == "en" else "أدخل استفسارك القانوني:", key="legal_query")
-        if st.button("Submit" if lang_code == "en" else "إرسال", key="submit_legal_query"):
-            if query:
-                with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
-                    try:
-                        response = get_legal_advice(query, language=lang_code)
-                        st.markdown("### Response:")
-                        st.markdown(format_response(response))
-                        add_to_chat_history(query, response, lang_code)
-                    except Exception as e:
-                        st.error(f"An error occurred: {str(e)}")
-            else:
-                st.warning("Please enter a query." if lang_code == "en" else "الرجاء إدخال استفسار.")
+        while True:
+            query = st.text_input("Enter your legal query:" if lang_code == "en" else "أدخل استفسارك القانوني:", key=f"legal_query_{len(st.session_state.chat_history)}")
+            if st.button("Submit" if lang_code == "en" else "إرسال", key=f"submit_legal_query_{len(st.session_state.chat_history)}"):
+                if query:
+                    with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
+                        try:
+                            response = get_legal_advice(query, language=lang_code)
+                            st.markdown("### Response:")
+                            st.markdown(format_response(response))
+                            add_to_chat_history(query, response, lang_code)
+                        except Exception as e:
+                            st.error(f"An error occurred: {str(e)}")
+                else:
+                    st.warning("Please enter a query." if lang_code == "en" else "الرجاء إدخال استفسار.")
     
     elif option == feature_options[lang_code][2]:  # Oman Laws
         laws = get_oman_laws()
