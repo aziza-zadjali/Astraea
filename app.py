@@ -7,6 +7,7 @@ from tenacity import retry, stop_after_attempt, wait_random_exponential
 import arabic_reshaper
 from bidi.algorithm import get_display
 import re
+import io
 import os
 import logging
 
@@ -26,9 +27,6 @@ DATABASE_DIR = "database"
 # Initialize session state
 if 'chat_history' not in st.session_state:
     st.session_state.chat_history = []
-
-if 'law_queries' not in st.session_state:
-    st.session_state.law_queries = []
 
 @st.cache_data(ttl=3600)
 @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(6))
@@ -96,7 +94,7 @@ def read_docx(file):
 @st.cache_data
 def read_pdf(file):
     try:
-        pdf_document = fitz.open(stream=file.read(), filetype="pdf")
+        pdf_document = fitz.open(stream=io.BytesIO(file.read()), filetype="pdf")
         full_text = []
         for page in pdf_document:
             text = page.get_text()
@@ -170,6 +168,8 @@ def read_oman_law(file_path):
         return None
 
 def main():
+    init_db()
+    
     language = st.sidebar.selectbox("Choose Language / اختر اللغة", ["English", "العربية"])
     lang_code = "en" if language == "English" else "ar"
     
@@ -234,8 +234,11 @@ def main():
                             st.markdown(format_response(response))
                             add_to_chat_history(query, response, lang_code)
                 
-                custom_query = st.text_input("Enter your custom query:" if lang_code == "en" else "أدخل استفسارك الخاص:", key="custom_query")
-                if st.button("Submit Custom Query" if lang_code == "en" else "إرسال الاستفسار الخاص"):
+                with st.form(key='custom_query_form'):
+                    custom_query = st.text_input("Enter your custom query:" if lang_code == "en" else "أدخل استفسارك الخاص:", key="custom_query")
+                    submit_button = st.form_submit_button("Submit Custom Query" if lang_code == "en" else "إرسال الاستفسار الخاص")
+                
+                if submit_button:
                     if custom_query:
                         with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
                             response = get_legal_advice(custom_query, document_text, lang_code)
@@ -246,8 +249,17 @@ def main():
                         st.warning("Please enter a query." if lang_code == "en" else "الرجاء إدخال استفسار.")
     
     elif option == feature_options[lang_code][1]:  # Get Legal Advice
-        query = st.text_input("Enter your legal query:" if lang_code == "en" else "أدخل استفسارك القانوني:")
-        if st.button("Submit" if lang_code == "en" else "إرسال"):
+        chat_history = get_chat_history(lang_code)
+        for query, response in chat_history:
+            with st.expander(f"Q: {query[:50]}..."):
+                st.write(f"**Query:** {query}")
+                st.write(f"**Response:** {response}")
+        
+        with st.form(key='legal_advice_form'):
+            query = st.text_input("Enter your legal query:" if lang_code == "en" else "أدخل استفسارك القانوني:")
+            submit_button = st.form_submit_button("Submit" if lang_code == "en" else "إرسال")
+        
+        if submit_button:
             if query:
                 with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
                     response = get_legal_advice(query, language=lang_code)
@@ -266,9 +278,13 @@ def main():
             if selected_law:
                 law_text = read_oman_law(laws[selected_law])
                 if law_text:
-                    query_text = "Enter your query about this law:" if lang_code == "en" else "أدخل استفسارك حول هذا القانون:"
-                    query = st.text_input(query_text)
-                    if st.button("Submit" if lang_code == "en" else "إرسال"):
+                    st.write(f"Selected law: {selected_law}")
+                    
+                    with st.form(key='oman_law_form'):
+                        query = st.text_input("Enter your query about this law:" if lang_code == "en" else "أدخل استفسارك حول هذا القانون:")
+                        submit_button = st.form_submit_button("Submit" if lang_code == "en" else "إرسال")
+                    
+                    if submit_button:
                         if query:
                             with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
                                 response = get_legal_advice(query, law_text, lang_code)
