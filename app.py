@@ -232,19 +232,25 @@ def main():
                         st.write(f"**Selected question:** {query}")
                         
                         with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
-                            response = get_legal_advice(query, document_text, lang_code)
-                            st.markdown("### Response:")
-                            st.markdown(format_response(response))
-                            add_to_chat_history(query, response, lang_code)
+                            try:
+                                response = get_legal_advice(query, document_text, lang_code)
+                                st.markdown("### Response:")
+                                st.markdown(format_response(response))
+                                add_to_chat_history(query, response, lang_code)
+                            except Exception as e:
+                                st.error(f"An error occurred: {str(e)}")
                 
                 custom_query = st.text_input("Enter your custom query:" if lang_code == "en" else "أدخل استفسارك الخاص:", key="custom_query")
                 if st.button("Submit Custom Query" if lang_code == "en" else "إرسال الاستفسار الخاص", key="submit_custom_query"):
                     if custom_query:
                         with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
-                            response = get_legal_advice(custom_query, document_text, lang_code)
-                            st.markdown("### Response:")
-                            st.markdown(format_response(response))
-                            add_to_chat_history(custom_query, response, lang_code)
+                            try:
+                                response = get_legal_advice(custom_query, document_text, lang_code)
+                                st.markdown("### Response:")
+                                st.markdown(format_response(response))
+                                add_to_chat_history(custom_query, response, lang_code)
+                            except Exception as e:
+                                st.error(f"An error occurred: {str(e)}")
                     else:
                         st.warning("Please enter a query." if lang_code == "en" else "الرجاء إدخال استفسار.")
     
@@ -253,10 +259,13 @@ def main():
         if st.button("Submit" if lang_code == "en" else "إرسال", key="submit_legal_query"):
             if query:
                 with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
-                    response = get_legal_advice(query, language=lang_code)
-                    st.markdown("### Response:")
-                    st.markdown(format_response(response))
-                    add_to_chat_history(query, response, lang_code)
+                    try:
+                        response = get_legal_advice(query, language=lang_code)
+                        st.markdown("### Response:")
+                        st.markdown(format_response(response))
+                        add_to_chat_history(query, response, lang_code)
+                    except Exception as e:
+                        st.error(f"An error occurred: {str(e)}")
             else:
                 st.warning("Please enter a query." if lang_code == "en" else "الرجاء إدخال استفسار.")
     
@@ -274,10 +283,13 @@ def main():
                     if st.button("Submit" if lang_code == "en" else "إرسال", key="submit_oman_law_query"):
                         if query:
                             with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
-                                response = get_legal_advice(query, law_text, lang_code)
-                                st.markdown("### Response:")
-                                st.markdown(format_response(response))
-                                add_to_chat_history(query, response, lang_code)
+                                try:
+                                    response = get_legal_advice(query, law_text, lang_code)
+                                    st.markdown("### Response:")
+                                    st.markdown(format_response(response))
+                                    add_to_chat_history(query, response, lang_code)
+                                except Exception as e:
+                                    st.error(f"An error occurred: {str(e)}")
                         
                         # Allow user to query again
                         query_text_again = "Enter your query about this law:" if lang_code == "en" else "أدخل استفسارك حول هذا القانون:"
@@ -285,10 +297,13 @@ def main():
                         if st.button("Submit Again" if lang_code == "en" else "إرسال مرة أخرى", key=f"submit_oman_law_query_again_{len(st.session_state.chat_history)}"):
                             if query_again:
                                 with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
-                                    response_again = get_legal_advice(query_again, law_text, lang_code)
-                                    st.markdown("### Response:")
-                                    st.markdown(format_response(response_again))
-                                    add_to_chat_history(query_again, response_again, lang_code)
+                                    try:
+                                        response_again = get_legal_advice(query_again, law_text, lang_code)
+                                        st.markdown("### Response:")
+                                        st.markdown(format_response(response_again))
+                                        add_to_chat_history(query_again, response_again, lang_code)
+                                    except Exception as e:
+                                        st.error(f"An error occurred: {str(e)}")
                             else:
                                 st.warning("Please enter a query." if lang_code == "en" else "الرجاء إدخال استفسار.")
                 else:
