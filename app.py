@@ -3,11 +3,16 @@ import openai
 from docx import Document
 import fitz  # PyMuPDF
 from pyarabic.araby import strip_tashkeel, normalize_hamza
+from tenacity import retry, stop_after_attempt, wait_random_exponential
 import arabic_reshaper
 from bidi.algorithm import get_display
 import re
-import sqlite3
 import os
+import logging
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Set page config at the very beginning
 st.set_page_config(page_title="Astraea - Legal Query Assistant", page_icon="⚖️", layout="wide")
@@ -22,24 +27,11 @@ DATABASE_DIR = "database"
 if 'chat_history' not in st.session_state:
     st.session_state.chat_history = []
 
-def init_db():
-    conn = sqlite3.connect('chat_history.db')
-    c = conn.cursor()
-    c.execute('''CREATE TABLE IF NOT EXISTS chat_history 
-                 (id INTEGER PRIMARY KEY, query TEXT, response TEXT, language TEXT)''')
-    conn.commit()
-    conn.close()
-
-def add_to_chat_history(query, response, language):
-    st.session_state.chat_history.append({"query": query, "response": response})
-    conn = sqlite3.connect('chat_history.db')
-    c = conn.cursor()
-    c.execute("INSERT INTO chat_history (query, response, language) VALUES (?, ?, ?)", 
-              (query, response, language))
-    conn.commit()
-    conn.close()
+if 'law_queries' not in st.session_state:
+    st.session_state.law_queries = []
 
 @st.cache_data(ttl=3600)
+@retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(6))
 def get_legal_advice(query, document_text=None, language="en"):
     try:
         system_content = {
@@ -53,7 +45,6 @@ def get_legal_advice(query, document_text=None, language="en"):
         ]
         
         if document_text:
-            # Split the document into chunks of approximately 4000 tokens
             chunk_size = 4000
             chunks = [document_text[i:i+chunk_size] for i in range(0, len(document_text), chunk_size)]
             summaries = []
@@ -76,7 +67,6 @@ def get_legal_advice(query, document_text=None, language="en"):
                 summary = response.choices[0].message['content'].strip()
                 summaries.append(summary)
             
-            # Combine summaries and use them for the final query
             combined_summary = "\n\n".join(summaries)
             final_prompt = {
                 "en": f"Based on the following document summaries, answer this question: {query}\n\nDocument summaries:\n{combined_summary}",
@@ -95,6 +85,7 @@ def get_legal_advice(query, document_text=None, language="en"):
         full_response = response.choices[0].message['content'].strip()
         return full_response
     except Exception as e:
+        logger.error(f"An error occurred in get_legal_advice: {str(e)}")
         return f"An error occurred: {str(e)}"
 
 @st.cache_data
@@ -112,13 +103,14 @@ def read_pdf(file):
             full_text.append(text)
         return '\n'.join(full_text)
     except Exception as e:
-        st.error(f"Error reading PDF: {str(e)}")
+        logger.error(f"Error reading PDF: {str(e)}")
         return None
 
 @st.cache_data
 def read_txt(file):
     return file.read().decode("utf-8")
 
+@st.cache_data
 def preprocess_arabic_text(text):
     if isinstance(text, list):
         text = ' '.join(text)
@@ -152,9 +144,10 @@ def generate_suggested_questions(document_text, language):
         suggested_questions = response.choices[0].message['content'].strip().split('\n')
         return [q.strip('1234567890. ') for q in suggested_questions if q.strip()]
     except Exception as e:
-        st.error(f"Error generating suggested questions: {str(e)}")
+        logger.error(f"Error generating suggested questions: {str(e)}")
         return []
 
+@st.cache_data
 def get_oman_laws():
     laws = {}
     for filename in os.listdir(DATABASE_DIR):
@@ -163,6 +156,7 @@ def get_oman_laws():
             laws[law_name] = os.path.join(DATABASE_DIR, filename)
     return laws
 
+@st.cache_data
 def read_oman_law(file_path):
     try:
         with fitz.open(file_path) as pdf_document:
@@ -172,7 +166,7 @@ def read_oman_law(file_path):
                 full_text.append(text)
             return '\n'.join(full_text)
     except Exception as e:
-        st.error(f"Error reading PDF: {str(e)}")
+        logger.error(f"Error reading PDF: {str(e)}")
         return None
 
 def main():
@@ -252,12 +246,6 @@ def main():
                         st.warning("Please enter a query." if lang_code == "en" else "الرجاء إدخال استفسار.")
     
     elif option == feature_options[lang_code][1]:  # Get Legal Advice
-        chat_history = get_chat_history(lang_code)
-        for query, response in chat_history:
-            st.text_area("User:", value=query, height=100, disabled=True)
-            st.text_area("Astraea:", value=response, height=200, disabled=True)
-            st.markdown("---")
-        
         query = st.text_input("Enter your legal query:" if lang_code == "en" else "أدخل استفسارك القانوني:")
         if st.button("Submit" if lang_code == "en" else "إرسال"):
             if query:
@@ -278,36 +266,15 @@ def main():
             if selected_law:
                 law_text = read_oman_law(laws[selected_law])
                 if law_text:
-                    st.write(f"Selected law: {selected_law}")
-                    
-                    # Initialize session state for law queries if not exists
-                    if 'law_queries' not in st.session_state:
-                        st.session_state.law_queries = []
-                    
-                    # Display previous queries and responses
-                    for i, (prev_query, prev_response) in enumerate(st.session_state.law_queries):
-                        st.text_area(f"Query {i+1}:", value=prev_query, height=100, key=f"prev_query_{i}", disabled=True)
-                        st.text_area(f"Response {i+1}:", value=prev_response, height=200, key=f"prev_response_{i}", disabled=True)
-                        st.markdown("---")
-                    
                     query_text = "Enter your query about this law:" if lang_code == "en" else "أدخل استفسارك حول هذا القانون:"
-                    query = st.text_input(query_text, key="law_query_input")
-                    
+                    query = st.text_input(query_text)
                     if st.button("Submit" if lang_code == "en" else "إرسال"):
                         if query:
                             with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
                                 response = get_legal_advice(query, law_text, lang_code)
-                                st.markdown("### Latest Response:")
+                                st.markdown("### Response:")
                                 st.markdown(format_response(response))
-                                
-                                # Add query and response to session state
-                                st.session_state.law_queries.append((query, response))
-                                
-                                # Add to chat history
                                 add_to_chat_history(query, response, lang_code)
-                                
-                                # Clear the input field
-                                st.session_state.law_query_input = ""
                         else:
                             st.warning("Please enter a query." if lang_code == "en" else "الرجاء إدخال استفسار.")
                 else:
