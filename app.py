@@ -88,7 +88,7 @@ def handle_document_queries(document_text, suggested_questions, lang_code):
     
     if suggested_questions:
         question_text = "Suggested questions:" if lang_code == "en" else "الأسئلة المقترحة:"
-        selected_question = st.selectbox(question_text, [""] + suggested_questions, key="suggested_questions")
+        selected_question = st.selectbox(question_text, [""] + suggested_questions, key="selected_question")
         if selected_question:
             process_query(selected_question, document_text, lang_code)
 
