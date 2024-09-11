@@ -47,14 +47,6 @@ def main():
     else:
         oman_laws_feature(lang_code)
 
-    # Display chat history
-    st.markdown("---")
-    st.markdown("### Chat History")
-    for query, response in st.session_state.chat_history:
-        st.markdown(f"**You:** {query}")
-        st.markdown(f"**Astraea:** {response}")
-        st.markdown("---")
-
 def document_query_feature(lang_code):
     st.header("Query from Document" if lang_code == "en" else "استعلام من وثيقة")
     
