@@ -2,6 +2,7 @@ import streamlit as st
 import openai
 from tenacity import retry, stop_after_attempt, wait_random_exponential
 import logging
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 logger = logging.getLogger(__name__)
 
@@ -10,8 +11,8 @@ logger = logging.getLogger(__name__)
 def get_legal_advice(query, document_text=None, language="en"):
     try:
         system_content = {
-            "en": "You are Astraea, an expert legal assistant specializing in legal documents. Provide detailed and accurate information based on the given document. Focus on key aspects such as the nature of the case, parties involved, legal issues, and court decisions.",
-            "ar": "أنت أسترايا، مساعد قانوني خبير متخصص في الوثائق القانونية. قدم معلومات مفصلة ودقيقة بناءً على الوثيقة المعطاة. ركز على الجوانب الرئيسية مثل طبيعة القضية والأطراف المعنية والقضايا القانونية وقرارات المحكمة."
+            "en": "You are Astraea, an expert legal assistant specializing in legal documents. Provide concise and accurate information based on the given document. Focus on key aspects such as the nature of the case, parties involved, legal issues, and court decisions.",
+            "ar": "أنت أسترايا، مساعد قانوني خبير متخصص في الوثائق القانونية. قدم معلومات موجزة ودقيقة بناءً على الوثيقة المعطاة. ركز على الجوانب الرئيسية مثل طبيعة القضية والأطراف المعنية والقضايا القانونية وقرارات المحكمة."
         }
 
         messages = [
@@ -22,29 +23,17 @@ def get_legal_advice(query, document_text=None, language="en"):
         if document_text:
             chunk_size = 4000
             chunks = [document_text[i:i+chunk_size] for i in range(0, len(document_text), chunk_size)]
-            summaries = []
-
-            for i, chunk in enumerate(chunks):
-                context_prompt = {
-                    "en": f"Document context (Part {i+1}/{len(chunks)}): {chunk}\n\nProvide a brief summary of this part of the document, focusing on key legal aspects.",
-                    "ar": f"سياق الوثيقة (الجزء {i+1}/{len(chunks)}): {chunk}\n\nقدم ملخصًا موجزًا لهذا الجزء من الوثيقة، مع التركيز على الجوانب القانونية الرئيسية."
-                }
-
-                chunk_messages = messages + [{"role": "user", "content": context_prompt[language]}]
-                response = openai.ChatCompletion.create(
-                    model="gpt-3.5-turbo-16k",
-                    messages=chunk_messages,
-                    max_tokens=500,
-                    temperature=0.7
-                )
-
-                summary = response.choices[0].message['content'].strip()
-                summaries.append(summary)
+            
+            with ThreadPoolExecutor(max_workers=min(len(chunks), 5)) as executor:
+                future_to_chunk = {executor.submit(summarize_chunk, chunk, i, len(chunks), language): i for i, chunk in enumerate(chunks)}
+                summaries = []
+                for future in as_completed(future_to_chunk):
+                    summaries.append(future.result())
 
             combined_summary = "\n\n".join(summaries)
             final_prompt = {
-                "en": f"Based on the following document summaries, answer this question: {query}\n\nDocument summaries:\n{combined_summary}",
-                "ar": f"بناءً على ملخصات الوثيقة التالية، أجب على هذا السؤال: {query}\n\nملخصات الوثيقة:\n{combined_summary}"
+                "en": f"Based on the following document summaries, answer this question concisely: {query}\n\nDocument summaries:\n{combined_summary}",
+                "ar": f"بناءً على ملخصات الوثيقة التالية، أجب على هذا السؤال بإيجاز: {query}\n\nملخصات الوثيقة:\n{combined_summary}"
             }
 
             messages.append({"role": "user", "content": final_prompt[language]})
@@ -52,7 +41,7 @@ def get_legal_advice(query, document_text=None, language="en"):
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo-16k",
             messages=messages,
-            max_tokens=1000,
+            max_tokens=500,
             temperature=0.7
         )
 
@@ -62,12 +51,30 @@ def get_legal_advice(query, document_text=None, language="en"):
         logger.error(f"An error occurred in get_legal_advice: {str(e)}")
         return f"An error occurred: {str(e)}"
 
+def summarize_chunk(chunk, i, total_chunks, language):
+    context_prompt = {
+        "en": f"Document context (Part {i+1}/{total_chunks}): {chunk}\n\nProvide a brief summary of this part of the document, focusing on key legal aspects.",
+        "ar": f"سياق الوثيقة (الجزء {i+1}/{total_chunks}): {chunk}\n\nقدم ملخصًا موجزًا لهذا الجزء من الوثيقة، مع التركيز على الجوانب القانونية الرئيسية."
+    }
+
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system", "content": "You are an AI assistant that summarizes legal documents."},
+            {"role": "user", "content": context_prompt[language]}
+        ],
+        max_tokens=250,
+        temperature=0.7
+    )
+
+    return response.choices[0].message['content'].strip()
+
 @st.cache_data(ttl=3600)
 def generate_suggested_questions(document_text, language):
     try:
         prompt = {
-            "en": f"Based on the following legal document, generate 5 relevant questions that a user might ask about the case:\n\n{document_text[:2000]}...",
-            "ar": f"بناءً على الوثيقة القانونية التالية، قم بإنشاء 5 أسئلة ذات صلة قد يطرحها المستخدم حول القضية:\n\n{document_text[:2000]}..."
+            "en": f"Based on the following legal document, generate 3 relevant questions that a user might ask about the case:\n\n{document_text[:1500]}...",
+            "ar": f"بناءً على الوثيقة القانونية التالية، قم بإنشاء 3 أسئلة ذات صلة قد يطرحها المستخدم حول القضية:\n\n{document_text[:1500]}..."
         }
 
         response = openai.ChatCompletion.create(
@@ -76,7 +83,7 @@ def generate_suggested_questions(document_text, language):
                 {"role": "system", "content": "You are an AI assistant that generates relevant questions based on legal documents."},
                 {"role": "user", "content": prompt[language]}
             ],
-            max_tokens=200
+            max_tokens=150
         )
 
         suggested_questions = response.choices[0].message['content'].strip().split('\n')
@@ -84,42 +91,3 @@ def generate_suggested_questions(document_text, language):
     except Exception as e:
         logger.error(f"Error generating suggested questions: {str(e)}")
         return []
-
-def handle_document_queries(document_text, suggested_questions, lang_code):
-    st.success("Document uploaded successfully!" if lang_code == "en" else "تم تحميل الوثيقة بنجاح!")
-
-    while True:
-        if suggested_questions:
-            question_text = "Suggested questions:" if lang_code == "en" else "الأسئلة المقترحة:"
-            selected_question = st.selectbox(question_text, [""] + suggested_questions, key=f"suggested_questions_{st.session_state.get('query_counter', 0)}")
-            if selected_question:
-                query = selected_question
-            else:
-                query = st.text_input("Enter your custom query:" if lang_code == "en" else "أدخل استفسارك الخاص:", key=f"custom_query_{st.session_state.get('query_counter', 0)}")
-        else:
-            query = st.text_input("Enter your query:" if lang_code == "en" else "أدخل استفسارك:", key=f"query_{st.session_state.get('query_counter', 0)}")
-
-        if st.button("Submit Query" if lang_code == "en" else "إرسال الاستفسار", key=f"submit_query_{st.session_state.get('query_counter', 0)}"):
-            if query:
-                with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
-                    response = get_legal_advice(query, document_text, lang_code)
-                    st.markdown("### Response:")
-                    st.markdown(response)
-                
-                # Increment query counter
-                st.session_state['query_counter'] = st.session_state.get('query_counter', 0) + 1
-
-                # Ask if the user wants to query again
-                query_again = st.radio(
-                    "Do you want to ask another question?" if lang_code == "en" else "هل تريد طرح سؤال آخر؟",
-                    ("Yes" if lang_code == "en" else "نعم", "No" if lang_code == "en" else "لا"),
-                    key=f"query_again_{st.session_state.get('query_counter', 0)}"
-                )
-
-                if query_again == "No" if lang_code == "en" else "لا":
-                    break
-            else:
-                st.warning("Please enter a query." if lang_code == "en" else "الرجاء إدخال استفسار.")
-                break
-        else:
-            break
