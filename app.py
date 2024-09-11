@@ -1,11 +1,4 @@
-import streamlit as st
-from utils.document_processing import read_docx, read_pdf, read_txt, preprocess_arabic_text, format_response
-from utils.legal_advice import get_legal_advice, generate_suggested_questions
-from utils.oman_laws import get_oman_laws, read_oman_law, add_to_chat_history
-
 def main():
-    st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
-
     # Initialize session state
     if 'chat_history' not in st.session_state:
         st.session_state.chat_history = []
@@ -20,11 +13,15 @@ def main():
 
         st.markdown("---")
         st.markdown("### Navigation")
-        option = st.radio(
-            "Choose a feature" if lang_code == "en" else "اختر ميزة",
-            ('Query from Document', 'Get Legal Advice', 'Oman Laws'),
-            key="feature_select"
-        )
+        option_text = {
+            "en": "Choose a feature",
+            "ar": "اختر ميزة"
+        }
+        feature_options = {
+            "en": ('Query from Document', 'Get Legal Advice', 'Oman Laws'),
+            "ar": ('استعلام من وثيقة', 'الحصول على استشارة قانونية', 'قوانين عمان')
+        }
+        option = st.radio(option_text[lang_code], feature_options[lang_code], key="feature_select")
 
     # Main content
     title = "Astraea - Legal Query Assistant" if lang_code == "en" else "أسترايا - مساعد الاستفسارات القانونية"
@@ -36,9 +33,9 @@ def main():
     }
     st.info(disclaimer[lang_code])
 
-    if option == 'Query from Document':
+    if option == feature_options[lang_code][0]:
         document_query_feature(lang_code)
-    elif option == 'Get Legal Advice':
+    elif option == feature_options[lang_code][1]:
         legal_advice_feature(lang_code)
     else:
         oman_laws_feature(lang_code)
@@ -46,10 +43,14 @@ def main():
     # Display chat history
     st.markdown("---")
     st.markdown("### Chat History")
-    for query, response in st.session_state.chat_history:
-        st.markdown(f"**You:** {query}")
-        st.markdown(f"**Astraea:** {response}")
-        st.markdown("---")
+    for item in st.session_state.chat_history:
+        if isinstance(item, tuple) and len(item) == 2:
+            query, response = item
+            st.markdown(f"**You:** {query}")
+            st.markdown(f"**Astraea:** {response}")
+            st.markdown("---")
+        else:
+            st.warning(f"Invalid chat history item: {item}")
 
 def document_query_feature(lang_code):
     st.header("Query from Document" if lang_code == "en" else "استعلام من وثيقة")
@@ -62,36 +63,6 @@ def document_query_feature(lang_code):
         if document_text:
             suggested_questions = generate_suggested_questions(document_text, lang_code)
             handle_document_queries(document_text, suggested_questions, lang_code)
-
-def process_uploaded_file(uploaded_file, lang_code):
-    file_type = uploaded_file.type
-    spinner_text = "Reading document..." if lang_code == "en" else "جاري قراءة الوثيقة..."
-    with st.spinner(spinner_text):
-        if file_type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-            return read_docx(uploaded_file)
-        elif file_type == "application/pdf":
-            return read_pdf(uploaded_file)
-        elif file_type == "text/plain":
-            return read_txt(uploaded_file)
-        else:
-            st.error("Unsupported file type." if lang_code == "en" else "نوع الملف غير مدعوم.")
-            return None
-
-def handle_document_queries(document_text, suggested_questions, lang_code):
-    st.success("Document uploaded successfully!" if lang_code == "en" else "تم تحميل الوثيقة بنجاح!")
-    
-    if suggested_questions:
-        question_text = "Suggested questions:" if lang_code == "en" else "الأسئلة المقترحة:"
-        selected_question = st.selectbox(question_text, [""] + suggested_questions, key="suggested_questions")
-        if selected_question:
-            process_query(selected_question, document_text, lang_code)
-
-    custom_query = st.text_input("Enter your custom query:" if lang_code == "en" else "أدخل استفسارك الخاص:", key="custom_query")
-    if st.button("Submit Custom Query" if lang_code == "en" else "إرسال الاستفسار الخاص", key="submit_custom_query"):
-        if custom_query:
-            process_query(custom_query, document_text, lang_code)
-        else:
-            st.warning("Please enter a query." if lang_code == "en" else "الرجاء إدخال استفسار.")
 
 def legal_advice_feature(lang_code):
     st.header("Get Legal Advice" if lang_code == "en" else "الحصول على استشارة قانونية")
@@ -124,6 +95,36 @@ def oman_laws_feature(lang_code):
                 st.error("Failed to read the selected law. Please try again or choose a different law." if lang_code == "en" else "فشل في قراءة القانون المحدد. يرجى المحاولة مرة أخرى أو اختيار قانون آخر.")
     else:
         st.error("No laws found in the database directory." if lang_code == "en" else "لم يتم العثور على قوانين في دليل قاعدة البيانات.")
+
+def process_uploaded_file(uploaded_file, lang_code):
+    file_type = uploaded_file.type
+    spinner_text = "Reading document..." if lang_code == "en" else "جاري قراءة الوثيقة..."
+    with st.spinner(spinner_text):
+        if file_type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+            return read_docx(uploaded_file)
+        elif file_type == "application/pdf":
+            return read_pdf(uploaded_file)
+        elif file_type == "text/plain":
+            return read_txt(uploaded_file)
+        else:
+            st.error("Unsupported file type." if lang_code == "en" else "نوع الملف غير مدعوم.")
+            return None
+
+def handle_document_queries(document_text, suggested_questions, lang_code):
+    st.success("Document uploaded successfully!" if lang_code == "en" else "تم تحميل الوثيقة بنجاح!")
+    
+    if suggested_questions:
+        question_text = "Suggested questions:" if lang_code == "en" else "الأسئلة المقترحة:"
+        selected_question = st.selectbox(question_text, [""] + suggested_questions, key="suggested_questions")
+        if selected_question:
+            process_query(selected_question, document_text, lang_code)
+
+    custom_query = st.text_input("Enter your custom query:" if lang_code == "en" else "أدخل استفسارك الخاص:", key="custom_query")
+    if st.button("Submit Custom Query" if lang_code == "en" else "إرسال الاستفسار الخاص", key="submit_custom_query"):
+        if custom_query:
+            process_query(custom_query, document_text, lang_code)
+        else:
+            st.warning("Please enter a query." if lang_code == "en" else "الرجاء إدخال استفسار.")
 
 def process_query(query, context=None, lang_code="en"):
     with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
