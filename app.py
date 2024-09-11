@@ -128,21 +128,6 @@ def main():
                                     add_to_chat_history(query, response, lang_code)
                                 except Exception as e:
                                     st.error(f"An error occurred: {str(e)}")
-                        
-                        # Allow user to query again
-                        while True:
-                            query_text_again = "Enter your query about this law:" if lang_code == "en" else "أدخل استفسارك حول هذا القانون:"
-                            query_again = st.text_input(query_text_again, key=f"oman_law_query_again_{len(st.session_state.chat_history)}")
-                            if st.button("Submit" if lang_code == "en" else "إرسال", key=f"submit_oman_law_query_again_{len(st.session_state.chat_history)}"):
-                                if query_again:
-                                    with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
-                                        try:
-                                            response_again = get_legal_advice(query_again, law_text, lang_code)
-                                            st.markdown("### Response:")
-                                            st.markdown(format_response(response_again))
-                                            add_to_chat_history(query_again, response_again, lang_code)
-                                        except Exception as e:
-                                            st.error(f"An error occurred: {str(e)}")
                 else:
                     st.error("Failed to read the selected law. Please try again or choose a different law." if lang_code == "en" else "فشل في قراءة القانون المحدد. يرجى المحاولة مرة أخرى أو اختيار قانون آخر.")
         else:
