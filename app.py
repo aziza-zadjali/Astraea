@@ -280,15 +280,36 @@ def main():
             if selected_law:
                 law_text = read_oman_law(laws[selected_law])
                 if law_text:
+                    st.write(f"Selected law: {selected_law}")
+                    
+                    # Initialize session state for law queries if not exists
+                    if 'law_queries' not in st.session_state:
+                        st.session_state.law_queries = []
+                    
+                    # Display previous queries and responses
+                    for query, response in st.session_state.law_queries:
+                        st.text_area("Previous Query:", value=query, height=100, disabled=True)
+                        st.text_area("Response:", value=response, height=200, disabled=True)
+                        st.markdown("---")
+                    
                     query_text = "Enter your query about this law:" if lang_code == "en" else "أدخل استفسارك حول هذا القانون:"
-                    query = st.text_input(query_text)
+                    query = st.text_input(query_text, key="law_query_input")
+                    
                     if st.button("Submit" if lang_code == "en" else "إرسال"):
                         if query:
                             with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
                                 response = get_legal_advice(query, law_text, lang_code)
                                 st.markdown("### Response:")
                                 st.markdown(format_response(response))
+                                
+                                # Add query and response to session state
+                                st.session_state.law_queries.append((query, response))
+                                
+                                # Add to chat history
                                 add_to_chat_history(query, response, lang_code)
+                                
+                                # Clear the input field
+                                st.session_state.law_query_input = ""
                         else:
                             st.warning("Please enter a query." if lang_code == "en" else "الرجاء إدخال استفسار.")
                 else:
