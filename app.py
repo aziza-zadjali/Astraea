@@ -169,6 +169,9 @@ def read_oman_law(file_path):
         logger.error(f"Error reading PDF: {str(e)}")
         return None
 
+def add_to_chat_history(query, response, lang_code):
+    st.session_state.chat_history.append({"query": query, "response": response, "language": lang_code})
+
 def main():
     language = st.sidebar.selectbox("Choose Language / اختر اللغة", ["English", "العربية"])
     lang_code = "en" if language == "English" else "ar"
