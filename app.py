@@ -269,17 +269,18 @@ def main():
             if selected_law:
                 law_text = read_oman_law(laws[selected_law])
                 if law_text:
-                    query_text = "Enter your query about this law:" if lang_code == "en" else "أدخل استفسارك حول هذا القانون:"
-                    query = st.text_input(query_text)
-                    if st.button("Submit" if lang_code == "en" else "إرسال"):
-                        if query:
-                            with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
-                                response = get_legal_advice(query, law_text, lang_code)
-                                st.markdown("### Response:")
-                                st.markdown(format_response(response))
-                                add_to_chat_history(query, response, lang_code)
-                        else:
-                            st.warning("Please enter a query." if lang_code == "en" else "الرجاء إدخال استفسار.")
+                    while True:
+                        query_text = "Enter your query about this law:" if lang_code == "en" else "أدخل استفسارك حول هذا القانون:"
+                        query = st.text_input(query_text)
+                        if st.button("Submit" if lang_code == "en" else "إرسال"):
+                            if query:
+                                with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
+                                    response = get_legal_advice(query, law_text, lang_code)
+                                    st.markdown("### Response:")
+                                    st.markdown(format_response(response))
+                                    add_to_chat_history(query, response, lang_code)
+                            else:
+                                st.warning("Please enter a query." if lang_code == "en" else "الرجاء إدخال استفسار.")
                 else:
                     st.error("Failed to read the selected law. Please try again or choose a different law." if lang_code == "en" else "فشل في قراءة القانون المحدد. يرجى المحاولة مرة أخرى أو اختيار قانون آخر.")
         else:
