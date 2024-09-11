@@ -176,8 +176,6 @@ def read_oman_law(file_path):
         return None
 
 def main():
-    init_db()
-    
     language = st.sidebar.selectbox("Choose Language / اختر اللغة", ["English", "العربية"])
     lang_code = "en" if language == "English" else "ar"
     
@@ -287,9 +285,9 @@ def main():
                         st.session_state.law_queries = []
                     
                     # Display previous queries and responses
-                    for query, response in st.session_state.law_queries:
-                        st.text_area("Previous Query:", value=query, height=100, disabled=True)
-                        st.text_area("Response:", value=response, height=200, disabled=True)
+                    for i, (prev_query, prev_response) in enumerate(st.session_state.law_queries):
+                        st.text_area(f"Query {i+1}:", value=prev_query, height=100, key=f"prev_query_{i}", disabled=True)
+                        st.text_area(f"Response {i+1}:", value=prev_response, height=200, key=f"prev_response_{i}", disabled=True)
                         st.markdown("---")
                     
                     query_text = "Enter your query about this law:" if lang_code == "en" else "أدخل استفسارك حول هذا القانون:"
@@ -299,7 +297,7 @@ def main():
                         if query:
                             with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
                                 response = get_legal_advice(query, law_text, lang_code)
-                                st.markdown("### Response:")
+                                st.markdown("### Latest Response:")
                                 st.markdown(format_response(response))
                                 
                                 # Add query and response to session state
