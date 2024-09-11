@@ -96,14 +96,27 @@ if st.button("Submit"):
     if document_text and query:
         response = get_legal_advice(query, document_text)
         st.write(response)
+        st.session_state['last_response'] = response
     else:
         st.write("Please provide both a document and a query.")
 
-if document_text:
-    suggested_questions = generate_suggested_questions(document_text)
-    st.write("Suggested Questions:")
-    for question in suggested_questions:
-        if st.button(question):
-            query = question
-            response = get_legal_advice(query, document_text)
-            st.write(response)
+if 'last_response' in st.session_state:
+    if st.button("Get New Suggested Questions"):
+        suggested_questions = generate_suggested_questions(document_text)
+        st.write("Suggested Questions:")
+        for question in suggested_questions:
+            if st.button(question):
+                query = question
+                response = get_legal_advice(query, document_text)
+                st.write(response)
+                st.session_state['last_response'] = response
+else:
+    if document_text:
+        suggested_questions = generate_suggested_questions(document_text)
+        st.write("Suggested Questions:")
+        for question in suggested_questions:
+            if st.button(question):
+                query = question
+                response = get_legal_advice(query, document_text)
+                st.write(response)
+                st.session_state['last_response'] = response
