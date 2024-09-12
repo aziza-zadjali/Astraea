@@ -2,6 +2,7 @@ import streamlit as st
 from utils.document_processing import read_docx, read_pdf, read_txt, preprocess_arabic_text, format_response
 from utils.legal_advice import get_legal_advice, generate_suggested_questions
 from utils.oman_laws import get_oman_laws, read_oman_law
+from googletrans import Translator
 
 def main():
     st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
@@ -15,7 +16,7 @@ def main():
         st.markdown("### Navigation")
         option = st.radio(
             "Choose a feature" if lang_code == "en" else "اختر ميزة",
-            ('Query from Document', 'Get Legal Advice', 'Oman Laws'),
+            ('Query from Document', 'Get Legal Advice', 'Oman Laws', 'Legal Translation Service'),
             key="feature_select"
         )
 
@@ -33,6 +34,8 @@ def main():
         document_query_feature(lang_code)
     elif option == 'Get Legal Advice':
         legal_advice_feature(lang_code)
+    elif option == 'Legal Translation Service':
+        legal_translation_service(lang_code)
     else:
         oman_laws_feature(lang_code)
 
@@ -104,6 +107,27 @@ def oman_laws_feature(lang_code):
                 st.error("Failed to read the selected law. Please try again or choose a different law." if lang_code == "en" else "فشل في قراءة القانون المحدد. يرجى المحاولة مرة أخرى أو اختيار قانون آخر.")
     else:
         st.error("No laws found in the database directory." if lang_code == "en" else "لم يتم العثور على قوانين في دليل قاعدة البيانات.")
+
+def legal_translation_service(lang_code):
+    st.header("Legal Translation Service" if lang_code == 'en' else 'خدمة الترجمة القانونية')
+    
+    text_to_translate = st.text_area(
+        label="Enter the legal text to translate from English to Arabic:" if lang_code == 'en' else 'أدخل النص القانوني لترجمته من الإنجليزية إلى العربية:',
+        key="text_to_translate"
+    )
+    
+    if st.button("Translate" if lang_code == 'en' else 'ترجمة', key="translate_button"):
+        if text_to_translate:
+            translated_text = translate_text(text_to_translate)
+            st.markdown("### Translated Text:" if lang_code == 'en' else '### النص المترجم:')
+            st.markdown(translated_text)
+        else:
+            st.warning("Please enter text to translate." if lang_code == 'en' else 'يرجى إدخال النص للترجمة.')
+
+def translate_text(text):
+    translator = Translator()
+    translated = translator.translate(text, src='en', dest='ar')
+    return translated.text
 
 def process_query(query, context=None, lang_code="en"):
     with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
