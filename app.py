@@ -9,6 +9,8 @@ def main():
     # Initialize session state
     if 'query_count' not in st.session_state:
         st.session_state.query_count = 0
+    if 'last_response' not in st.session_state:
+        st.session_state.last_response = None
 
     # Sidebar
     with st.sidebar:
@@ -68,20 +70,31 @@ def process_uploaded_file(uploaded_file, lang_code):
 def handle_document_queries(document_text, suggested_questions, lang_code):
     st.success("Document uploaded successfully!" if lang_code == "en" else "تم تحميل الوثيقة بنجاح!")
 
-    if suggested_questions:
-        question_text = "Suggested questions:" if lang_code == "en" else "الأسئلة المقترحة:"
-        selected_question = st.selectbox(question_text, [""] + suggested_questions, key=f"suggested_questions_{st.session_state.query_count}")
+    # Display last response if available
+    if st.session_state.last_response:
+        st.markdown("### Last Response:")
+        st.markdown(st.session_state.last_response)
+
+    # Suggested questions dropdown
+    question_text = "Suggested questions:" if lang_code == "en" else "الأسئلة المقترحة:"
+    selected_question = st.selectbox(question_text, [""] + suggested_questions, key=f"suggested_questions_{st.session_state.query_count}")
+
+    # Custom query input
+    query = st.text_input("Enter your query:" if lang_code == "en" else "أدخل استفسارك:", key=f"document_query_{st.session_state.query_count}")
+
+    # Submit button
+    if st.button("Submit Query" if lang_code == "en" else "إرسال الاستفسار", key=f"submit_document_query_{st.session_state.query_count}"):
         if selected_question:
             process_query(selected_question, document_text, lang_code)
-            st.session_state.query_count += 1
-
-    query = st.text_input("Enter your query:" if lang_code == "en" else "أدخل استفسارك:", key=f"document_query_{st.session_state.query_count}")
-    if st.button("Submit Query" if lang_code == "en" else "إرسال الاستفسار", key=f"submit_document_query_{st.session_state.query_count}"):
-        if query:
+        elif query:
             process_query(query, document_text, lang_code)
-            st.session_state.query_count += 1
         else:
-            st.warning("Please enter a query." if lang_code == "en" else "الرجاء إدخال استفسار.")
+            st.warning("Please enter a query or select a suggested question." if lang_code == "en" else "الرجاء إدخال استفسار أو اختيار سؤال مقترح.")
+
+        # Reset the query box and selected suggestion
+        st.session_state[f"document_query_{st.session_state.query_count}"] = ""
+        st.session_state[f"suggested_questions_{st.session_state.query_count}"] = ""
+        st.session_state.query_count += 1
 
 def legal_advice_feature(lang_code):
     st.header("Get Legal Advice" if lang_code == "en" else "الحصول على استشارة قانونية")
@@ -89,6 +102,7 @@ def legal_advice_feature(lang_code):
     if st.button("Submit" if lang_code == "en" else "إرسال", key=f"submit_legal_query_{st.session_state.query_count}"):
         if query:
             process_query(query, language=lang_code)
+            st.session_state[f"legal_query_{st.session_state.query_count}"] = ""
             st.session_state.query_count += 1
         else:
             st.warning("Please enter a query." if lang_code == "en" else "الرجاء إدخال استفسار.")
@@ -106,6 +120,7 @@ def oman_laws_feature(lang_code):
                 if st.button("Submit" if lang_code == "en" else "إرسال", key=f"submit_oman_law_query_{st.session_state.query_count}"):
                     if query:
                         process_query(query, law_text, lang_code)
+                        st.session_state[f"oman_law_query_{st.session_state.query_count}"] = ""
                         st.session_state.query_count += 1
                     else:
                         st.warning("Please enter a query." if lang_code == "en" else "الرجاء إدخال استفسار.")
@@ -118,8 +133,8 @@ def process_query(query, context=None, lang_code="en"):
     with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
         try:
             response = get_legal_advice(query, context, lang_code)
-            st.markdown("### Response:")
-            st.markdown(format_response(response))
+            st.session_state.last_response = format_response(response)
+            st.experimental_rerun()
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
 
