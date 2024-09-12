@@ -64,17 +64,6 @@ def process_uploaded_file(uploaded_file, lang_code):
 def handle_document_queries(document_text, suggested_questions, lang_code):
     st.success("Document uploaded successfully!" if lang_code == "en" else "تم تحميل الوثيقة بنجاح!")
 
-    # Use session state to manage the form reset
-    if 'reset_form' not in st.session_state:
-        st.session_state.reset_form = False
-
-    if st.session_state.reset_form:
-        st.session_state.reset_form = False
-        st.experimental_set_query_params()
-
-    if 'custom_query' not in st.session_state:
-        st.session_state.custom_query = ""
-
     custom_query = st.text_input("Enter your custom query:" if lang_code == "en" else "أدخل استفسارك الخاص:", key="custom_query")
     
     st.markdown("**OR**" if lang_code == "en" else "**أو**")
@@ -122,11 +111,6 @@ def process_query(query, context=None, lang_code="en"):
             response = get_legal_advice(query, context, lang_code)
             st.markdown("### Response:")
             st.markdown(format_response(response))
-            
-            # Add a button to ask another question
-            if st.button("Ask Another Question" if lang_code == "en" else "اطرح سؤالاً آخر", key="ask_another"):
-                st.session_state.reset_form = True
-                st.experimental_set_query_params()
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
 
