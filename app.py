@@ -79,17 +79,11 @@ def handle_document_queries(document_text, suggested_questions, lang_code):
         query = custom_query if custom_query else selected_question
         if query:
             process_query(query, document_text, lang_code)
-            # Clear the form inputs after processing
-            st.session_state.custom_query = ""
-            st.session_state.suggested_questions = ""
-            st.experimental_rerun()
         else:
             st.warning("Please enter a query or select a suggested question." if lang_code == "en" else "الرجاء إدخال استفسار أو اختيار سؤال مقترح.")
 
     # Add a button to ask another question
     if st.button("Ask Another Question" if lang_code == "en" else "اطرح سؤالاً آخر"):
-        st.session_state.custom_query = ""
-        st.session_state.suggested_questions = ""
         st.experimental_rerun()
 
 def legal_advice_feature(lang_code):
