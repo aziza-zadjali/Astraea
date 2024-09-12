@@ -98,8 +98,8 @@ def handle_document_queries(lang_code):
 
 def legal_advice_feature(lang_code):
     st.header("Get Legal Advice" if lang_code == "en" else "الحصول على استشارة قانونية")
-    query = st.text_input("Enter your legal query:" if lang_code == "en" else "أدخل استفسارك القانوني:", key=f"legal_query_{len(st.session_state.chat_history)}")
-    if st.button("Submit" if lang_code == "en" else "إرسال", key=f"submit_legal_query_{len(st.session_state.chat_history)}"):
+    query = st.text_input("Enter your legal query:" if lang_code == "en" else "أدخل استفسارك القانوني:", key="legal_query")
+    if st.button("Submit" if lang_code == "en" else "إرسال", key="submit_legal_query"):
         if query:
             process_query(query, language=lang_code)
         else:
@@ -114,8 +114,7 @@ def oman_laws_feature(lang_code):
         if selected_law:
             law_text = read_oman_law(laws[selected_law])
             if law_text:
-                query_text = "Enter your query about this law:" if lang_code == "en" else "أدخل استفسارك حول هذا القانون:"
-                query = st.text_input(query_text, key="oman_law_query")
+                query = st.text_input("Enter your query about this law:" if lang_code == "en" else "أدخل استفسارك حول هذا القانون:", key="oman_law_query")
                 if st.button("Submit" if lang_code == "en" else "إرسال", key="submit_oman_law_query"):
                     if query:
                         process_query(query, law_text, lang_code)
