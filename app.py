@@ -111,20 +111,19 @@ def oman_laws_feature(lang_code):
 def legal_translation_service(lang_code):
     st.header("Legal Translation Service" if lang_code == 'en' else 'خدمة الترجمة القانونية')
     
-    text_to_translate = st.text_area(
-        label="Enter the legal text to translate from English to Arabic:" if lang_code == 'en' else 'أدخل النص القانوني لترجمته من الإنجليزية إلى العربية:',
-        key="text_to_translate"
-    )
-    
-    if st.button("Translate" if lang_code == 'en' else 'ترجمة', key="translate_button"):
-        if text_to_translate:
-            translated_text = translate_text(text_to_translate)
+    upload_text = 'Upload a document for translation' if lang_code == 'en' else 'قم بتحميل وثيقة للترجمة'
+    uploaded_file = st.file_uploader(upload_text, type=["docx", "pdf", "txt"], key="translation_file_uploader")
+
+    if uploaded_file:
+        document_text = process_uploaded_file(uploaded_file, lang_code)
+        if document_text:
+            translated_text = translate_text(document_text)
             st.markdown("### Translated Text:" if lang_code == 'en' else '### النص المترجم:')
             st.markdown(translated_text)
-        else:
-            st.warning("Please enter text to translate." if lang_code == 'en' else 'يرجى إدخال النص للترجمة.')
 
 def translate_text(text):
+    # Placeholder for legal translation logic
+    # Implement best practices for legal translation here
     translator = Translator()
     translated = translator.translate(text, src='en', dest='ar')
     return translated.text
