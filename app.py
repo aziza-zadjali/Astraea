@@ -64,21 +64,29 @@ def process_uploaded_file(uploaded_file, lang_code):
 def handle_document_queries(document_text, suggested_questions, lang_code):
     st.success("Document uploaded successfully!" if lang_code == "en" else "تم تحميل الوثيقة بنجاح!")
 
-    col1, col2 = st.columns([2, 1])
-    
-    with col1:
-        custom_query = st.text_input("Enter your query:" if lang_code == "en" else "أدخل استفسارك:", key="custom_query")
-    
-    with col2:
-        question_text = "Or select a suggested question:" if lang_code == "en" else "أو اختر سؤالاً مقترحًا:"
+    query_container = st.container()
+    response_container = st.container()
+
+    with query_container:
+        st.subheader("Ask a question" if lang_code == "en" else "اطرح سؤالاً")
+        custom_query = st.text_input("Enter your custom query:" if lang_code == "en" else "أدخل استفسارك الخاص:", key="custom_query")
+        
+        st.markdown("**OR**" if lang_code == "en" else "**أو**")
+        
+        question_text = "Select a suggested question:" if lang_code == "en" else "اختر سؤالاً مقترحًا:"
         selected_question = st.selectbox(question_text, [""] + suggested_questions, key="suggested_questions")
 
-    if st.button("Submit Query" if lang_code == "en" else "إرسال الاستفسار", key="submit_query"):
-        query = custom_query if custom_query else selected_question
-        if query:
-            process_query(query, document_text, lang_code)
-        else:
-            st.warning("Please enter a query or select a suggested question." if lang_code == "en" else "الرجاء إدخال استفسار أو اختيار سؤال مقترح.")
+        if st.button("Submit Query" if lang_code == "en" else "إرسال الاستفسار", key="submit_query"):
+            query = custom_query if custom_query else selected_question
+            if query:
+                with response_container:
+                    process_query(query, document_text, lang_code)
+                    if st.button("Ask Another Question" if lang_code == "en" else "اطرح سؤالاً آخر"):
+                        st.session_state.custom_query = ""
+                        st.session_state.suggested_questions = ""
+                        st.experimental_rerun()
+            else:
+                st.warning("Please enter a query or select a suggested question." if lang_code == "en" else "الرجاء إدخال استفسار أو اختيار سؤال مقترح.")
 
 def legal_advice_feature(lang_code):
     st.header("Get Legal Advice" if lang_code == "en" else "الحصول على استشارة قانونية")
@@ -86,6 +94,9 @@ def legal_advice_feature(lang_code):
     if st.button("Submit" if lang_code == "en" else "إرسال", key="submit_legal_query"):
         if query:
             process_query(query, language=lang_code)
+            if st.button("Ask Another Question" if lang_code == "en" else "اطرح سؤالاً آخر"):
+                st.session_state.legal_query = ""
+                st.experimental_rerun()
         else:
             st.warning("Please enter a query." if lang_code == "en" else "الرجاء إدخال استفسار.")
 
@@ -102,6 +113,9 @@ def oman_laws_feature(lang_code):
                 if st.button("Submit" if lang_code == "en" else "إرسال", key="submit_oman_law_query"):
                     if query:
                         process_query(query, law_text, lang_code)
+                        if st.button("Ask Another Question" if lang_code == "en" else "اطرح سؤالاً آخر"):
+                            st.session_state.oman_law_query = ""
+                            st.experimental_rerun()
                     else:
                         st.warning("Please enter a query." if lang_code == "en" else "الرجاء إدخال استفسار.")
             else:
