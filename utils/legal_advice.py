@@ -5,7 +5,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-@st.cache_data(ttl=3600)
+@st.cache_data(ttl=3600, allow_output_mutation=True)
 @retry(wait=wait_random_exponential(min=1, max=60), stop=stop_after_attempt(6))
 def get_legal_advice(query, document_text=None, language="en"):
     try:
@@ -28,6 +28,7 @@ def get_legal_advice(query, document_text=None, language="en"):
                     "en": f"Document context (Part {i+1}/{len(chunks)}): {chunk}\n\nProvide a brief summary of this part of the document, focusing on key legal aspects.",
                     "ar": f"سياق الوثيقة (الجزء {i+1}/{len(chunks)}): {chunk}\n\nقدم ملخصًا موجزًا لهذا الجزء من الوثيقة، مع التركيز على الجوانب القانونية الرئيسية."
                 }
+
                 chunk_messages = messages + [{"role": "user", "content": context_prompt[language]}]
                 response = openai.ChatCompletion.create(
                     model="gpt-3.5-turbo-16k",
@@ -35,6 +36,7 @@ def get_legal_advice(query, document_text=None, language="en"):
                     max_tokens=500,
                     temperature=0.7
                 )
+
                 summary = response.choices[0].message['content'].strip()
                 summaries.append(summary)
 
@@ -43,22 +45,22 @@ def get_legal_advice(query, document_text=None, language="en"):
                 "en": f"Based on the following document summaries, answer this question: {query}\n\nDocument summaries:\n{combined_summary}",
                 "ar": f"بناءً على ملخصات الوثيقة التالية، أجب على هذا السؤال: {query}\n\nملخصات الوثيقة:\n{combined_summary}"
             }
+
             messages.append({"role": "user", "content": final_prompt[language]})
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo-16k",
+                messages=messages,
+                max_tokens=1000,
+                temperature=0.7
+            )
 
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo-16k",
-            messages=messages,
-            max_tokens=1000,
-            temperature=0.7
-        )
+            full_response = response.choices[0].message['content'].strip()
+            return full_response
+        except Exception as e:
+            logger.error(f"An error occurred in get_legal_advice: {str(e)}")
+            return f"An error occurred: {str(e)}"
 
-        full_response = response.choices[0].message['content'].strip()
-        return full_response
-    except Exception as e:
-        logger.error(f"An error occurred in get_legal_advice: {str(e)}")
-        return f"An error occurred: {str(e)}"
-
-@st.cache_data(ttl=3600)
+@st.cache_data(ttl=3600, allow_output_mutation=True)
 def generate_suggested_questions(document_text, language):
     try:
         prompt = {
