@@ -11,5 +11,7 @@ arabic_reshaper
 python-bidi
 googletrans==4.0.0-rc1
 fpdf
-spacy>=3.0.0,<4.0.0
 deep-translator
+spacy>=3.0.0,<4.0.0
+https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.5.0/en_core_web_sm-3.5.0-py3-none-any.whl
+https://github.com/explosion/spacy-models/releases/download/ar_core_news_sm-3.5.0/ar_core_news_sm-3.5.0-py3-none-any.whl
