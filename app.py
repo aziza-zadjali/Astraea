@@ -70,7 +70,7 @@ def handle_document_queries(document_text, suggested_questions, lang_code):
 
     if st.session_state.reset_form:
         st.session_state.reset_form = False
-        st.experimental_rerun()
+        st.experimental_set_query_params()
 
     if 'custom_query' not in st.session_state:
         st.session_state.custom_query = ""
@@ -126,7 +126,7 @@ def process_query(query, context=None, lang_code="en"):
             # Add a button to ask another question
             if st.button("Ask Another Question" if lang_code == "en" else "اطرح سؤالاً آخر", key="ask_another"):
                 st.session_state.reset_form = True
-                st.experimental_rerun()
+                st.experimental_set_query_params()
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
 
