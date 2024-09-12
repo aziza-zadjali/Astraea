@@ -81,11 +81,11 @@ def process_uploaded_file(uploaded_file, lang_code):
 
 def handle_document_queries(document_text, suggested_questions, lang_code):
     st.success("Document uploaded successfully!" if lang_code == "en" else "تم تحميل الوثيقة بنجاح!")
-    custom_query = st.text_input("Enter your custom query:" if lang_code == "en" else "أدخل استفسارك الخاص:", key="custom_query")
-    st.markdown("**OR**" if lang_code == "en" else "**أو**")
     question_text = "Select a suggested question:" if lang_code == "en" else "اختر سؤالاً مقترحًا:"
     selected_question = st.selectbox(question_text, [""] + suggested_questions, key="selected_question")
-
+    st.markdown("**OR**" if lang_code == "en" else "**أو**")
+    custom_query = st.text_input("Enter your custom query:" if lang_code == "en" else "أدخل استفسارك الخاص:", key="custom_query")
+    
     if selected_question:
         process_query(selected_question, document_text, lang_code)
     elif custom_query and st.button("Submit Custom Query" if lang_code == "en" else "إرسال الاستفسار الخاص", key="submit_custom_query"):
