@@ -28,4 +28,4 @@ def read_oman_law(file_path):
         logger.error(f"Error reading PDF: {str(e)}")
         return None
 
-# Remove the add_to_chat_history function as it's no longer needed
+# Removed add_to_chat_history function as it's no longer needed
