@@ -126,6 +126,8 @@ def legal_translation_service(lang_code):
                     )
                 except Exception as e:
                     st.error(f"An error occurred while creating the PDF: {str(e)}")
+                    st.text("The translated text is:")
+                    st.text(translated_text)
 
 def translate_to_arabic(text):
     translator = GoogleTranslator(source='en', target='ar')
@@ -136,9 +138,10 @@ def create_pdf(text):
     pdf = FPDF()
     pdf.add_page()
     pdf.set_auto_page_break(auto=True, margin=15)
-    pdf.set_font("Helvetica", size=12)
+    pdf.add_font("DejaVu", "", "DejaVuSansCondensed.ttf", uni=True)
+    pdf.set_font("DejaVu", size=12)
     pdf.multi_cell(0, 10, text)
-    return pdf.output(dest='S').encode('latin1')
+    return pdf.output(dest='S').encode('latin-1', errors='ignore')
 
 def process_query(query, context=None, lang_code="en"):
     with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
