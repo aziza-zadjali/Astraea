@@ -23,10 +23,9 @@ def read_oman_law(file_path):
             for page in pdf_document:
                 text = page.get_text()
                 full_text.append(text)
-            return '\n'.join(full_text)
+        return '\n'.join(full_text)
     except Exception as e:
         logger.error(f"Error reading PDF: {str(e)}")
         return None
 
-def add_to_chat_history(query, response, lang_code):
-    st.session_state.chat_history.append({"query": query, "response": response, "language": lang_code})
+# Remove the add_to_chat_history function as it's no longer needed
