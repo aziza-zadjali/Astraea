@@ -4,6 +4,8 @@ from utils.legal_advice import get_legal_advice, generate_suggested_questions
 from utils.oman_laws import get_oman_laws, read_oman_law
 from deep_translator import GoogleTranslator
 from fpdf import FPDF
+import base64
+import os
 
 def main():
     st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
@@ -138,8 +140,7 @@ def create_pdf(text):
     pdf = FPDF()
     pdf.add_page()
     pdf.set_auto_page_break(auto=True, margin=15)
-    pdf.add_font("DejaVu", "", "DejaVuSansCondensed.ttf", uni=True)
-    pdf.set_font("DejaVu", size=12)
+    pdf.set_font("Arial", size=12)
     pdf.multi_cell(0, 10, text)
     return pdf.output(dest='S').encode('latin-1', errors='ignore')
 
