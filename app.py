@@ -6,6 +6,10 @@ from utils.oman_laws import get_oman_laws, read_oman_law
 def main():
     st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
 
+    # Initialize session state
+    if 'query_count' not in st.session_state:
+        st.session_state.query_count = 0
+
     # Sidebar
     with st.sidebar:
         st.image("logo.png", width=200)
@@ -64,23 +68,35 @@ def process_uploaded_file(uploaded_file, lang_code):
 def handle_document_queries(document_text, suggested_questions, lang_code):
     st.success("Document uploaded successfully!" if lang_code == "en" else "تم تحميل الوثيقة بنجاح!")
 
-    if suggested_questions:
-        question_text = "Suggested questions:" if lang_code == "en" else "الأسئلة المقترحة:"
-        selected_question = st.selectbox(question_text, [""] + suggested_questions, key="suggested_questions")
-        if selected_question:
-            process_query(selected_question, document_text, lang_code)
+    while True:
+        if suggested_questions:
+            question_text = "Suggested questions:" if lang_code == "en" else "الأسئلة المقترحة:"
+            selected_question = st.selectbox(question_text, [""] + suggested_questions, key=f"suggested_questions_{st.session_state.query_count}")
+            if selected_question:
+                process_query(selected_question, document_text, lang_code)
+                suggested_questions = generate_suggested_questions(document_text, lang_code)
+                st.session_state.query_count += 1
+                continue
 
-    query = st.text_input("Enter your query:" if lang_code == "en" else "أدخل استفسارك:", key="document_query")
-    if st.button("Submit Query" if lang_code == "en" else "إرسال الاستفسار", key="submit_document_query"):
-        if query:
-            process_query(query, document_text, lang_code)
-        else:
-            st.warning("Please enter a query." if lang_code == "en" else "الرجاء إدخال استفسار.")
+        query = st.text_input("Enter your query:" if lang_code == "en" else "أدخل استفسارك:", key=f"document_query_{st.session_state.query_count}")
+        if st.button("Submit Query" if lang_code == "en" else "إرسال الاستفسار", key=f"submit_document_query_{st.session_state.query_count}"):
+            if query:
+                process_query(query, document_text, lang_code)
+                suggested_questions = generate_suggested_questions(document_text, lang_code)
+                st.session_state.query_count += 1
+            else:
+                st.warning("Please enter a query." if lang_code == "en" else "الرجاء إدخال استفسار.")
+
+        if not ask_for_more_questions(lang_code):
+            break
+
+def ask_for_more_questions(lang_code):
+    return st.button("Ask more questions" if lang_code == "en" else "اطرح المزيد من الأسئلة", key=f"ask_more_{st.session_state.query_count}")
 
 def legal_advice_feature(lang_code):
     st.header("Get Legal Advice" if lang_code == "en" else "الحصول على استشارة قانونية")
-    query = st.text_input("Enter your legal query:" if lang_code == "en" else "أدخل استفسارك القانوني:", key="legal_query")
-    if st.button("Submit" if lang_code == "en" else "إرسال", key="submit_legal_query"):
+    query = st.text_input("Enter your legal query:" if lang_code == "en" else "أدخل استفسارك القانوني:", key=f"legal_query_{st.session_state.query_count}")
+    if st.button("Submit" if lang_code == "en" else "إرسال", key=f"submit_legal_query_{st.session_state.query_count}"):
         if query:
             process_query(query, language=lang_code)
         else:
@@ -95,8 +111,8 @@ def oman_laws_feature(lang_code):
         if selected_law:
             law_text = read_oman_law(laws[selected_law])
             if law_text:
-                query = st.text_input("Enter your query about this law:" if lang_code == "en" else "أدخل استفسارك حول هذا القانون:", key="oman_law_query")
-                if st.button("Submit" if lang_code == "en" else "إرسال", key="submit_oman_law_query"):
+                query = st.text_input("Enter your query about this law:" if lang_code == "en" else "أدخل استفسارك حول هذا القانون:", key=f"oman_law_query_{st.session_state.query_count}")
+                if st.button("Submit" if lang_code == "en" else "إرسال", key=f"submit_oman_law_query_{st.session_state.query_count}"):
                     if query:
                         process_query(query, law_text, lang_code)
                     else:
