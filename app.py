@@ -1,20 +1,10 @@
 import streamlit as st
 from utils.document_processing import read_docx, read_pdf, read_txt, preprocess_arabic_text, format_response
 from utils.legal_advice import get_legal_advice, generate_suggested_questions
-from utils.oman_laws import get_oman_laws, read_oman_law, add_to_chat_history
+from utils.oman_laws import get_oman_laws, read_oman_law
 
 def main():
     st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
-
-    # Initialize session state
-    if 'chat_history' not in st.session_state:
-        st.session_state.chat_history = []
-    if 'law_queries' not in st.session_state:
-        st.session_state.law_queries = []
-    if 'document_text' not in st.session_state:
-        st.session_state.document_text = None
-    if 'suggested_questions' not in st.session_state:
-        st.session_state.suggested_questions = []
 
     # Sidebar
     with st.sidebar:
@@ -46,24 +36,15 @@ def main():
     else:
         oman_laws_feature(lang_code)
 
-    # Display chat history
-    st.markdown("---")
-    st.markdown("### Chat History")
-    for item in st.session_state.chat_history:
-        st.markdown(f"**You:** {item['query']}")
-        st.markdown(f"**Astraea:** {item['response']}")
-    st.markdown("---")
-
 def document_query_feature(lang_code):
     st.header("Query from Document" if lang_code == "en" else "استعلام من وثيقة")
     upload_text = "Upload a document" if lang_code == "en" else "قم بتحميل وثيقة"
     uploaded_file = st.file_uploader(upload_text, type=["docx", "pdf", "txt"], key="file_uploader")
 
     if uploaded_file:
-        st.session_state.document_text = process_uploaded_file(uploaded_file, lang_code)
-        if st.session_state.document_text:
-            st.session_state.suggested_questions = generate_suggested_questions(st.session_state.document_text, lang_code)
-            handle_document_queries(lang_code)
+        document_text = process_uploaded_file(uploaded_file, lang_code)
+        if document_text:
+            handle_document_queries(document_text, lang_code)
 
 def process_uploaded_file(uploaded_file, lang_code):
     file_type = uploaded_file.type
@@ -79,20 +60,20 @@ def process_uploaded_file(uploaded_file, lang_code):
             st.error("Unsupported file type." if lang_code == "en" else "نوع الملف غير مدعوم.")
             return None
 
-def handle_document_queries(lang_code):
+def handle_document_queries(document_text, lang_code):
     st.success("Document uploaded successfully!" if lang_code == "en" else "تم تحميل الوثيقة بنجاح!")
 
-    if st.session_state.suggested_questions:
+    suggested_questions = generate_suggested_questions(document_text, lang_code)
+    if suggested_questions:
         question_text = "Suggested questions:" if lang_code == "en" else "الأسئلة المقترحة:"
-        selected_question = st.selectbox(question_text, [""] + st.session_state.suggested_questions, key="suggested_questions")
+        selected_question = st.selectbox(question_text, [""] + suggested_questions, key="suggested_questions")
         if selected_question:
-            process_query(selected_question, st.session_state.document_text, lang_code)
-            st.experimental_rerun()
+            process_query(selected_question, document_text, lang_code)
 
     custom_query = st.text_input("Enter your custom query:" if lang_code == "en" else "أدخل استفسارك الخاص:", key="custom_query")
     if st.button("Submit Custom Query" if lang_code == "en" else "إرسال الاستفسار الخاص", key="submit_custom_query"):
         if custom_query:
-            process_query(custom_query, st.session_state.document_text, lang_code)
+            process_query(custom_query, document_text, lang_code)
         else:
             st.warning("Please enter a query." if lang_code == "en" else "الرجاء إدخال استفسار.")
 
@@ -131,7 +112,6 @@ def process_query(query, context=None, lang_code="en"):
             response = get_legal_advice(query, context, lang_code)
             st.markdown("### Response:")
             st.markdown(format_response(response))
-            add_to_chat_history(query, response, lang_code)
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
 
