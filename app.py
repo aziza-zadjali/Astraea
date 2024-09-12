@@ -22,7 +22,7 @@ def main():
         st.markdown("### Navigation")
         option = st.radio(
             "Choose a feature" if lang_code == "en" else "اختر ميزة",
-            ('Query from Document', 'Get Legal Advice', 'Oman Laws', 'Legal Translation Service', 'Automated Document Creation'),
+            ('Legal Query Assistant', 'Oman Laws', 'Legal Translation Service', 'Automated Document Creation'),
             key="feature_select"
         )
 
@@ -35,10 +35,8 @@ def main():
     }
     st.info(disclaimer[lang_code])
 
-    if option == 'Query from Document':
-        document_query_feature(lang_code)
-    elif option == 'Get Legal Advice':
-        legal_advice_feature(lang_code)
+    if option == 'Legal Query Assistant':
+        legal_query_assistant(lang_code)
     elif option == 'Oman Laws':
         oman_laws_feature(lang_code)
     elif option == 'Legal Translation Service':
@@ -46,16 +44,26 @@ def main():
     elif option == 'Automated Document Creation':
         automated_document_creation(lang_code)
 
-def document_query_feature(lang_code):
-    st.header("Query from Document" if lang_code == "en" else "استعلام من وثيقة")
-    upload_text = "Upload a document" if lang_code == "en" else "قم بتحميل وثيقة"
-    uploaded_file = st.file_uploader(upload_text, type=["docx", "pdf", "txt"], key="file_uploader")
+def legal_query_assistant(lang_code):
+    st.header("Legal Query Assistant" if lang_code == "en" else "مساعد الاستفسارات القانونية")
+    
+    query_type = st.radio(
+        "Choose query type" if lang_code == "en" else "اختر نوع الاستفسار",
+        ('Enter your own query', 'Query from document'),
+        key="query_type"
+    )
 
-    if uploaded_file:
-        document_text = process_uploaded_file(uploaded_file, lang_code)
-        if document_text:
-            suggested_questions = generate_suggested_questions(document_text, lang_code)
-            handle_document_queries(document_text, suggested_questions, lang_code)
+    if query_type == 'Enter your own query':
+        query = st.text_input("Enter your legal query:" if lang_code == "en" else "أدخل استفسارك القانوني:", key="legal_query")
+        if query and st.button("Submit" if lang_code == "en" else "إرسال", key="submit_legal_query"):
+            process_query(query, context=None, lang_code=lang_code)
+    else:
+        uploaded_file = st.file_uploader("Upload a document" if lang_code == "en" else "قم بتحميل وثيقة", type=["docx", "pdf", "txt"], key="file_uploader")
+        if uploaded_file:
+            document_text = process_uploaded_file(uploaded_file, lang_code)
+            if document_text:
+                suggested_questions = generate_suggested_questions(document_text, lang_code)
+                handle_document_queries(document_text, suggested_questions, lang_code)
 
 def process_uploaded_file(uploaded_file, lang_code):
     file_type = uploaded_file.type
@@ -82,16 +90,6 @@ def handle_document_queries(document_text, suggested_questions, lang_code):
         process_query(selected_question, document_text, lang_code)
     elif custom_query and st.button("Submit Custom Query" if lang_code == "en" else "إرسال الاستفسار الخاص", key="submit_custom_query"):
         process_query(custom_query, document_text, lang_code)
-    elif not custom_query and st.button("Submit Custom Query" if lang_code == "en" else "إرسال الاستفسار الخاص", key="submit_custom_query"):
-        st.warning("Please enter a query or select a suggested question." if lang_code == "en" else "الرجاء إدخال استفسار أو اختيار سؤال مقترح.")
-
-def legal_advice_feature(lang_code):
-    st.header("Get Legal Advice" if lang_code == "en" else "الحصول على استشارة قانونية")
-    query = st.text_input("Enter your legal query:" if lang_code == "en" else "أدخل استفسارك القانوني:", key="legal_query")
-    if query and st.button("Submit" if lang_code == "en" else "إرسال", key="submit_legal_query"):
-        process_query(query, context=None, lang_code=lang_code)
-    elif not query and st.button("Submit" if lang_code == "en" else "إرسال", key="submit_legal_query"):
-        st.warning("Please enter a query." if lang_code == "en" else "الرجاء إدخال استفسار.")
 
 def oman_laws_feature(lang_code):
     st.header("Oman Laws" if lang_code == "en" else "قوانين عمان")
