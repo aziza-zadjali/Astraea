@@ -17,6 +17,7 @@ def main():
         st.image("logo.png", width=200)  # Add your logo here
         language = st.selectbox("Choose Language / اختر اللغة", ["English", "العربية"], key="language_select")
         lang_code = "en" if language == "English" else "ar"
+
         st.markdown("---")
         st.markdown("### Navigation")
         option = st.radio(
@@ -28,6 +29,7 @@ def main():
     # Main content
     title = "Astraea - Legal Query Assistant" if lang_code == "en" else "أسترايا - مساعد الاستفسارات القانونية"
     st.title(title)
+
     disclaimer = {
         "en": "This assistant uses GPT-3.5-turbo to provide general legal information. Please note that this is not a substitute for professional legal advice.",
         "ar": "يستخدم هذا المساعد نموذج GPT-3.5-turbo لتقديم معلومات قانونية عامة. يرجى ملاحظة أن هذا ليس بديلاً عن المشورة القانونية المهنية."
@@ -47,12 +49,14 @@ def main():
     for query, response in st.session_state.chat_history:
         st.markdown(f"**You:** {query}")
         st.markdown(f"**Astraea:** {response}")
-    st.markdown("---")
+        st.markdown("---")
 
 def document_query_feature(lang_code):
     st.header("Query from Document" if lang_code == "en" else "استعلام من وثيقة")
+    
     upload_text = "Upload a document" if lang_code == "en" else "قم بتحميل وثيقة"
     uploaded_file = st.file_uploader(upload_text, type=["docx", "pdf", "txt"], key="file_uploader")
+
     if uploaded_file:
         document_text = process_uploaded_file(uploaded_file, lang_code)
         if document_text:
@@ -75,11 +79,13 @@ def process_uploaded_file(uploaded_file, lang_code):
 
 def handle_document_queries(document_text, suggested_questions, lang_code):
     st.success("Document uploaded successfully!" if lang_code == "en" else "تم تحميل الوثيقة بنجاح!")
+    
     if suggested_questions:
         question_text = "Suggested questions:" if lang_code == "en" else "الأسئلة المقترحة:"
         selected_question = st.selectbox(question_text, [""] + suggested_questions, key="suggested_questions")
         if selected_question:
             process_query(selected_question, document_text, lang_code)
+
     custom_query = st.text_input("Enter your custom query:" if lang_code == "en" else "أدخل استفسارك الخاص:", key="custom_query")
     if st.button("Submit Custom Query" if lang_code == "en" else "إرسال الاستفسار الخاص", key="submit_custom_query"):
         if custom_query:
@@ -89,6 +95,7 @@ def handle_document_queries(document_text, suggested_questions, lang_code):
 
 def legal_advice_feature(lang_code):
     st.header("Get Legal Advice" if lang_code == "en" else "الحصول على استشارة قانونية")
+    
     query = st.text_input("Enter your legal query:" if lang_code == "en" else "أدخل استفسارك القانوني:", key=f"legal_query_{len(st.session_state.chat_history)}")
     if st.button("Submit" if lang_code == "en" else "إرسال", key=f"submit_legal_query_{len(st.session_state.chat_history)}"):
         if query:
@@ -98,6 +105,7 @@ def legal_advice_feature(lang_code):
 
 def oman_laws_feature(lang_code):
     st.header("Oman Laws" if lang_code == "en" else "قوانين عمان")
+    
     laws = get_oman_laws()
     if laws:
         law_select_text = "Select a law:" if lang_code == "en" else "اختر قانونًا:"
