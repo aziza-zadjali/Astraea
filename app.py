@@ -3,6 +3,10 @@ from utils.document_processing import read_docx, read_pdf, read_txt, preprocess_
 from utils.legal_advice import get_legal_advice, generate_suggested_questions
 from utils.oman_laws import get_oman_laws, read_oman_law
 from deep_translator import GoogleTranslator
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 def main():
     st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
@@ -81,7 +85,8 @@ def legal_advice_feature(lang_code):
     st.header("Get Legal Advice" if lang_code == "en" else "الحصول على استشارة قانونية")
     query = st.text_input("Enter your legal query:" if lang_code == "en" else "أدخل استفسارك القانوني:", key="legal_query")
     if query and st.button("Submit" if lang_code == "en" else "إرسال", key="submit_legal_query"):
-        process_query(query, language=lang_code)
+        logger.debug(f"Processing query: {query}")
+        process_query(query, context=None, lang_code=lang_code)
     elif not query and st.button("Submit" if lang_code == "en" else "إرسال", key="submit_legal_query"):
         st.warning("Please enter a query." if lang_code == "en" else "الرجاء إدخال استفسار.")
 
@@ -131,10 +136,13 @@ def translate_to_arabic(text):
 def process_query(query, context=None, lang_code="en"):
     with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
         try:
+            logger.debug(f"Calling get_legal_advice with query: {query}, lang_code: {lang_code}")
             response = get_legal_advice(query, context, lang_code)
+            logger.debug(f"Response received: {response}")
             st.markdown("### Response:")
             st.markdown(format_response(response))
         except Exception as e:
+            logger.error(f"An error occurred: {str(e)}", exc_info=True)
             st.error(f"An error occurred: {str(e)}")
 
 if __name__ == "__main__":
