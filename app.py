@@ -133,8 +133,8 @@ def create_pdf(text):
     pdf = FPDF()
     pdf.add_page()
     pdf.set_auto_page_break(auto=True, margin=15)
-    pdf.add_font("NotoNaskhArabic", "", "NotoNaskhArabic-Regular.ttf", uni=True)
-    pdf.set_font("NotoNaskhArabic", size=12)
+    pdf.add_font("Arial", "", "/usr/share/fonts/truetype/msttcorefonts/Arial.ttf", uni=True)
+    pdf.set_font("Arial", size=12)
     pdf.multi_cell(0, 10, text)
     return pdf.output(dest='S').encode('latin1')
 
