@@ -9,3 +9,4 @@ pyarabic
 tenacity
 arabic_reshaper
 python-bidi
+googletrans==4.0.0-rc1
