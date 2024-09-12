@@ -6,12 +6,12 @@ import arabic_reshaper
 from bidi.algorithm import get_display
 from pyarabic.araby import strip_tashkeel, normalize_hamza
 
-@st.cache_data
+@st.cache_data(ttl=3600, allow_output_mutation=True)
 def read_docx(file):
     doc = Document(file)
     return '\n'.join([para.text for para in doc.paragraphs])
 
-@st.cache_data
+@st.cache_data(ttl=3600, allow_output_mutation=True)
 def read_pdf(file):
     try:
         pdf_document = fitz.open(stream=file.read(), filetype="pdf")
@@ -24,11 +24,11 @@ def read_pdf(file):
         st.error(f"Error reading PDF: {str(e)}")
         return None
 
-@st.cache_data
+@st.cache_data(ttl=3600, allow_output_mutation=True)
 def read_txt(file):
     return file.read().decode("utf-8")
 
-@st.cache_data
+@st.cache_data(ttl=3600, allow_output_mutation=True)
 def preprocess_arabic_text(text):
     if isinstance(text, list):
         text = ' '.join(text)
