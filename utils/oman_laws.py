@@ -9,10 +9,11 @@ logger = logging.getLogger(__name__)
 def get_oman_laws():
     DATABASE_DIR = "database"
     laws = {}
-    for filename in os.listdir(DATABASE_DIR):
-        if filename.endswith(".pdf"):
-            law_name = filename[:-4]  # Remove .pdf extension
-            laws[law_name] = os.path.join(DATABASE_DIR, filename)
+    if os.path.exists(DATABASE_DIR):
+        for filename in os.listdir(DATABASE_DIR):
+            if filename.endswith(".pdf"):
+                law_name = filename[:-4]  # Remove .pdf extension
+                laws[law_name] = os.path.join(DATABASE_DIR, filename)
     return laws
 
 @st.cache_data
