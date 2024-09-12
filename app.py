@@ -3,9 +3,6 @@ from utils.document_processing import read_docx, read_pdf, read_txt, preprocess_
 from utils.legal_advice import get_legal_advice, generate_suggested_questions
 from utils.oman_laws import get_oman_laws, read_oman_law
 from deep_translator import GoogleTranslator
-from fpdf import FPDF
-import base64
-import os
 
 def main():
     st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
@@ -118,31 +115,18 @@ def legal_translation_service(lang_code):
         if document_text:
             if st.button("Translate to Arabic" if lang_code == 'en' else 'ترجمة إلى العربية', key="translate_button"):
                 translated_text = translate_to_arabic(document_text)
-                try:
-                    pdf = create_pdf(translated_text)
-                    st.download_button(
-                        label="Download Arabic Translation" if lang_code == 'en' else 'تحميل الترجمة العربية',
-                        data=pdf,
-                        file_name="arabic_translation.pdf",
-                        mime="application/pdf"
-                    )
-                except Exception as e:
-                    st.error(f"An error occurred while creating the PDF: {str(e)}")
-                    st.text("The translated text is:")
-                    st.text(translated_text)
+                st.text_area("Translated Text", translated_text, height=300)
+                st.download_button(
+                    label="Download Arabic Translation" if lang_code == 'en' else 'تحميل الترجمة العربية',
+                    data=translated_text.encode('utf-8'),
+                    file_name="arabic_translation.txt",
+                    mime="text/plain"
+                )
 
 def translate_to_arabic(text):
-    translator = GoogleTranslator(source='en', target='ar')
+    translator = GoogleTranslator(source='auto', target='ar')
     translated = translator.translate(text)
     return translated
-
-def create_pdf(text):
-    pdf = FPDF()
-    pdf.add_page()
-    pdf.set_auto_page_break(auto=True, margin=15)
-    pdf.set_font("Arial", size=12)
-    pdf.multi_cell(0, 10, text)
-    return pdf.output(dest='S').encode('latin-1', errors='ignore')
 
 def process_query(query, context=None, lang_code="en"):
     with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
