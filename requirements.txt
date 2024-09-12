@@ -7,5 +7,5 @@ beautifulsoup4
 PyMuPDF
 pyarabic
 tenacity
-arabic-reshaper
+arabic_reshaper
 python-bidi
