@@ -117,9 +117,10 @@ def legal_translation_service(lang_code):
     if uploaded_file:
         document_text = process_uploaded_file(uploaded_file, lang_code)
         if document_text:
-            translated_text = translate_text(document_text)
-            st.markdown("### Translated Text:" if lang_code == 'en' else '### النص المترجم:')
-            st.markdown(translated_text)
+            if st.button("Translate" if lang_code == 'en' else 'ترجمة', key="translate_button"):
+                translated_text = translate_text(document_text)
+                st.markdown("### Translated Text:" if lang_code == 'en' else '### النص المترجم:')
+                st.markdown(translated_text)
 
 def translate_text(text):
     # Placeholder for legal translation logic
