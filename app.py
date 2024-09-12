@@ -3,6 +3,7 @@ from utils.document_processing import read_docx, read_pdf, read_txt, preprocess_
 from utils.legal_advice import get_legal_advice, generate_suggested_questions
 from utils.oman_laws import get_oman_laws, read_oman_law
 from googletrans import Translator
+from fpdf import FPDF
 
 def main():
     st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
@@ -119,8 +120,13 @@ def legal_translation_service(lang_code):
         if document_text:
             if st.button("Translate" if lang_code == 'en' else 'ترجمة', key="translate_button"):
                 translated_text = translate_text(document_text)
-                st.markdown("### Translated Text:" if lang_code == 'en' else '### النص المترجم:')
-                st.markdown(translated_text)
+                pdf = create_pdf(translated_text)
+                st.download_button(
+                    label="Download Translated Document" if lang_code == 'en' else 'تحميل الوثيقة المترجمة',
+                    data=pdf,
+                    file_name="translated_document.pdf",
+                    mime="application/pdf"
+                )
 
 def translate_text(text):
     # Placeholder for legal translation logic
@@ -128,6 +134,14 @@ def translate_text(text):
     translator = Translator()
     translated = translator.translate(text, src='en', dest='ar')
     return translated.text
+
+def create_pdf(text):
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_auto_page_break(auto=True, margin=15)
+    pdf.set_font("Arial", size=12)
+    pdf.multi_cell(0, 10, text)
+    return pdf.output(dest='S').encode('latin1')
 
 def process_query(query, context=None, lang_code="en"):
     with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
