@@ -73,6 +73,9 @@ def handle_document_queries(document_text, suggested_questions, lang_code):
         st.session_state.custom_query = ""
         st.session_state.selected_question = ""
 
+    if 'custom_query' not in st.session_state:
+        st.session_state.custom_query = ""
+
     custom_query = st.text_input("Enter your custom query:" if lang_code == "en" else "أدخل استفسارك الخاص:", key="custom_query")
     
     st.markdown("**OR**" if lang_code == "en" else "**أو**")
@@ -82,20 +85,18 @@ def handle_document_queries(document_text, suggested_questions, lang_code):
 
     if selected_question:
         process_query(selected_question, document_text, lang_code)
-    elif st.button("Submit Custom Query" if lang_code == "en" else "إرسال الاستفسار الخاص", key="submit_custom_query"):
-        if custom_query:
-            process_query(custom_query, document_text, lang_code)
-        else:
-            st.warning("Please enter a query or select a suggested question." if lang_code == "en" else "الرجاء إدخال استفسار أو اختيار سؤال مقترح.")
+    elif custom_query and st.button("Submit Custom Query" if lang_code == "en" else "إرسال الاستفسار الخاص", key="submit_custom_query"):
+        process_query(custom_query, document_text, lang_code)
+    elif not custom_query and st.button("Submit Custom Query" if lang_code == "en" else "إرسال الاستفسار الخاص", key="submit_custom_query"):
+        st.warning("Please enter a query or select a suggested question." if lang_code == "en" else "الرجاء إدخال استفسار أو اختيار سؤال مقترح.")
 
 def legal_advice_feature(lang_code):
     st.header("Get Legal Advice" if lang_code == "en" else "الحصول على استشارة قانونية")
     query = st.text_input("Enter your legal query:" if lang_code == "en" else "أدخل استفسارك القانوني:", key="legal_query")
-    if st.button("Submit" if lang_code == "en" else "إرسال", key="submit_legal_query"):
-        if query:
-            process_query(query, language=lang_code)
-        else:
-            st.warning("Please enter a query." if lang_code == "en" else "الرجاء إدخال استفسار.")
+    if query and st.button("Submit" if lang_code == "en" else "إرسال", key="submit_legal_query"):
+        process_query(query, language=lang_code)
+    elif not query and st.button("Submit" if lang_code == "en" else "إرسال", key="submit_legal_query"):
+        st.warning("Please enter a query." if lang_code == "en" else "الرجاء إدخال استفسار.")
 
 def oman_laws_feature(lang_code):
     st.header("Oman Laws" if lang_code == "en" else "قوانين عمان")
@@ -107,11 +108,10 @@ def oman_laws_feature(lang_code):
             law_text = read_oman_law(laws[selected_law])
             if law_text:
                 query = st.text_input("Enter your query about this law:" if lang_code == "en" else "أدخل استفسارك حول هذا القانون:", key="oman_law_query")
-                if st.button("Submit" if lang_code == "en" else "إرسال", key="submit_oman_law_query"):
-                    if query:
-                        process_query(query, law_text, lang_code)
-                    else:
-                        st.warning("Please enter a query." if lang_code == "en" else "الرجاء إدخال استفسار.")
+                if query and st.button("Submit" if lang_code == "en" else "إرسال", key="submit_oman_law_query"):
+                    process_query(query, law_text, lang_code)
+                elif not query and st.button("Submit" if lang_code == "en" else "إرسال", key="submit_oman_law_query"):
+                    st.warning("Please enter a query." if lang_code == "en" else "الرجاء إدخال استفسار.")
             else:
                 st.error("Failed to read the selected law. Please try again or choose a different law." if lang_code == "en" else "فشل في قراءة القانون المحدد. يرجى المحاولة مرة أخرى أو اختيار قانون آخر.")
     else:
