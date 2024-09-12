@@ -116,13 +116,16 @@ def legal_translation_service(lang_code):
         if document_text:
             if st.button("Translate to Arabic" if lang_code == 'en' else 'ترجمة إلى العربية', key="translate_button"):
                 translated_text = translate_to_arabic(document_text)
-                pdf = create_pdf(translated_text)
-                st.download_button(
-                    label="Download Arabic Translation" if lang_code == 'en' else 'تحميل الترجمة العربية',
-                    data=pdf,
-                    file_name="arabic_translation.pdf",
-                    mime="application/pdf"
-                )
+                try:
+                    pdf = create_pdf(translated_text)
+                    st.download_button(
+                        label="Download Arabic Translation" if lang_code == 'en' else 'تحميل الترجمة العربية',
+                        data=pdf,
+                        file_name="arabic_translation.pdf",
+                        mime="application/pdf"
+                    )
+                except Exception as e:
+                    st.error(f"An error occurred while creating the PDF: {str(e)}")
 
 def translate_to_arabic(text):
     translator = GoogleTranslator(source='en', target='ar')
@@ -133,8 +136,7 @@ def create_pdf(text):
     pdf = FPDF()
     pdf.add_page()
     pdf.set_auto_page_break(auto=True, margin=15)
-    pdf.add_font("Arial", "", "/usr/share/fonts/truetype/msttcorefonts/Arial.ttf", uni=True)
-    pdf.set_font("Arial", size=12)
+    pdf.set_font("Helvetica", size=12)
     pdf.multi_cell(0, 10, text)
     return pdf.output(dest='S').encode('latin1')
 
