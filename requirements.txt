@@ -1,4 +1,4 @@
-streamlit
+spacy>=3.0.0,<4.0.0streamlit
 openai==0.28.0
 python-docx
 pymupdf
@@ -11,4 +11,4 @@ arabic_reshaper
 python-bidi
 googletrans==4.0.0-rc1
 fpdf
-spacy
+spacy>=3.0.0,<4.0.0
