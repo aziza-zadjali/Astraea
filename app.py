@@ -2,9 +2,8 @@ import streamlit as st
 from utils.document_processing import read_docx, read_pdf, read_txt, preprocess_arabic_text, format_response
 from utils.legal_advice import get_legal_advice, generate_suggested_questions
 from utils.oman_laws import get_oman_laws, read_oman_law
-from fpdf import FPDF
-import spacy
 from deep_translator import GoogleTranslator
+from fpdf import FPDF
 
 def main():
     st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
@@ -109,59 +108,33 @@ def oman_laws_feature(lang_code):
 def legal_translation_service(lang_code):
     st.header("Legal Translation Service" if lang_code == 'en' else 'خدمة الترجمة القانونية')
     
-    upload_text = 'Upload a document for translation' if lang_code == 'en' else 'قم بتحميل وثيقة للترجمة'
+    upload_text = 'Upload a document for translation to Arabic' if lang_code == 'en' else 'قم بتحميل وثيقة للترجمة إلى العربية'
     uploaded_file = st.file_uploader(upload_text, type=["docx", "pdf", "txt"], key="translation_file_uploader")
     
     if uploaded_file:
         document_text = process_uploaded_file(uploaded_file, lang_code)
         if document_text:
-            source_lang = st.selectbox("Select source language", ["English", "Arabic"], key="source_lang")
-            target_lang = st.selectbox("Select target language", ["Arabic", "English"], key="target_lang")
-            
-            if st.button("Translate" if lang_code == 'en' else 'ترجمة', key="translate_button"):
-                translated_text = translate_legal_text(document_text, source_lang, target_lang)
-                pdf = create_pdf(translated_text, target_lang)
+            if st.button("Translate to Arabic" if lang_code == 'en' else 'ترجمة إلى العربية', key="translate_button"):
+                translated_text = translate_to_arabic(document_text)
+                pdf = create_pdf(translated_text)
                 st.download_button(
-                    label="Download Translated Document" if lang_code == 'en' else 'تحميل الوثيقة المترجمة',
+                    label="Download Arabic Translation" if lang_code == 'en' else 'تحميل الترجمة العربية',
                     data=pdf,
-                    file_name="translated_document.pdf",
+                    file_name="arabic_translation.pdf",
                     mime="application/pdf"
                 )
 
-def translate_legal_text(text, source_lang, target_lang):
-    nlp = spacy.load("en_core_web_sm" if source_lang == "English" else "ar_core_news_sm")
-    doc = nlp(text)
-    entities = [(ent.text, ent.label_) for ent in doc.ents]
-    term_translations = {}
-    
-    translator = GoogleTranslator(source=source_lang.lower(), target=target_lang.lower())
-    translated_text = translator.translate(text)
-    
-    for entity, label in entities:
-        if label in ['ORG', 'PERSON', 'LAW', 'DATE']:
-            entity_translation = translator.translate(entity)
-            term_translations[entity] = entity_translation
-            translated_text = translated_text.replace(entity_translation, f"{entity_translation} ({entity})")
-    
-    glossary = "\n\nGlossary of Terms:\n"
-    for original, translation in term_translations.items():
-        glossary += f"{original}: {translation}\n"
-    
-    return translated_text + glossary
+def translate_to_arabic(text):
+    translator = GoogleTranslator(source='en', target='ar')
+    translated = translator.translate(text)
+    return translated
 
-def create_pdf(text, target_lang):
+def create_pdf(text):
     pdf = FPDF()
     pdf.add_page()
     pdf.set_auto_page_break(auto=True, margin=15)
-    
-    if target_lang == "Arabic":
-        pdf.add_font("NotoNaskhArabic", "", "NotoNaskhArabic-Regular.ttf", uni=True)
-        pdf.set_font("NotoNaskhArabic", size=12)
-        pdf.right_margin = 0
-        pdf.left_margin = 0
-    else:
-        pdf.set_font("Helvetica", size=12)
-    
+    pdf.add_font("NotoNaskhArabic", "", "NotoNaskhArabic-Regular.ttf", uni=True)
+    pdf.set_font("NotoNaskhArabic", size=12)
     pdf.multi_cell(0, 10, text)
     return pdf.output(dest='S').encode('latin1')
 
