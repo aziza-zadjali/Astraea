@@ -1,16 +1,10 @@
 import streamlit as st
 from utils.document_processing import read_docx, read_pdf, read_txt, preprocess_arabic_text, format_response
 from utils.legal_advice import get_legal_advice, generate_suggested_questions
-from utils.oman_laws import get_oman_laws, read_oman_law, add_to_chat_history
+from utils.oman_laws import get_oman_laws, read_oman_law
 
 def main():
     st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
-
-    # Initialize session state
-    if 'chat_history' not in st.session_state:
-        st.session_state.chat_history = []
-    if 'law_queries' not in st.session_state:
-        st.session_state.law_queries = []
 
     # Sidebar
     with st.sidebar:
@@ -42,14 +36,6 @@ def main():
     else:
         oman_laws_feature(lang_code)
 
-    # Display chat history
-    st.markdown("---")
-    st.markdown("### Chat History")
-    for query, response in st.session_state.chat_history:
-        st.markdown(f"**You:** {query}")
-        st.markdown(f"**Astraea:** {response}")
-    st.markdown("---")
-
 def document_query_feature(lang_code):
     st.header("Query from Document" if lang_code == "en" else "استعلام من وثيقة")
     upload_text = "Upload a document" if lang_code == "en" else "قم بتحميل وثيقة"
@@ -78,24 +64,26 @@ def process_uploaded_file(uploaded_file, lang_code):
 def handle_document_queries(document_text, suggested_questions, lang_code):
     st.success("Document uploaded successfully!" if lang_code == "en" else "تم تحميل الوثيقة بنجاح!")
 
-    custom_query = st.text_input("Enter your custom query:" if lang_code == "en" else "أدخل استفسارك الخاص:", key="custom_query")
-    if st.button("Submit Custom Query" if lang_code == "en" else "إرسال الاستفسار الخاص", key="submit_custom_query"):
-        if custom_query:
-            process_query(custom_query, document_text, lang_code)
-        else:
-            st.warning("Please enter a query." if lang_code == "en" else "الرجاء إدخال استفسار.")
-
-    if suggested_questions:
-        st.markdown("---")
-        question_text = "Suggested questions:" if lang_code == "en" else "الأسئلة المقترحة:"
+    col1, col2 = st.columns([2, 1])
+    
+    with col1:
+        custom_query = st.text_input("Enter your query:" if lang_code == "en" else "أدخل استفسارك:", key="custom_query")
+    
+    with col2:
+        question_text = "Or select a suggested question:" if lang_code == "en" else "أو اختر سؤالاً مقترحًا:"
         selected_question = st.selectbox(question_text, [""] + suggested_questions, key="suggested_questions")
-        if selected_question:
-            process_query(selected_question, document_text, lang_code)
+
+    if st.button("Submit Query" if lang_code == "en" else "إرسال الاستفسار", key="submit_query"):
+        query = custom_query if custom_query else selected_question
+        if query:
+            process_query(query, document_text, lang_code)
+        else:
+            st.warning("Please enter a query or select a suggested question." if lang_code == "en" else "الرجاء إدخال استفسار أو اختيار سؤال مقترح.")
 
 def legal_advice_feature(lang_code):
     st.header("Get Legal Advice" if lang_code == "en" else "الحصول على استشارة قانونية")
-    query = st.text_input("Enter your legal query:" if lang_code == "en" else "أدخل استفسارك القانوني:", key=f"legal_query_{len(st.session_state.chat_history)}")
-    if st.button("Submit" if lang_code == "en" else "إرسال", key=f"submit_legal_query_{len(st.session_state.chat_history)}"):
+    query = st.text_input("Enter your legal query:" if lang_code == "en" else "أدخل استفسارك القانوني:", key="legal_query")
+    if st.button("Submit" if lang_code == "en" else "إرسال", key="submit_legal_query"):
         if query:
             process_query(query, language=lang_code)
         else:
@@ -127,7 +115,6 @@ def process_query(query, context=None, lang_code="en"):
             response = get_legal_advice(query, context, lang_code)
             st.markdown("### Response:")
             st.markdown(format_response(response))
-            add_to_chat_history(query, response, lang_code)
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
 
