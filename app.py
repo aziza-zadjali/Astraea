@@ -142,7 +142,8 @@ def automated_document_creation(lang_code):
     
     selected_template = st.selectbox(
         "Select a template:" if lang_code == "en" else "اختر نموذجًا:",
-        templates
+        templates,
+        key="template_select"
     )
     
     if selected_template:
@@ -153,26 +154,32 @@ def automated_document_creation(lang_code):
         
         st.subheader("Fill in the details:" if lang_code == "en" else "املأ التفاصيل:")
         inputs = {}
-        for placeholder in placeholders:
-            inputs[placeholder] = st.text_input(f"Enter {placeholder}:" if lang_code == "en" else f"أدخل {placeholder}:")
+        for i, placeholder in enumerate(placeholders):
+            inputs[placeholder] = st.text_input(
+                f"Enter {placeholder}:" if lang_code == "en" else f"أدخل {placeholder}:",
+                key=f"input_{placeholder}_{i}"
+            )
         
-        if st.button("Generate Document" if lang_code == "en" else "إنشاء المستند"):
+        if st.button("Generate Document" if lang_code == "en" else "إنشاء المستند", key="generate_doc_button"):
             filled_document = fill_template(template_content, inputs)
-            st.text_area("Generated Document", filled_document, height=300)
+            st.text_area("Generated Document", filled_document, height=300, key="generated_doc_area")
             st.download_button(
                 label="Download Document" if lang_code == "en" else "تحميل المستند",
                 data=filled_document.encode('utf-8'),
                 file_name=f"filled_{selected_template}",
-                mime="text/plain"
+                mime="text/plain",
+                key="download_doc_button"
             )
 
 def extract_placeholders(template_content):
+    import re
     return re.findall(r'\{(\w+)\}', template_content)
 
 def fill_template(template_content, inputs):
     for placeholder, value in inputs.items():
         template_content = template_content.replace(f"{{{placeholder}}}", value)
     return template_content
+
 
 def process_query(query, context=None, lang_code="en"):
     with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
