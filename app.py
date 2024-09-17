@@ -87,21 +87,28 @@ def process_uploaded_file(uploaded_file, lang_code):
 def handle_document_queries(document_text, suggested_questions, lang_code):
     st.success("Document uploaded successfully!" if lang_code == "en" else "تم تحميل الوثيقة بنجاح!")
     
+    # Custom query section
+    st.subheader("Custom Query" if lang_code == "en" else "استفسار مخصص")
     col1, col2 = st.columns([3, 1])
     with col1:
         custom_query = st.text_input("Enter your custom query:" if lang_code == "en" else "أدخل استفسارك الخاص:", key="custom_query")
     with col2:
-        submit_custom = st.button("Submit" if lang_code == "en" else "إرسال", key="submit_custom_query")
+        submit_custom = st.button("Submit Custom" if lang_code == "en" else "إرسال المخصص", key="submit_custom_query")
     
-    st.markdown("**OR**" if lang_code == "en" else "**أو**")
+    if custom_query and submit_custom:
+        process_query(custom_query, document_text, lang_code)
+    
+    st.markdown("---")
+    
+    # Suggested questions section
+    st.subheader("Suggested Questions" if lang_code == "en" else "الأسئلة المقترحة")
     question_text = "Select a suggested question:" if lang_code == "en" else "اختر سؤالاً مقترحًا:"
     selected_question = st.selectbox(question_text, [""] + suggested_questions, key="selected_question")
+    submit_suggested = st.button("Submit Suggested" if lang_code == "en" else "إرسال المقترح", key="submit_suggested_query")
     
-    if selected_question:
+    if selected_question and submit_suggested:
         process_query(selected_question, document_text, lang_code)
-    elif custom_query and submit_custom:
-        process_query(custom_query, document_text, lang_code)
-
+        
 def oman_laws_feature(lang_code):
     st.header("Oman Laws" if lang_code == "en" else "قوانين عمان")
     laws = get_oman_laws()
