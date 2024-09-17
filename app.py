@@ -7,7 +7,75 @@ from utils.oman_laws import get_oman_laws, read_oman_law
 from deep_translator import GoogleTranslator
 from fpdf import FPDF
 
-# Assuming you have a directory for templates
+def legal_essay_feedback(lang_code):
+    st.header("Legal Essay Feedback" if lang_code == "en" else "تقييم المقال القانوني")
+    
+    essay_text = st.text_area("Enter your legal essay:" if lang_code == "en" else "أدخل مقالك القانوني:", height=300)
+    
+    if st.button("Get Feedback" if lang_code == "en" else "الحصول على التقييم"):
+        if essay_text:
+            feedback = get_essay_feedback(essay_text, lang_code)
+            display_feedback(feedback, lang_code)
+        else:
+            st.warning("Please enter an essay." if lang_code == "en" else "الرجاء إدخال مقال.")
+
+def get_essay_feedback(essay_text, lang_code):
+    prompt = {
+        "en": "You will be provided with a law student's essay. Please give them feedback and a grade. Use this format for feedback:\n\nGrade: [Your grade, like A, B, or C]\nStrengths: [Highlight what they did really well, such as how they structured their paragraph, used Critical Thinking, Originality and Plagiarism, and Proper Grammar and Style]\nAreas for Improvement: [Tell them where you think they can make it even better]\n\nEssay:\n",
+        "ar": "سيتم تزويدك بمقال لطالب قانون. يرجى إعطاؤهم ملاحظات ودرجة. استخدم هذا التنسيق للملاحظات:\n\nالدرجة: [درجتك، مثل A أو B أو C]\nنقاط القوة: [سلط الضوء على ما قاموا به بشكل جيد للغاية، مثل كيفية هيكلة الفقرة، واستخدام التفكير النقدي، والأصالة وعدم الانتحال، والقواعد النحوية والأسلوب المناسب]\nمجالات التحسين: [أخبرهم أين تعتقد أنه يمكنهم جعله أفضل]\n\nالمقال:\n"
+    }
+    
+    messages = [
+        {"role": "system", "content": prompt[lang_code]},
+        {"role": "user", "content": essay_text}
+    ]
+    
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=messages,
+            temperature=0,
+            max_tokens=500,
+            top_p=1,
+            frequency_penalty=0,
+            presence_penalty=0
+        )
+        
+        return response.choices[0].message["content"]
+    except Exception as e:
+        return f"Error generating feedback: {str(e)}"
+
+def display_feedback(feedback, lang_code):
+    lines = feedback.split('\n')
+    grade = ""
+    strengths = ""
+    areas_for_improvement = ""
+    current_section = None
+    
+    for line in lines:
+        if line.startswith("Grade:") or line.startswith("الدرجة:"):
+            current_section = "Grade"
+            grade += line + '\n'
+        elif line.startswith("Strengths:") or line.startswith("نقاط القوة:"):
+            current_section = "Strengths"
+            strengths += line + '\n'
+        elif line.startswith("Areas for Improvement:") or line.startswith("مجالات التحسين:"):
+            current_section = "Areas for Improvement"
+            areas_for_improvement += line + '\n'
+        else:
+            if current_section == "Grade":
+                grade += line + '\n'
+            elif current_section == "Strengths":
+                strengths += line + '\n'
+            elif current_section == "Areas for Improvement":
+                areas_for_improvement += line + '\n'
+    
+    st.subheader("Feedback:" if lang_code == "en" else "التقييم:")
+    st.markdown(grade)
+    st.markdown(strengths)
+    st.markdown(areas_for_improvement)
+
+
 TEMPLATE_DIR = "templates"
 
 def main():
@@ -26,6 +94,10 @@ def main():
             ('مساعد الاستفسارات القانونية', 'قوانين عمان', 'خدمة الترجمة القانونية', 'إنشاء المستندات الآلي'),
             key="feature_select"
         )
+        elif option in ['Legal Essay Feedback', 'تقييم المقال القانوني']:
+        legal_essay_feedback(lang_code)
+
+    
     # Main content
     title = "Astraea - Legal Query Assistant" if lang_code == "en" else "أسترايا - مساعد الاستفسارات القانونية"
     st.title(title)
