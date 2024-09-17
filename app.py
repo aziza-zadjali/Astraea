@@ -22,10 +22,10 @@ def main():
         st.markdown("### Navigation")
         option = st.radio(
             "Choose a feature" if lang_code == "en" else "اختر ميزة",
-            ('Legal Query Assistant', 'Oman Laws', 'Legal Translation Service', 'Automated Document Creation'),
+            ('Legal Query Assistant', 'Oman Laws', 'Legal Translation Service', 'Automated Document Creation') if lang_code == "en" else 
+            ('مساعد الاستفسارات القانونية', 'قوانين عمان', 'خدمة الترجمة القانونية', 'إنشاء المستندات الآلي'),
             key="feature_select"
         )
-
     # Main content
     title = "Astraea - Legal Query Assistant" if lang_code == "en" else "أسترايا - مساعد الاستفسارات القانونية"
     st.title(title)
@@ -35,13 +35,13 @@ def main():
     }
     st.info(disclaimer[lang_code])
 
-    if option == 'Legal Query Assistant':
+    if option in ['Legal Query Assistant', 'مساعد الاستفسارات القانونية']:
         legal_query_assistant(lang_code)
-    elif option == 'Oman Laws':
+    elif option in ['Oman Laws', 'قوانين عمان']:
         oman_laws_feature(lang_code)
-    elif option == 'Legal Translation Service':
+    elif option in ['Legal Translation Service', 'خدمة الترجمة القانونية']:
         legal_translation_service(lang_code)
-    elif option == 'Automated Document Creation':
+    elif option in ['Automated Document Creation', 'إنشاء المستندات الآلي']:
         automated_document_creation(lang_code)
 
 def legal_query_assistant(lang_code):
