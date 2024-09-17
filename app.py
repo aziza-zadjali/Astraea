@@ -49,11 +49,11 @@ def legal_query_assistant(lang_code):
     
     query_type = st.radio(
         "Choose query type" if lang_code == "en" else "اختر نوع الاستفسار",
-        ('Enter your own query', 'Query from document'),
+        ('Enter your own query', 'Query from document') if lang_code == "en" else ('أدخل استفسارك الخاص', 'استفسر من وثيقة'),
         key="query_type"
     )
 
-    if query_type == 'Enter your own query':
+    if query_type in ['Enter your own query', 'أدخل استفسارك الخاص']:
         query = st.text_input("Enter your legal query:" if lang_code == "en" else "أدخل استفسارك القانوني:", key="legal_query")
         if query and st.button("Submit" if lang_code == "en" else "إرسال", key="submit_legal_query"):
             process_query(query, context=None, lang_code=lang_code)
