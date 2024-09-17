@@ -86,14 +86,20 @@ def process_uploaded_file(uploaded_file, lang_code):
 
 def handle_document_queries(document_text, suggested_questions, lang_code):
     st.success("Document uploaded successfully!" if lang_code == "en" else "تم تحميل الوثيقة بنجاح!")
-    custom_query = st.text_input("Enter your custom query:" if lang_code == "en" else "أدخل استفسارك الخاص:", key="custom_query")
+    
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        custom_query = st.text_input("Enter your custom query:" if lang_code == "en" else "أدخل استفسارك الخاص:", key="custom_query")
+    with col2:
+        submit_custom = st.button("Submit" if lang_code == "en" else "إرسال", key="submit_custom_query")
+    
     st.markdown("**OR**" if lang_code == "en" else "**أو**")
     question_text = "Select a suggested question:" if lang_code == "en" else "اختر سؤالاً مقترحًا:"
     selected_question = st.selectbox(question_text, [""] + suggested_questions, key="selected_question")
     
     if selected_question:
         process_query(selected_question, document_text, lang_code)
-    elif custom_query and st.button("Submit Custom Query" if lang_code == "en" else "إرسال الاستفسار الخاص", key="submit_custom_query"):
+    elif custom_query and submit_custom:
         process_query(custom_query, document_text, lang_code)
 
 def oman_laws_feature(lang_code):
