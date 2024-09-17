@@ -48,6 +48,18 @@ def main():
     elif option in ['Legal Essay Feedback', 'تقييم المقال القانوني']:
         legal_essay_feedback(lang_code)
 
+def document_query_feature(lang_code):
+    st.header("Query from Document" if lang_code == "en" else "استعلام من وثيقة")
+    
+    upload_text = "Upload a document" if lang_code == "en" else "قم بتحميل وثيقة"
+    uploaded_file = st.file_uploader(upload_text, type=["docx", "pdf", "txt"], key="file_uploader")
+    
+    if uploaded_file:
+        document_text = process_uploaded_file(uploaded_file, lang_code)
+        if document_text:
+            suggested_questions = generate_suggested_questions(document_text, lang_code)
+            handle_document_queries(document_text, suggested_questions, lang_code)
+            
 def legal_query_assistant(lang_code):
     st.header("Legal Query Assistant" if lang_code == "en" else "مساعد الاستفسارات القانونية")
     
