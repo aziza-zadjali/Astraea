@@ -275,6 +275,38 @@ def generate_suggested_questions_for_law(law_text, lang_code):
     except Exception as e:
         st.error(f"Error generating suggested questions: {str(e)}")
         return []
-        
+def add_back_to_top_button():
+    st.markdown("""
+    <style>
+        .back-to-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #0e1117;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            text-decoration: none;
+            display: none;
+            z-index: 9999;
+        }
+    </style>
+    <a href="#" class="back-to-top" id="backToTop">Back to Top</a>
+    <script>
+        window.onscroll = function() {scrollFunction()};
+        function scrollFunction() {
+            if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+                document.getElementById("backToTop").style.display = "block";
+            } else {
+                document.getElementById("backToTop").style.display = "none";
+            }
+        }
+        document.getElementById("backToTop").onclick = function() {
+            document.body.scrollTop = 0;
+            document.documentElement.scrollTop = 0;
+        }
+    </script>
+    """, unsafe_allow_html=True)
+    
 if __name__ == "__main__":
     main()
