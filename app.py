@@ -120,11 +120,8 @@ def oman_laws_feature(lang_code):
                 
                 # Display custom query input
                 st.subheader("Custom Query" if lang_code == "en" else "استفسار مخصص")
-                col1, col2 = st.columns([3, 1])
-                with col1:
-                    custom_query = st.text_input("Enter your custom query:" if lang_code == "en" else "أدخل استفسارك الخاص:", key="oman_law_custom_query")
-                with col2:
-                    submit_custom = st.button("Submit Custom" if lang_code == "en" else "إرسال المخصص", key="submit_oman_law_custom_query")
+                custom_query = st.text_input("Enter your custom query:" if lang_code == "en" else "أدخل استفسارك الخاص:", key="oman_law_custom_query")
+                submit_custom = st.button("Submit Custom" if lang_code == "en" else "إرسال المخصص", key="submit_oman_law_custom_query")
                 
                 if custom_query and submit_custom:
                     process_query(custom_query, law_text, lang_code)
@@ -143,6 +140,8 @@ def oman_laws_feature(lang_code):
                 st.error("Failed to read the selected law. Please try again or choose a different law." if lang_code == "en" else "فشل في قراءة القانون المحدد. يرجى المحاولة مرة أخرى أو اختيار قانون آخر.")
     else:
         st.error("No laws found in the database directory." if lang_code == "en" else "لم يتم العثور على قوانين في دليل قاعدة البيانات.")
+
+
 
             
 def legal_translation_service(lang_code):
@@ -211,15 +210,15 @@ def fill_template(template_content, inputs):
         template_content = template_content.replace(f"{{{placeholder}}}", value)
     return template_content
 
-def process_query(query, context=None, lang_code="en"):
+def process_query(query, context, lang_code):
     with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
         try:
             response = get_legal_advice(query, context, lang_code)
             st.markdown("### Response:")
-            st.markdown(format_response(response))
+            st.markdown(response)
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
-
+            
 def grade_legal_document(lang_code):
     st.header("Grade Legal Document" if lang_code == "en" else "تقييم الوثيقة القانونية")
     
