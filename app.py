@@ -115,11 +115,19 @@ def oman_laws_feature(lang_code):
         if selected_law:
             law_text = read_oman_law(laws[selected_law])
             if law_text:
-                query = st.text_input("Enter your query about this law:" if lang_code == "en" else "أدخل استفسارك حول هذا القانون:", key="oman_law_query")
-                if query and st.button("Submit" if lang_code == "en" else "إرسال", key="submit_oman_law_query"):
-                    process_query(query, law_text, lang_code)
-                elif not query and st.button("Submit" if lang_code == "en" else "إرسال", key="submit_oman_law_query"):
-                    st.warning("Please enter a query." if lang_code == "en" else "الرجاء إدخال استفسار.")
+                # Generate suggested questions
+                suggested_questions = generate_suggested_questions_for_law(law_text, lang_code)
+                
+                # Display custom query input
+                custom_query = st.text_input("Enter your custom query:" if lang_code == "en" else "أدخل استفسارك الخاص:", key="oman_law_custom_query")
+                if custom_query and st.button("Submit Custom Query" if lang_code == "en" else "إرسال الاستفسار الخاص", key="submit_oman_law_custom_query"):
+                    process_query(custom_query, law_text, lang_code)
+                
+                # Display suggested questions
+                st.subheader("Suggested Questions" if lang_code == "en" else "الأسئلة المقترحة")
+                for question in suggested_questions:
+                    if st.button(question, key=f"suggested_question_{question}"):
+                        process_query(question, law_text, lang_code)
             else:
                 st.error("Failed to read the selected law. Please try again or choose a different law." if lang_code == "en" else "فشل في قراءة القانون المحدد. يرجى المحاولة مرة أخرى أو اختيار قانون آخر.")
     else:
@@ -235,5 +243,27 @@ def display_grade_result(grade_result, lang_code):
     st.subheader("Grading Result:" if lang_code == "en" else "نتيجة التقييم:")
     st.markdown(grade_result)
 
+def generate_suggested_questions_for_law(law_text, lang_code):
+    try:
+        prompt = {
+            "en": f"Based on the following law text, generate 5 relevant questions that a user might ask:\n\n{law_text[:2000]}...",
+            "ar": f"بناءً على نص القانون التالي، قم بإنشاء 5 أسئلة ذات صلة قد يطرحها المستخدم:\n\n{law_text[:2000]}..."
+        }
+        
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are an AI assistant that generates relevant questions based on legal texts."},
+                {"role": "user", "content": prompt[lang_code]}
+            ],
+            max_tokens=200
+        )
+        
+        suggested_questions = response.choices[0].message['content'].strip().split('\n')
+        return [q.strip('1234567890. ') for q in suggested_questions if q.strip()]
+    except Exception as e:
+        st.error(f"Error generating suggested questions: {str(e)}")
+        return []
+        
 if __name__ == "__main__":
     main()
