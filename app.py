@@ -116,23 +116,35 @@ def oman_laws_feature(lang_code):
             law_text = read_oman_law(laws[selected_law])
             if law_text:
                 # Generate suggested questions
-                suggested_questions = generate_suggested_questions_for_law(law_text, lang_code)
+                suggested_questions = generate_suggested_questions(law_text, lang_code)
                 
                 # Display custom query input
-                custom_query = st.text_input("Enter your custom query:" if lang_code == "en" else "أدخل استفسارك الخاص:", key="oman_law_custom_query")
-                if custom_query and st.button("Submit Custom Query" if lang_code == "en" else "إرسال الاستفسار الخاص", key="submit_oman_law_custom_query"):
+                st.subheader("Custom Query" if lang_code == "en" else "استفسار مخصص")
+                col1, col2 = st.columns([3, 1])
+                with col1:
+                    custom_query = st.text_input("Enter your custom query:" if lang_code == "en" else "أدخل استفسارك الخاص:", key="oman_law_custom_query")
+                with col2:
+                    submit_custom = st.button("Submit Custom" if lang_code == "en" else "إرسال المخصص", key="submit_oman_law_custom_query")
+                
+                if custom_query and submit_custom:
                     process_query(custom_query, law_text, lang_code)
+                
+                st.markdown("---")
                 
                 # Display suggested questions
                 st.subheader("Suggested Questions" if lang_code == "en" else "الأسئلة المقترحة")
-                for question in suggested_questions:
-                    if st.button(question, key=f"suggested_question_{question}"):
-                        process_query(question, law_text, lang_code)
+                question_text = "Select a suggested question:" if lang_code == "en" else "اختر سؤالاً مقترحًا:"
+                selected_question = st.selectbox(question_text, [""] + suggested_questions, key="selected_question")
+                submit_suggested = st.button("Submit Suggested" if lang_code == "en" else "إرسال المقترح", key="submit_suggested_question")
+                
+                if selected_question and submit_suggested:
+                    process_query(selected_question, law_text, lang_code)
             else:
                 st.error("Failed to read the selected law. Please try again or choose a different law." if lang_code == "en" else "فشل في قراءة القانون المحدد. يرجى المحاولة مرة أخرى أو اختيار قانون آخر.")
     else:
         st.error("No laws found in the database directory." if lang_code == "en" else "لم يتم العثور على قوانين في دليل قاعدة البيانات.")
 
+            
 def legal_translation_service(lang_code):
     st.header("Legal Translation Service" if lang_code == 'en' else 'خدمة الترجمة القانونية')
     upload_text = 'Upload a document for translation to Arabic' if lang_code == 'en' else 'قم بتحميل وثيقة للترجمة إلى العربية'
