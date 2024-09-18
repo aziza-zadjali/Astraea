@@ -13,8 +13,7 @@ TEMPLATE_DIR = "templates"
 
 def main():
     st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
-    add_back_to_top_button()
-    
+
     # Sidebar
     with st.sidebar:
         st.image("logo.png", width=200)
@@ -88,10 +87,6 @@ def process_uploaded_file(uploaded_file, lang_code):
 def handle_document_queries(document_text, suggested_questions, lang_code):
     st.success("Document uploaded successfully!" if lang_code == "en" else "تم تحميل الوثيقة بنجاح!")
     
-    st.subheader("Document Content" if lang_code == "en" else "محتوى الوثيقة")
-    st.text_area("Document Text", document_text, height=300)
-    add_back_to_top_button()
-
     # Custom query section
     st.subheader("Custom Query" if lang_code == "en" else "استفسار مخصص")
     custom_query = st.text_input("Enter your custom query:" if lang_code == "en" else "أدخل استفسارك الخاص:", key="custom_query")
@@ -120,19 +115,33 @@ def oman_laws_feature(lang_code):
         if selected_law:
             law_text = read_oman_law(laws[selected_law])
             if law_text:
-                st.markdown(f"### {selected_law}")
-                st.text_area("Law Text", law_text, height=300)
-                add_back_to_top_button()
+                # Generate suggested questions
+                suggested_questions = generate_suggested_questions(law_text, lang_code)
                 
-                query = st.text_input("Enter your query about this law:" if lang_code == "en" else "أدخل استفسارك حول هذا القانون:", key="oman_law_query")
-                if query and st.button("Submit" if lang_code == "en" else "إرسال", key="submit_oman_law_query"):
-                    process_query(query, law_text, lang_code)
-                elif not query and st.button("Submit" if lang_code == "en" else "إرسال", key="submit_oman_law_query"):
-                    st.warning("Please enter a query." if lang_code == "en" else "الرجاء إدخال استفسار.")
+                # Display custom query input
+                st.subheader("Custom Query" if lang_code == "en" else "استفسار مخصص")
+                custom_query = st.text_input("Enter your custom query:" if lang_code == "en" else "أدخل استفسارك الخاص:", key="oman_law_custom_query")
+                submit_custom = st.button("Submit Custom" if lang_code == "en" else "إرسال المخصص", key="submit_oman_law_custom_query")
+                
+                if custom_query and submit_custom:
+                    process_query(custom_query, law_text, lang_code)
+                
+                st.markdown("---")
+                
+                # Display suggested questions
+                st.subheader("Suggested Questions" if lang_code == "en" else "الأسئلة المقترحة")
+                question_text = "Select a suggested question:" if lang_code == "en" else "اختر سؤالاً مقترحًا:"
+                selected_question = st.selectbox(question_text, [""] + suggested_questions, key="selected_question")
+                submit_suggested = st.button("Submit Suggested" if lang_code == "en" else "إرسال المقترح", key="submit_suggested_question")
+                
+                if selected_question and submit_suggested:
+                    process_query(selected_question, law_text, lang_code)
             else:
                 st.error("Failed to read the selected law. Please try again or choose a different law." if lang_code == "en" else "فشل في قراءة القانون المحدد. يرجى المحاولة مرة أخرى أو اختيار قانون آخر.")
     else:
         st.error("No laws found in the database directory." if lang_code == "en" else "لم يتم العثور على قوانين في دليل قاعدة البيانات.")
+
+
 
             
 def legal_translation_service(lang_code):
@@ -266,38 +275,6 @@ def generate_suggested_questions_for_law(law_text, lang_code):
     except Exception as e:
         st.error(f"Error generating suggested questions: {str(e)}")
         return []
-def add_back_to_top_button():
-    st.markdown("""
-    <style>
-        .back-to-top {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background-color: #0e1117;
-            color: white;
-            padding: 10px 15px;
-            border-radius: 5px;
-            text-decoration: none;
-            display: none;
-            z-index: 9999;
-        }
-    </style>
-    <a href="#" class="back-to-top" id="backToTop">Back to Top</a>
-    <script>
-        window.onscroll = function() {scrollFunction()};
-        function scrollFunction() {
-            if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
-                document.getElementById("backToTop").style.display = "block";
-            } else {
-                document.getElementById("backToTop").style.display = "none";
-            }
-        }
-        document.getElementById("backToTop").onclick = function() {
-            document.body.scrollTop = 0;
-            document.documentElement.scrollTop = 0;
-        }
-    </script>
-    """, unsafe_allow_html=True)
-    
+        
 if __name__ == "__main__":
     main()
