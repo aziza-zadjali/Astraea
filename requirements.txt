@@ -17,3 +17,4 @@ pytesseract
 Pillow
 pdfplumber
 langchain_openai==0.1.23
+pydantic==1.10.7
