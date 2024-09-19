@@ -181,7 +181,30 @@ def legal_translation_service(lang_code):
 def translate_to_arabic(text):
     translator = GoogleTranslator(source='auto', target='ar')
     translated = translator.translate(text)
-    return translated
+    
+    # Prompt to maintain standard legal terms
+    prompt = f"""
+    Please ensure that the following translation maintains standard legal terms in Arabic. 
+    Use the appropriate legal terminology and consult legal glossaries if necessary. 
+    The translation should be accurate, clear, and consistent with legal standards.
+
+    Original Text: {text}
+    Translated Text: {translated}
+    """
+    
+    # Use OpenAI to refine the translation
+    response = openai.ChatCompletion.create(
+        model="gpt-4o",
+        messages=[
+            {"role": "system", "content": "You are an expert legal translator. Ensure the translation maintains standard legal terms in Arabic."},
+            {"role": "user", "content": prompt}
+        ],
+        max_tokens=1000,
+        temperature=0.7
+    )
+    
+    refined_translation = response.choices[0].message['content'].strip()
+    return refined_translation
 
 def automated_document_creation(lang_code):
     st.header("Automated Document Creation" if lang_code == "en" else "إنشاء المستندات الآلي")
