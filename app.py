@@ -35,8 +35,14 @@ def main():
         border-radius: 5px;
         padding: 8px;
     }
+    .stSelectbox>div>div>div {
+        border: 1px solid #4CAF50 !important;
+        border-radius: 5px;
+        padding: 8px;
+    }
     </style>
     """, unsafe_allow_html=True)
+
 
 
     # Sidebar
@@ -243,7 +249,7 @@ def handle_document_queries(document_text, suggested_questions, lang_code):
     submit_suggested = st.button("Submit Suggested Question" if lang_code == "en" else "إرسال السؤال المقترح", key="submit_suggested_query")
     if selected_question and submit_suggested:
         process_query(selected_question, document_text, lang_code)
-
+        
 def translate_to_arabic(text):
     translator = GoogleTranslator(source='auto', target='ar')
     translated = translator.translate(text)
