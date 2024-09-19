@@ -127,23 +127,22 @@ def legal_query_assistant(lang_code):
 
 def oman_laws_feature(lang_code):
     st.header("Oman Laws" if lang_code == "en" else "قوانين عمان")
-    
-    with st.expander("Select and Query Law" if lang_code == "en" else "اختر واستفسر عن القانون", expanded=True):
-        laws = get_oman_laws()
-        if laws:
-            law_select_text = "Select a law:" if lang_code == "en" else "اختر قانونًا:"
-            selected_law = st.selectbox(law_select_text, list(laws.keys()), key="select_law")
-            
-            if selected_law:
-                law_text = read_oman_law(laws[selected_law])
-                if law_text:
-                    query = st.text_input("Enter your query about this law:" if lang_code == "en" else "أدخل استفسارك حول هذا القانون:", key="oman_law_query")
-                    if query and st.button("Submit" if lang_code == "en" else "إرسال", key="submit_oman_law_query"):
-                        process_query(query, law_text, lang_code)
-                else:
-                    st.error("Failed to read the selected law. Please try again or choose a different law." if lang_code == "en" else "فشل في قراءة القانون المحدد. يرجى المحاولة مرة أخرى أو اختيار قانون آخر.")
-        else:
-            st.error("No laws found in the database directory." if lang_code == "en" else "لم يتم العثور على قوانين في دليل قاعدة البيانات.")
+    laws = get_oman_laws()
+    if laws:
+        law_select_text = "Select a law:" if lang_code == "en" else "اختر قانونًا:"
+        selected_law = st.selectbox(law_select_text, list(laws.keys()), key="select_law")
+        if selected_law:
+            law_text = read_oman_law(laws[selected_law])
+            if law_text:
+                query = st.text_input("Enter your query about this law:" if lang_code == "en" else "أدخل استفسارك حول هذا القانون:", key="oman_law_query")
+                if query and st.button("Submit" if lang_code == "en" else "إرسال", key="submit_oman_law_query"):
+                    process_query(query, law_text, lang_code)
+                elif not query and st.button("Submit" if lang_code == "en" else "إرسال", key="submit_oman_law_query"):
+                    st.warning("Please enter a query." if lang_code == "en" else "الرجاء إدخال استفسار.")
+            else:
+                st.error("Failed to read the selected law. Please try again or choose a different law." if lang_code == "en" else "فشل في قراءة القانون المحدد. يرجى المحاولة مرة أخرى أو اختيار قانون آخر.")
+    else:
+        st.error("No laws found in the database directory." if lang_code == "en" else "لم يتم العثور على قوانين في دليل قاعدة البيانات.")
 
 def legal_translation_service(lang_code):
     st.header("Legal Translation Service" if lang_code == 'en' else 'خدمة الترجمة القانونية')
