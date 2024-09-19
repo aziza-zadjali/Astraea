@@ -43,6 +43,61 @@ def main():
     </style>
     """, unsafe_allow_html=True)
 
+    # Main content
+    col1, col2 = st.columns([3, 1])
+    
+    with col1:
+        title = "Astraea - Legal Query Assistant"
+        st.title(title)
+
+        disclaimer = "This assistant uses GPT-3.5-turbo to provide general legal information. Please note that this is not a substitute for professional legal advice."
+        st.info(disclaimer)
+
+        # Language selection
+        language = st.selectbox("Choose Language / اختر اللغة", ["English", "العربية"], key="language_select")
+        lang_code = "en" if language == "English" else "ar"
+
+        # Feature selection
+        feature_options = ['Legal Query Assistant', 'Oman Laws', 'Legal Translation Service', 'Automated Document Creation', 'Grade Legal Document'] if lang_code == "en" else ['مساعد الاستفسارات القانونية', 'قوانين عمان', 'خدمة الترجمة القانونية', 'إنشاء المستندات الآلي', 'تقييم الوثيقة القانونية']
+        selected_feature = st.selectbox("Select a feature" if lang_code == "en" else "اختر ميزة", feature_options, key="feature_select")
+
+        # Display selected feature
+        if selected_feature in ['Legal Query Assistant', 'مساعد الاستفسارات القانونية']:
+            legal_query_assistant(lang_code)
+        elif selected_feature in ['Oman Laws', 'قوانين عمان']:
+            oman_laws_feature(lang_code)
+        elif selected_feature in ['Legal Translation Service', 'خدمة الترجمة القانونية']:
+            legal_translation_service(lang_code)
+        elif selected_feature in ['Automated Document Creation', 'إنشاء المستندات الآلي']:
+            automated_document_creation(lang_code)
+        elif selected_feature in ['Grade Legal Document', 'تقييم الوثيقة القانونية']:
+            grade_legal_document(lang_code)
+
+    with col2:
+        subscription_options(lang_code)
+
+def subscription_options(lang_code):
+    st.sidebar.title("Subscription Options" if lang_code == "en" else "خيارات الاشتراك")
+    st.sidebar.markdown("---")
+
+    plans = {
+        "Basic": {"price": "$9.99/month", "features": ["Access to basic legal queries", "Limited document processing"]},
+        "Pro": {"price": "$29.99/month", "features": ["Unlimited legal queries", "Advanced document analysis", "Priority support"]},
+        "Enterprise": {"price": "Custom pricing", "features": ["All Pro features", "Customized solutions", "Dedicated account manager"]}
+    }
+
+    for plan, details in plans.items():
+        st.sidebar.subheader(plan)
+        st.sidebar.write(f"Price: {details['price']}")
+        st.sidebar.write("Features:")
+        for feature in details['features']:
+            st.sidebar.write(f"- {feature}")
+        if plan != "Enterprise":
+            st.sidebar.button(f"Subscribe to {plan}" if lang_code == "en" else f"اشترك في {plan}", key=f"subscribe_{plan}")
+        else:
+            st.sidebar.button("Contact Sales" if lang_code == "en" else "تواصل مع المبيعات", key="contact_sales")
+        st.sidebar.markdown("---")
+
 
 
     # Sidebar
