@@ -78,6 +78,33 @@ def main():
     st.markdown("---")
     st.markdown("© 2023 Astraea Legal Assistant. All rights reserved.")
 
+    # Subscription options (you can place this in a separate page or in the sidebar)
+    if st.sidebar.checkbox("Show Subscription Options"):
+        subscription_options(lang_code)
+
+def subscription_options(lang_code):
+    st.sidebar.title("Subscription Options" if lang_code == "en" else "خيارات الاشتراك")
+    st.sidebar.markdown("---")
+
+    plans = {
+        "Basic": {"price": "$9.99/month", "features": ["Access to basic legal queries", "Limited document processing"]},
+        "Pro": {"price": "$29.99/month", "features": ["Unlimited legal queries", "Advanced document analysis", "Priority support"]},
+        "Enterprise": {"price": "Custom pricing", "features": ["All Pro features", "Customized solutions", "Dedicated account manager"]}
+    }
+
+    for plan, details in plans.items():
+        st.sidebar.subheader(plan)
+        st.sidebar.write(f"Price: {details['price']}")
+        st.sidebar.write("Features:")
+        for feature in details['features']:
+            st.sidebar.write(f"- {feature}")
+        if plan != "Enterprise":
+            st.sidebar.button(f"Subscribe to {plan}" if lang_code == "en" else f"اشترك في {plan}", key=f"subscribe_{plan}")
+        else:
+            st.sidebar.button("Contact Sales" if lang_code == "en" else "تواصل مع المبيعات", key="contact_sales")
+        st.sidebar.markdown("---")
+
+
 def legal_query_assistant(lang_code):
     st.header("Legal Query Assistant" if lang_code == "en" else "مساعد الاستفسارات القانونية")
     
