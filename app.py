@@ -288,26 +288,6 @@ def grade_legal_document(lang_code):
     if uploaded_file:
         document_text = process_uploaded_file(uploaded_file, lang_code)
         if document_text:
-            # Suggested questions section
-            st.subheader("Suggested Questions" if lang_code == "en" else "الأسئلة المقترحة")
-            suggested_questions = generate_suggested_questions(document_text, lang_code)
-            question_text = "Select a suggested question:" if lang_code == "en" else "اختر سؤالاً مقترحًا:"
-            selected_question = st.selectbox(question_text, [""] + suggested_questions, key="grade_selected_question")
-            submit_suggested = st.button("Submit Suggested Question" if lang_code == "en" else "إرسال السؤال المقترح", key="submit_grade_suggested_query")
-            
-            if selected_question and submit_suggested:
-                process_query(selected_question, document_text, lang_code)
-            
-            st.markdown("---")
-            
-            # Custom query section
-            st.subheader("Custom Query" if lang_code == "en" else "استفسار مخصص")
-            custom_query = st.text_input("Enter your custom query:" if lang_code == "en" else "أدخل استفسارك الخاص:", key="grade_custom_query")
-            submit_custom = st.button("Submit Custom Query" if lang_code == "en" else "إرسال الاستفسار الخاص", key="submit_grade_custom_query")
-            
-            if custom_query and submit_custom:
-                process_query(custom_query, document_text, lang_code)
-            
             if st.button("Grade Document" if lang_code == "en" else "تقييم الوثيقة", key="grade_button"):
                 grade_result = get_document_grade(document_text, lang_code)
                 display_grade_result(grade_result, lang_code)
