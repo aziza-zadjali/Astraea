@@ -188,9 +188,24 @@ def fill_template(template_content, inputs):
 def process_query(query, context=None, lang_code="en"):
     with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
         try:
-            response = get_legal_advice(query, context, lang_code)
+            # Modify the prompt to request a clear and certain answer
+            prompt = {
+                "en": f"Provide a clear and direct answer to the following legal query. Avoid ambiguity and ensure the response is certain:\n\nQuery: {query}\n\nContext: {context if context else 'No additional context provided.'}",
+                "ar": f"قدم إجابة واضحة ومباشرة للاستفسار القانوني التالي. تجنب الغموض وتأكد من أن الإجابة مؤكدة:\n\nالاستفسار: {query}\n\nالسياق: {context if context else 'لم يتم توفير سياق إضافي.'}"
+            }
+            
+            response = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo-16k",
+                messages=[
+                    {"role": "system", "content": "You are an expert legal advisor. Provide a clear, direct, and certain answer to the given query."},
+                    {"role": "user", "content": prompt[lang_code]}
+                ],
+                max_tokens=1000,
+                temperature=0.7
+            )
+            
             st.markdown("### Response:")
-            st.markdown(format_response(response))
+            st.markdown(format_response(response.choices[0].message['content'].strip()))
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
 
