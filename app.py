@@ -47,6 +47,7 @@ def main():
     col1, col2 = st.columns([3, 1])
     
     with col1:
+        st.image("logo.png", width=200)
         title = "Astraea - Legal Query Assistant"
         st.title(title)
 
@@ -54,7 +55,7 @@ def main():
         st.info(disclaimer)
 
         # Language selection
-        language = st.selectbox("Choose Language / اختر اللغة", ["English", "العربية"], key="language_select")
+        language = st.selectbox("Choose Language / اختر اللغة", ["English", "العربية"], key="main_language_select")
         lang_code = "en" if language == "English" else "ar"
 
         # Feature selection
@@ -97,6 +98,7 @@ def subscription_options(lang_code):
         else:
             st.sidebar.button("Contact Sales" if lang_code == "en" else "تواصل مع المبيعات", key="contact_sales")
         st.sidebar.markdown("---")
+
 
 
 
