@@ -58,29 +58,25 @@ def main():
     }
     st.info(disclaimer[lang_code])
 
-    # Main content
-    st.markdown("---")
+    # Feature tabs
     feature_options = ['Legal Query Assistant', 'Oman Laws', 'Legal Translation Service', 'Automated Document Creation', 'Grade Legal Document'] if lang_code == "en" else ['مساعد الاستفسارات القانونية', 'قوانين عمان', 'خدمة الترجمة القانونية', 'إنشاء المستندات الآلي', 'تقييم الوثيقة القانونية']
-    selected_feature = st.selectbox("Select a feature" if lang_code == "en" else "اختر ميزة", feature_options, key="feature_select")
+    tabs = st.tabs(feature_options)
 
-    if selected_feature in ['Legal Query Assistant', 'مساعد الاستفسارات القانونية']:
+    with tabs[0]:
         legal_query_assistant(lang_code)
-    elif selected_feature in ['Oman Laws', 'قوانين عمان']:
+    with tabs[1]:
         oman_laws_feature(lang_code)
-    elif selected_feature in ['Legal Translation Service', 'خدمة الترجمة القانونية']:
+    with tabs[2]:
         legal_translation_service(lang_code)
-    elif selected_feature in ['Automated Document Creation', 'إنشاء المستندات الآلي']:
+    with tabs[3]:
         automated_document_creation(lang_code)
-    elif selected_feature in ['Grade Legal Document', 'تقييم الوثيقة القانونية']:
+    with tabs[4]:
         grade_legal_document(lang_code)
 
     # Footer
     st.markdown("---")
     st.markdown("© 2023 Astraea Legal Assistant. All rights reserved.")
 
-    # Subscription options (you can place this in a separate page or in the sidebar)
-    if st.sidebar.checkbox("Show Subscription Options"):
-        subscription_options(lang_code)
 
 def subscription_options(lang_code):
     st.sidebar.title("Subscription Options" if lang_code == "en" else "خيارات الاشتراك")
