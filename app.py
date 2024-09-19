@@ -12,7 +12,18 @@ import openai
 # Assuming you have a directory for templates
 TEMPLATE_DIR = "templates"
 
+
+from langchain.memory import ConversationBufferMemory
+from langchain.chains import ConversationChain
+from langchain.llms import OpenAI
+
+# Initialize Langchain memory and conversation chain
+memory = ConversationBufferMemory()
+llm = OpenAI(temperature=0.7)  # Assuming you are using OpenAI API for LLM
+conversation = ConversationChain(llm=llm, memory=memory)
+
 def main():
+    
     st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
 
     # Sidebar for language selection
