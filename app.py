@@ -70,6 +70,7 @@ def legal_query_assistant(lang_code):
                 suggested_questions = generate_suggested_questions(document_text, lang_code)
                 handle_document_queries(document_text, suggested_questions, lang_code)
 
+@st.cache_data
 def process_uploaded_file(uploaded_file, lang_code):
     file_type = uploaded_file.type
     spinner_text = "Reading document..." if lang_code == "en" else "جاري قراءة الوثيقة..."
