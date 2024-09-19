@@ -1,3 +1,4 @@
+
 import streamlit as st
 import os
 import re
@@ -40,7 +41,6 @@ def main():
         st.markdown("---")
         st.markdown("### Navigation")
         
-        # Replace radio buttons with a more visually appealing option
         options = ['Legal Query Assistant', 'Oman Laws', 'Legal Translation Service', 'Automated Document Creation', 'Grade Legal Document'] if lang_code == "en" else ['مساعد الاستفسارات القانونية', 'قوانين عمان', 'خدمة الترجمة القانونية', 'إنشاء المستندات الآلي', 'تقييم الوثيقة القانونية']
         icons = ['💬', '📚', '🔄', '📝', '✅']
         
@@ -193,7 +193,83 @@ def grade_legal_document(lang_code):
                     grade_result = get_document_grade(document_text, lang_code)
                 display_grade_result(grade_result, lang_code)
 
-# Helper functions (process_uploaded_file, translate_to_arabic, extract_placeholders, fill_template, get_document_grade, display_grade_result) remain the same
+def process_uploaded_file(uploaded_file, lang_code):
+    file_type = uploaded_file.type
+    spinner_text = "Reading document..." if lang_code == "en" else "جاري قراءة الوثيقة..."
+    with st.spinner(spinner_text):
+        if file_type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+            return read_docx(uploaded_file)
+        elif file_type == "application/pdf":
+            return read_pdf(uploaded_file)
+        elif file_type == "text/plain":
+            return read_txt(uploaded_file)
+        else:
+            st.error("Unsupported file type." if lang_code == "en" else "نوع الملف غير مدعوم.")
+            return None
+
+def handle_document_queries(document_text, suggested_questions, lang_code):
+    st.success("Document uploaded successfully!" if lang_code == "en" else "تم تحميل الوثيقة بنجاح!")
+    
+    # Custom query section
+    st.subheader("Custom Query" if lang_code == "en" else "استفسار مخصص")
+    custom_query = st.text_input("Enter your custom query:" if lang_code == "en" else "أدخل استفسارك الخاص:", key="custom_query")
+    submit_custom = st.button("Submit Custom Query" if lang_code == "en" else "إرسال الاستفسار الخاص", key="submit_custom_query")
+    if custom_query and submit_custom:
+        process_query(custom_query, document_text, lang_code)
+    
+    st.markdown("---")
+    
+    # Suggested questions section
+    st.subheader("Suggested Questions" if lang_code == "en" else "الأسئلة المقترحة")
+    question_text = "Select a suggested question:" if lang_code == "en" else "اختر سؤالاً مقترحًا:"
+    selected_question = st.selectbox(question_text, [""] + suggested_questions, key="selected_question")
+    submit_suggested = st.button("Submit Suggested Question" if lang_code == "en" else "إرسال السؤال المقترح", key="submit_suggested_query")
+    if selected_question and submit_suggested:
+        process_query(selected_question, document_text, lang_code)
+
+def translate_to_arabic(text):
+    translator = GoogleTranslator(source='auto', target='ar')
+    translated = translator.translate(text)
+    return translated
+
+def extract_placeholders(template_content):
+    return re.findall(r'\{(\w+)\}', template_content)
+
+def fill_template(template_content, inputs):
+    for placeholder, value in inputs.items():
+        template_content = template_content.replace(f"{{{placeholder}}}", value)
+    return template_content
+
+def process_query(query, context=None, lang_code="en"):
+    with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
+        try:
+            response = get_legal_advice(query, context, lang_code)
+            st.markdown("### Response:")
+            st.markdown(format_response(response))
+        except Exception as e:
+            st.error(f"An error occurred: {str(e)}")
+
+def get_document_grade(document_text, lang_code):
+    prompt = {
+        "en": f"Grade the following legal document on a scale of 1-10 for clarity, completeness, and legal accuracy. Provide a brief explanation for each aspect:\n\n{document_text[:4000]}...",
+        "ar": f"قيّم الوثيقة القانونية التالية على مقياس من 1 إلى 10 من حيث الوضوح والاكتمال والدقة القانونية. قدم شرحًا موجزًا لكل جانب:\n\n{document_text[:4000]}..."
+    }
+    
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo-16k",
+        messages=[
+            {"role": "system", "content": "You are an expert legal document grader. Provide a detailed assessment of the given document."},
+            {"role": "user", "content": prompt[lang_code]}
+        ],
+        max_tokens=1000,
+        temperature=0.7
+    )
+    
+    return response.choices[0].message['content'].strip()
+
+def display_grade_result(grade_result, lang_code):
+    st.subheader("Grading Result:" if lang_code == "en" else "نتيجة التقييم:")
+    st.markdown(grade_result)
 
 if __name__ == "__main__":
     main()
