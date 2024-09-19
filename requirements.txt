@@ -17,3 +17,4 @@ langchain_community
 pytesseract
 Pillow
 pdfplumber
+langchain_openai
