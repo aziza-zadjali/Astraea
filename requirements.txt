@@ -14,3 +14,5 @@ deep-translator
 PyPDF2
 langchain
 langchain_community
+pytesseract
+Pillow
