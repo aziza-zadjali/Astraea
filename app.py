@@ -52,7 +52,7 @@ def main():
     }
     st.info(disclaimer[lang_code])
 
-    tabs = st.tabs(["Legal Query Assistant", "Oman Laws", "Legal Translation Service", "Automated Document Creation", "Grade Legal Document"])
+    tabs = st.tabs(["Legal Query Assistant", "Oman Laws", "Legal Translation Service", "Automated Document Creation", "Grade Legal Document", "Predictive Case Analysis"])
 
     with tabs[0]:
         legal_query_assistant(lang_code)
@@ -64,6 +64,8 @@ def main():
         automated_document_creation(lang_code)
     with tabs[4]:
         grade_legal_document(lang_code)
+    with tabs[5]:
+        predictive_analysis_ui()
 
 def legal_query_assistant(lang_code):
     st.header("Legal Query Assistant" if lang_code == "en" else "مساعد الاستفسارات القانونية")
@@ -330,6 +332,87 @@ def get_document_grade(document_text, lang_code):
 def display_grade_result(grade_result, lang_code):
     st.subheader("Grading Result:" if lang_code == "en" else "نتيجة التقييم:")
     st.markdown(grade_result)
+
+def analyze_case_for_prediction(case_details: str) -> Dict[str, Any]:
+    chunks = split_text_into_chunks(case_details)
+    full_analysis = ""
+
+    for i, chunk in enumerate(chunks):
+        analysis_prompt = f"""
+        Analyze the following case details (part {i+1}/{len(chunks)}) in the context of the US legal system and provide a predictive analysis.
+
+        Case Details (Part {i+1}/{len(chunks)}):
+        ```
+        {chunk}
+        ```
+
+        Your analysis should address the following:
+        * **Case Summary:** Briefly summarize the key facts, legal claims, and parties involved in the case.
+        * **Predicted Outcome:** What is the most likely outcome of this case based on the provided information, US legal precedents, and similar cases? Explain your reasoning.
+        * **Strengths of the Case:** Identify the most compelling arguments and evidence that support a favorable outcome.
+        * **Weaknesses of the Case:** What are potential weaknesses in the case, or areas where the opposing party might have strong arguments?
+        * **Areas of Caution:** What potential pitfalls or challenges should be considered? What strategies could the opposing party use?
+        * **Relevant US Case Law:** Cite specific US legal precedents and similar cases that support your analysis and predicted outcome.
+        * **Recommended Strategies:** Offer specific, actionable recommendations on how to strengthen the case and increase the likelihood of a positive result.
+
+        Please maintain a neutral and objective tone throughout your analysis. The goal is to provide a realistic assessment of the case, not to advocate for a particular side.
+        """
+
+        try:
+            chunk_analysis = get_ai_response(analysis_prompt)
+            full_analysis += chunk_analysis + "\n\n"
+
+        except Exception as e:
+            return {"error": f"Error analyzing case (part {i+1}): {str(e)}"}
+
+    return {"analysis": full_analysis}
+
+def predictive_analysis_ui():
+    st.subheader("Predictive Case Analysis")
+    st.write('''
+    Enter the details of your case, including:
+
+    * Facts: Briefly describe the key events that led to the legal dispute.
+    * Legal Issues: State the specific legal questions or claims in the case.
+    * Relevant Law: Identify any relevant US laws, statutes, or regulations.
+    * Jurisdiction: Specify the US state where the case is filed.
+
+    LexAI will provide a predictive analysis, outlining potential outcomes, strengths and weaknesses of the case, and relevant US case law.
+    ''')
+
+    st.warning("Please do not upload files larger than 5MB as it may cause issues and consume all available tokens.")
+
+    input_method = st.radio("Choose input method:", ("Text Input", "Document Upload"))
+    
+    case_details = ""
+    if input_method == "Text Input":
+        case_details = st.text_area("Enter case details:", height=200)
+    else:
+        uploaded_file = st.file_uploader("Upload a document containing case details (PDF, DOCX, or TXT)", type=["pdf", "docx", "txt"])
+        if uploaded_file is not None:
+            case_details = extract_text_from_document(uploaded_file)
+
+    if st.button("Analyze Case"):
+        if case_details:
+            with st.spinner("Analyzing your case..."):
+                analysis_results = analyze_case_for_prediction(case_details)
+
+            st.write("### Case Analysis")
+            if "error" in analysis_results:
+                st.error(analysis_results["error"])
+            else:
+                analysis = analysis_results.get("analysis", "No analysis available.")
+                st.write(analysis)
+
+                # Download button for analysis
+                st.download_button(
+                    label="Download Analysis",
+                    data=analysis,
+                    file_name="case_analysis.txt",
+                    mime="text/plain"
+                )
+        else:
+            st.warning("Please enter case details or upload a document to analyze.")
 
 if __name__ == "__main__":
     main()
