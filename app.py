@@ -1,5 +1,6 @@
 import streamlit as st
 import os
+import re
 import pdfplumber
 from typing import Dict, Any
 from utils.document_processing import read_docx, read_txt, preprocess_arabic_text, format_response
@@ -27,6 +28,12 @@ def extract_text_from_pdf(pdf_path):
         for page in pdf.pages:
             text += page.extract_text()
     return text
+
+def preprocess_text(text):
+    # Remove unwanted characters and extra spaces
+    text = re.sub(r'\s+', ' ', text)
+    text = re.sub(r'[^\x00-\x7F]+', ' ', text)  # Remove non-ASCII characters
+    return text.strip()
 
 def main():
     st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
@@ -76,7 +83,7 @@ def main():
     with tabs[1]:
         oman_laws_feature(lang_code)
     with tabs[2]:
-        legal_translation_service(lang_code)  # Ensure this function is called here
+        legal_translation_service(lang_code)
     with tabs[3]:
         automated_document_creation(lang_code)
     with tabs[4]:
@@ -114,7 +121,8 @@ def process_uploaded_file(file_path, lang_code):
         if file_type == "docx":
             return read_docx(file_path)
         elif file_type == "pdf":
-            return extract_text_from_pdf(file_path)  # Use the new function for PDF handling
+            text = extract_text_from_pdf(file_path)
+            return preprocess_text(text)  # Preprocess the extracted text
         elif file_type == "txt":
             return read_txt(file_path)
         else:
