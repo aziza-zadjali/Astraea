@@ -1,7 +1,7 @@
 import streamlit as st
 import os
 import re
-from typing import Dict, Any  # Add this import
+from typing import Dict, Any
 from utils.document_processing import read_docx, read_pdf, read_txt, preprocess_arabic_text, format_response
 from utils.legal_advice import get_legal_advice, generate_suggested_questions
 from utils.oman_laws import get_oman_laws, read_oman_law
@@ -367,6 +367,18 @@ def analyze_case_for_prediction(case_details: str) -> Dict[str, Any]:
             return {"error": f"Error analyzing case (part {i+1}): {str(e)}"}
 
     return {"analysis": full_analysis}
+
+def get_ai_response(prompt: str) -> str:
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo-16k",
+        messages=[
+            {"role": "system", "content": "You are an expert legal analyst."},
+            {"role": "user", "content": prompt}
+        ],
+        max_tokens=1000,
+        temperature=0.7
+    )
+    return response.choices[0].message['content'].strip()
 
 def predictive_analysis_ui():
     st.subheader("Predictive Case Analysis")
