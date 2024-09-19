@@ -110,17 +110,36 @@ def main():
     elif option == 'Document Upload':
         st.title("Document Upload")
         st.write("Upload and process legal documents.")
-        # Your existing functionality for Document Upload
-    
+        # Functionality for Document Upload
+        uploaded_file = st.file_uploader("Choose a file", type=['pdf', 'docx', 'txt'])
+        if uploaded_file is not None:
+            file_type = uploaded_file.name.split('.')[-1]
+            if file_type == 'pdf':
+                content = read_pdf(uploaded_file)
+            elif file_type == 'docx':
+                content = read_docx(uploaded_file)
+            elif file_type == 'txt':
+                content = read_txt(uploaded_file)
+            st.write("File content processed successfully!")
+        
     elif option == 'Legal Translation':
         st.title("Legal Translation")
         st.write("Translate legal documents.")
-        # Your existing functionality for Legal Translation
+        text = st.text_area("Enter text to translate:")
+        if text:
+            lang = st.selectbox("Select target language", ["English", "Arabic"])
+            translator = GoogleTranslator(source='auto', target=lang.lower())
+            translated_text = translator.translate(text)
+            st.write("Translated text:")
+            st.write(translated_text)
     
     elif option == 'FAQs':
         st.title("Frequently Asked Questions")
         st.write("Find answers to common legal questions.")
-        # Your existing functionality for FAQs
+        st.write("- How do I get legal advice?")
+        st.write("- What are Oman laws about privacy?")
+        st.write("- How do I upload legal documents?")
+        # More FAQs
 
 if __name__ == '__main__':
     main()
