@@ -20,6 +20,28 @@ def main():
         language = st.selectbox("Choose Language / اختر اللغة", ["English", "العربية"], key="language_select")
         lang_code = "en" if language == "English" else "ar"
 
+    # Inject custom CSS for RTL layout if Arabic is selected
+    if lang_code == "ar":
+        st.markdown(
+            """
+            <style>
+            body {
+                direction: rtl;
+                text-align: right;
+            }
+            .css-1d391kg { /* Sidebar */
+                direction: rtl;
+                text-align: right;
+            }
+            .css-1v3fvcr { /* Main content */
+                direction: rtl;
+                text-align: right;
+            }
+            </style>
+            """,
+            unsafe_allow_html=True
+        )
+
     # Main content with tabs
     title = "Astraea - Legal Query Assistant" if lang_code == "en" else "أسترايا - مساعد الاستفسارات القانونية"
     st.title(title)
