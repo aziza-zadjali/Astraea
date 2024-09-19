@@ -380,6 +380,18 @@ def get_ai_response(prompt: str) -> str:
     )
     return response.choices[0].message['content'].strip()
 
+def extract_text_from_document(uploaded_file) -> str:
+    file_type = uploaded_file.type
+    if file_type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+        return read_docx(uploaded_file)
+    elif file_type == "application/pdf":
+        return read_pdf(uploaded_file)
+    elif file_type == "text/plain":
+        return read_txt(uploaded_file)
+    else:
+        st.error("Unsupported file type.")
+        return ""
+
 def predictive_analysis_ui():
     st.subheader("Predictive Case Analysis")
     st.write('''
