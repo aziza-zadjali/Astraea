@@ -1,4 +1,3 @@
-
 import streamlit as st
 import os
 import re
@@ -43,250 +42,159 @@ def main():
     </style>
     """, unsafe_allow_html=True)
 
-    # Main content
+    # Header
     col1, col2 = st.columns([3, 1])
-    
     with col1:
         st.image("logo.png", width=200)
-        title = "Astraea - Legal Query Assistant"
-        st.title(title)
-
-        disclaimer = "This assistant uses GPT-3.5-turbo to provide general legal information. Please note that this is not a substitute for professional legal advice."
-        st.info(disclaimer)
-
-        # Language selection
+        st.title("Astraea - Legal Query Assistant")
+    with col2:
         language = st.selectbox("Choose Language / اختر اللغة", ["English", "العربية"], key="main_language_select")
         lang_code = "en" if language == "English" else "ar"
 
-        # Feature selection
-        feature_options = ['Legal Query Assistant', 'Oman Laws', 'Legal Translation Service', 'Automated Document Creation', 'Grade Legal Document'] if lang_code == "en" else ['مساعد الاستفسارات القانونية', 'قوانين عمان', 'خدمة الترجمة القانونية', 'إنشاء المستندات الآلي', 'تقييم الوثيقة القانونية']
-        selected_feature = st.selectbox("Select a feature" if lang_code == "en" else "اختر ميزة", feature_options, key="feature_select")
-
-        # Display selected feature
-        if selected_feature in ['Legal Query Assistant', 'مساعد الاستفسارات القانونية']:
-            legal_query_assistant(lang_code)
-        elif selected_feature in ['Oman Laws', 'قوانين عمان']:
-            oman_laws_feature(lang_code)
-        elif selected_feature in ['Legal Translation Service', 'خدمة الترجمة القانونية']:
-            legal_translation_service(lang_code)
-        elif selected_feature in ['Automated Document Creation', 'إنشاء المستندات الآلي']:
-            automated_document_creation(lang_code)
-        elif selected_feature in ['Grade Legal Document', 'تقييم الوثيقة القانونية']:
-            grade_legal_document(lang_code)
-
-    with col2:
-        subscription_options(lang_code)
-
-def subscription_options(lang_code):
-    st.sidebar.title("Subscription Options" if lang_code == "en" else "خيارات الاشتراك")
-    st.sidebar.markdown("---")
-
-    plans = {
-        "Basic": {"price": "$9.99/month", "features": ["Access to basic legal queries", "Limited document processing"]},
-        "Pro": {"price": "$29.99/month", "features": ["Unlimited legal queries", "Advanced document analysis", "Priority support"]},
-        "Enterprise": {"price": "Custom pricing", "features": ["All Pro features", "Customized solutions", "Dedicated account manager"]}
-    }
-
-    for plan, details in plans.items():
-        st.sidebar.subheader(plan)
-        st.sidebar.write(f"Price: {details['price']}")
-        st.sidebar.write("Features:")
-        for feature in details['features']:
-            st.sidebar.write(f"- {feature}")
-        if plan != "Enterprise":
-            st.sidebar.button(f"Subscribe to {plan}" if lang_code == "en" else f"اشترك في {plan}", key=f"subscribe_{plan}")
-        else:
-            st.sidebar.button("Contact Sales" if lang_code == "en" else "تواصل مع المبيعات", key="contact_sales")
-        st.sidebar.markdown("---")
-
-
-    # Sidebar
-    with st.sidebar:
-        st.image("logo.png", width=200)
-        language = st.selectbox("Choose Language / اختر اللغة", ["English", "العربية"], key="language_select")
-        lang_code = "en" if language == "English" else "ar"
-        st.markdown("---")
-        st.markdown("### Navigation")
-        
-        options = ['Legal Query Assistant', 'Oman Laws', 'Legal Translation Service', 'Automated Document Creation', 'Grade Legal Document'] if lang_code == "en" else ['مساعد الاستفسارات القانونية', 'قوانين عمان', 'خدمة الترجمة القانونية', 'إنشاء المستندات الآلي', 'تقييم الوثيقة القانونية']
-        icons = ['💬', '📚', '🔄', '📝', '✅']
-        
-        for i, opt in enumerate(options):
-            if st.button(f"{icons[i]} {opt}", key=f"nav_{i}"):
-                st.session_state.option = opt
-
-    # Main content
-    title = "Astraea - Legal Query Assistant" if lang_code == "en" else "أسترايا - مساعد الاستفسارات القانونية"
-    st.title(title)
-
+    # Disclaimer
     disclaimer = {
         "en": "This assistant uses GPT-3.5-turbo to provide general legal information. Please note that this is not a substitute for professional legal advice.",
         "ar": "يستخدم هذا المساعد نموذج GPT-3.5-turbo لتقديم معلومات قانونية عامة. يرجى ملاحظة أن هذا ليس بديلاً عن المشورة القانونية المهنية."
     }
     st.info(disclaimer[lang_code])
 
-    # Use tabs for main content
-    tab1, tab2, tab3, tab4, tab5 = st.tabs(options)
+    # Main content
+    st.markdown("---")
+    feature_options = ['Legal Query Assistant', 'Oman Laws', 'Legal Translation Service', 'Automated Document Creation', 'Grade Legal Document'] if lang_code == "en" else ['مساعد الاستفسارات القانونية', 'قوانين عمان', 'خدمة الترجمة القانونية', 'إنشاء المستندات الآلي', 'تقييم الوثيقة القانونية']
+    selected_feature = st.selectbox("Select a feature" if lang_code == "en" else "اختر ميزة", feature_options, key="feature_select")
 
-    with tab1:
+    if selected_feature in ['Legal Query Assistant', 'مساعد الاستفسارات القانونية']:
         legal_query_assistant(lang_code)
-    with tab2:
+    elif selected_feature in ['Oman Laws', 'قوانين عمان']:
         oman_laws_feature(lang_code)
-    with tab3:
+    elif selected_feature in ['Legal Translation Service', 'خدمة الترجمة القانونية']:
         legal_translation_service(lang_code)
-    with tab4:
+    elif selected_feature in ['Automated Document Creation', 'إنشاء المستندات الآلي']:
         automated_document_creation(lang_code)
-    with tab5:
+    elif selected_feature in ['Grade Legal Document', 'تقييم الوثيقة القانونية']:
         grade_legal_document(lang_code)
+
+    # Footer
+    st.markdown("---")
+    st.markdown("© 2023 Astraea Legal Assistant. All rights reserved.")
 
 def legal_query_assistant(lang_code):
     st.header("Legal Query Assistant" if lang_code == "en" else "مساعد الاستفسارات القانونية")
     
-    # Use a session state counter to create unique keys
-    if 'legal_query_counter' not in st.session_state:
-        st.session_state.legal_query_counter = 0
-    st.session_state.legal_query_counter += 1
-    counter = st.session_state.legal_query_counter
+    with st.expander("Enter Your Query" if lang_code == "en" else "أدخل استفسارك", expanded=True):
+        query_type = st.radio(
+            "Choose query type" if lang_code == "en" else "اختر نوع الاستفسار",
+            ('Enter your own query', 'Query from document') if lang_code == "en" else ('أدخل استفسارك الخاص', 'استفسر من وثيقة'),
+            key=f"legal_query_type_{st.session_state.get('counter', 0)}"
+        )
 
-    query_type = st.radio(
-        "Choose query type" if lang_code == "en" else "اختر نوع الاستفسار",
-        ('Enter your own query', 'Query from document') if lang_code == "en" else ('أدخل استفسارك الخاص', 'استفسر من وثيقة'),
-        key=f"legal_query_type_{counter}"
-    )
+        if query_type in ['Enter your own query', 'أدخل استفسارك الخاص']:
+            query = st.text_input("Enter your legal query:" if lang_code == "en" else "أدخل استفسارك القانوني:", key=f"legal_query_{st.session_state.get('counter', 0)}")
+            if st.button("Submit" if lang_code == "en" else "إرسال", key=f"submit_legal_query_{st.session_state.get('counter', 0)}"):
+                process_query(query, context=None, lang_code=lang_code)
+        else:
+            uploaded_file = st.file_uploader("Upload a document" if lang_code == "en" else "قم بتحميل وثيقة", type=["docx", "pdf", "txt"], key=f"file_uploader_{st.session_state.get('counter', 0)}")
+            if uploaded_file:
+                document_text = process_uploaded_file(uploaded_file, lang_code)
+                if document_text:
+                    suggested_questions = generate_suggested_questions(document_text, lang_code)
+                    handle_document_queries(document_text, suggested_questions, lang_code)
 
-    if query_type in ['Enter your own query', 'أدخل استفسارك الخاص']:
-        query = st.text_input("Enter your legal query:" if lang_code == "en" else "أدخل استفسارك القانوني:", key=f"legal_query_{counter}")
-        if query and st.button("Submit" if lang_code == "en" else "إرسال", key=f"submit_legal_query_{counter}"):
-            process_query(query, context=None, lang_code=lang_code)
-    else:
-        uploaded_file = st.file_uploader("Upload a document" if lang_code == "en" else "قم بتحميل وثيقة", type=["docx", "pdf", "txt"], key=f"file_uploader_{counter}")
-        if uploaded_file:
-            document_text = process_uploaded_file(uploaded_file, lang_code)
-            if document_text:
-                suggested_questions = generate_suggested_questions(document_text, lang_code)
-                handle_document_queries(document_text, suggested_questions, lang_code, counter)
-
-def handle_document_queries(document_text, suggested_questions, lang_code, counter):
-    st.success("Document uploaded successfully!" if lang_code == "en" else "تم تحميل الوثيقة بنجاح!")
-    
-    # Custom query section
-    st.subheader("Custom Query" if lang_code == "en" else "استفسار مخصص")
-    custom_query = st.text_input("Enter your custom query:" if lang_code == "en" else "أدخل استفسارك الخاص:", key=f"custom_query_{counter}")
-    submit_custom = st.button("Submit Custom Query" if lang_code == "en" else "إرسال الاستفسار الخاص", key=f"submit_custom_query_{counter}")
-    if custom_query and submit_custom:
-        process_query(custom_query, document_text, lang_code)
-    
-    st.markdown("---")
-    
-    # Suggested questions section
-    st.subheader("Suggested Questions" if lang_code == "en" else "الأسئلة المقترحة")
-    question_text = "Select a suggested question:" if lang_code == "en" else "اختر سؤالاً مقترحًا:"
-    selected_question = st.selectbox(question_text, [""] + suggested_questions, key=f"selected_question_{counter}")
-    submit_suggested = st.button("Submit Suggested Question" if lang_code == "en" else "إرسال السؤال المقترح", key=f"submit_suggested_query_{counter}")
-    if selected_question and submit_suggested:
-        process_query(selected_question, document_text, lang_code)
+    st.session_state['counter'] = st.session_state.get('counter', 0) + 1
 
 def oman_laws_feature(lang_code):
     st.header("Oman Laws" if lang_code == "en" else "قوانين عمان")
-    laws = get_oman_laws()
     
-    if laws:
-        law_select_text = "Select a law:" if lang_code == "en" else "اختر قانونًا:"
-        selected_law = st.selectbox(law_select_text, list(laws.keys()), key="select_law")
-        
-        if selected_law:
-            law_text = read_oman_law(laws[selected_law])
-            if law_text:
-                # Custom query section
-                st.subheader("Custom Query" if lang_code == "en" else "استفسار مخصص")
-                custom_query = st.text_input("Enter your custom query:" if lang_code == "en" else "أدخل استفسارك الخاص:", key="custom_query")
-                submit_custom = st.button("Submit Custom Query" if lang_code == "en" else "إرسال الاستفسار الخاص", key="submit_custom_query")
-                if custom_query and submit_custom:
-                    process_query(custom_query, law_text, lang_code)
-                
-                st.markdown("---")
-                
-                # Suggested questions section
-                st.subheader("Suggested Questions" if lang_code == "en" else "الأسئلة المقترحة")
-                suggested_questions = generate_suggested_questions(law_text, lang_code)
-                question_text = "Select a suggested question:" if lang_code == "en" else "اختر سؤالاً مقترحًا:"
-                selected_question = st.selectbox(question_text, [""] + suggested_questions, key="selected_question")
-                submit_suggested = st.button("Submit Suggested Question" if lang_code == "en" else "إرسال السؤال المقترح", key="submit_suggested_query")
-                if selected_question and submit_suggested:
-                    process_query(selected_question, law_text, lang_code)
-            else:
-                st.error("Failed to read the selected law. Please try again or choose a different law." if lang_code == "en" else "فشل في قراءة القانون المحدد. يرجى المحاولة مرة أخرى أو اختيار قانون آخر.")
-    else:
-        st.error("No laws found in the database directory." if lang_code == "en" else "لم يتم العثور على قوانين في دليل قاعدة البيانات.")
+    with st.expander("Select and Query Law" if lang_code == "en" else "اختر واستفسر عن القانون", expanded=True):
+        laws = get_oman_laws()
+        if laws:
+            law_select_text = "Select a law:" if lang_code == "en" else "اختر قانونًا:"
+            selected_law = st.selectbox(law_select_text, list(laws.keys()), key="select_law")
+            
+            if selected_law:
+                law_text = read_oman_law(laws[selected_law])
+                if law_text:
+                    query = st.text_input("Enter your query about this law:" if lang_code == "en" else "أدخل استفسارك حول هذا القانون:", key="oman_law_query")
+                    if query and st.button("Submit" if lang_code == "en" else "إرسال", key="submit_oman_law_query"):
+                        process_query(query, law_text, lang_code)
+                else:
+                    st.error("Failed to read the selected law. Please try again or choose a different law." if lang_code == "en" else "فشل في قراءة القانون المحدد. يرجى المحاولة مرة أخرى أو اختيار قانون آخر.")
+        else:
+            st.error("No laws found in the database directory." if lang_code == "en" else "لم يتم العثور على قوانين في دليل قاعدة البيانات.")
 
 def legal_translation_service(lang_code):
     st.header("Legal Translation Service" if lang_code == 'en' else 'خدمة الترجمة القانونية')
     
-    upload_text = 'Upload a document for translation to Arabic' if lang_code == 'en' else 'قم بتحميل وثيقة للترجمة إلى العربية'
-    uploaded_file = st.file_uploader(upload_text, type=["docx", "pdf", "txt"], key="translation_file_uploader")
-    
-    if uploaded_file:
-        document_text = process_uploaded_file(uploaded_file, lang_code)
-        if document_text:
-            if st.button("Translate to Arabic" if lang_code == 'en' else 'ترجمة إلى العربية', key="translate_button"):
-                with st.spinner("Translating..." if lang_code == 'en' else 'جاري الترجمة...'):
-                    translated_text = translate_to_arabic(document_text)
-                st.text_area("Translated Text", translated_text, height=300)
-                st.download_button(
-                    label="Download Arabic Translation" if lang_code == 'en' else 'تحميل الترجمة العربية',
-                    data=translated_text.encode('utf-8'),
-                    file_name="arabic_translation.txt",
-                    mime="text/plain"
-                )
+    with st.expander("Translate Document" if lang_code == "en" else "ترجمة الوثيقة", expanded=True):
+        upload_text = 'Upload a document for translation to Arabic' if lang_code == 'en' else 'قم بتحميل وثيقة للترجمة إلى العربية'
+        uploaded_file = st.file_uploader(upload_text, type=["docx", "pdf", "txt"], key="translation_file_uploader")
+        
+        if uploaded_file:
+            document_text = process_uploaded_file(uploaded_file, lang_code)
+            if document_text:
+                if st.button("Translate to Arabic" if lang_code == 'en' else 'ترجمة إلى العربية', key="translate_button"):
+                    with st.spinner("Translating..." if lang_code == 'en' else 'جاري الترجمة...'):
+                        translated_text = translate_to_arabic(document_text)
+                    st.text_area("Translated Text", translated_text, height=300)
+                    st.download_button(
+                        label="Download Arabic Translation" if lang_code == 'en' else 'تحميل الترجمة العربية',
+                        data=translated_text.encode('utf-8'),
+                        file_name="arabic_translation.txt",
+                        mime="text/plain"
+                    )
 
 def automated_document_creation(lang_code):
     st.header("Automated Document Creation" if lang_code == "en" else "إنشاء المستندات الآلي")
     
-    templates = [f for f in os.listdir(TEMPLATE_DIR) if f.endswith('.txt')]
-    selected_template = st.selectbox(
-        "Select a template:" if lang_code == "en" else "اختر نموذجًا:",
-        templates,
-        key="template_select"
-    )
-    
-    if selected_template:
-        with open(os.path.join(TEMPLATE_DIR, selected_template), 'r', encoding='utf-8') as file:
-            template_content = file.read()
+    with st.expander("Create Document" if lang_code == "en" else "إنشاء مستند", expanded=True):
+        templates = [f for f in os.listdir(TEMPLATE_DIR) if f.endswith('.txt')]
+        selected_template = st.selectbox(
+            "Select a template:" if lang_code == "en" else "اختر نموذجًا:",
+            templates,
+            key="template_select"
+        )
         
-        placeholders = extract_placeholders(template_content)
-        st.subheader("Fill in the details:" if lang_code == "en" else "املأ التفاصيل:")
-        
-        inputs = {}
-        for i, placeholder in enumerate(placeholders):
-            inputs[placeholder] = st.text_input(
-                f"Enter {placeholder}:" if lang_code == "en" else f"أدخل {placeholder}:",
-                key=f"input_{placeholder}_{i}"
-            )
-        
-        if st.button("Generate Document" if lang_code == "en" else "إنشاء المستند", key="generate_doc_button"):
-            filled_document = fill_template(template_content, inputs)
-            st.text_area("Generated Document", filled_document, height=300, key="generated_doc_area")
-            st.download_button(
-                label="Download Document" if lang_code == "en" else "تحميل المستند",
-                data=filled_document.encode('utf-8'),
-                file_name=f"filled_{selected_template}",
-                mime="text/plain",
-                key="download_doc_button"
-            )
+        if selected_template:
+            with open(os.path.join(TEMPLATE_DIR, selected_template), 'r', encoding='utf-8') as file:
+                template_content = file.read()
+            
+            placeholders = extract_placeholders(template_content)
+            st.subheader("Fill in the details:" if lang_code == "en" else "املأ التفاصيل:")
+            
+            inputs = {}
+            for i, placeholder in enumerate(placeholders):
+                inputs[placeholder] = st.text_input(
+                    f"Enter {placeholder}:" if lang_code == "en" else f"أدخل {placeholder}:",
+                    key=f"input_{placeholder}_{i}"
+                )
+            
+            if st.button("Generate Document" if lang_code == "en" else "إنشاء المستند", key="generate_doc_button"):
+                filled_document = fill_template(template_content, inputs)
+                st.text_area("Generated Document", filled_document, height=300, key="generated_doc_area")
+                st.download_button(
+                    label="Download Document" if lang_code == "en" else "تحميل المستند",
+                    data=filled_document.encode('utf-8'),
+                    file_name=f"filled_{selected_template}",
+                    mime="text/plain",
+                    key="download_doc_button"
+                )
 
 def grade_legal_document(lang_code):
     st.header("Grade Legal Document" if lang_code == "en" else "تقييم الوثيقة القانونية")
     
-    upload_text = "Upload a legal document to grade" if lang_code == "en" else "قم بتحميل وثيقة قانونية للتقييم"
-    uploaded_file = st.file_uploader(upload_text, type=["docx", "pdf", "txt"], key="grade_file_uploader")
-    
-    if uploaded_file:
-        document_text = process_uploaded_file(uploaded_file, lang_code)
-        if document_text:
-            if st.button("Grade Document" if lang_code == "en" else "تقييم الوثيقة", key="grade_button"):
-                with st.spinner("Grading document..." if lang_code == "en" else "جاري تقييم الوثيقة..."):
-                    grade_result = get_document_grade(document_text, lang_code)
-                display_grade_result(grade_result, lang_code)
+    with st.expander("Upload and Grade Document" if lang_code == "en" else "تحميل وتقييم الوثيقة", expanded=True):
+        upload_text = "Upload a legal document to grade" if lang_code == "en" else "قم بتحميل وثيقة قانونية للتقييم"
+        uploaded_file = st.file_uploader(upload_text, type=["docx", "pdf", "txt"], key="grade_file_uploader")
+        
+        if uploaded_file:
+            document_text = process_uploaded_file(uploaded_file, lang_code)
+            if document_text:
+                if st.button("Grade Document" if lang_code == "en" else "تقييم الوثيقة", key="grade_button"):
+                    with st.spinner("Grading document..." if lang_code == "en" else "جاري تقييم الوثيقة..."):
+                        grade_result = get_document_grade(document_text, lang_code)
+                    display_grade_result(grade_result, lang_code)
+
+# Helper functions
 
 def process_uploaded_file(uploaded_file, lang_code):
     file_type = uploaded_file.type
@@ -305,27 +213,60 @@ def process_uploaded_file(uploaded_file, lang_code):
 def handle_document_queries(document_text, suggested_questions, lang_code):
     st.success("Document uploaded successfully!" if lang_code == "en" else "تم تحميل الوثيقة بنجاح!")
     
-    # Custom query section
-    st.subheader("Custom Query" if lang_code == "en" else "استفسار مخصص")
-    custom_query = st.text_input("Enter your custom query:" if lang_code == "en" else "أدخل استفسارك الخاص:", key="custom_query")
-    submit_custom = st.button("Submit Custom Query" if lang_code == "en" else "إرسال الاستفسار الخاص", key="submit_custom_query")
-    if custom_query and submit_custom:
-        process_query(custom_query, document_text, lang_code)
+    with st.expander("Custom Query" if lang_code == "en" else "استفسار مخصص", expanded=True):
+        custom_query = st.text_input("Enter your custom query:" if lang_code == "en" else "أدخل استفسارك الخاص:", key="custom_query")
+        if st.button("Submit Custom Query" if lang_code == "en" else "إرسال الاستفسار الخاص", key="submit_custom_query"):
+            process_query(custom_query, document_text, lang_code)
     
-    st.markdown("---")
-    
-    # Suggested questions section
-    st.subheader("Suggested Questions" if lang_code == "en" else "الأسئلة المقترحة")
-    question_text = "Select a suggested question:" if lang_code == "en" else "اختر سؤالاً مقترحًا:"
-    selected_question = st.selectbox(question_text, [""] + suggested_questions, key="selected_question")
-    submit_suggested = st.button("Submit Suggested Question" if lang_code == "en" else "إرسال السؤال المقترح", key="submit_suggested_query")
-    if selected_question and submit_suggested:
-        process_query(selected_question, document_text, lang_code)
-        
+    with st.expander("Suggested Questions" if lang_code == "en" else "الأسئلة المقترحة", expanded=True):
+        question_text = "Select a suggested question:" if lang_code == "en" else "اختر سؤالاً مقترحًا:"
+        selected_question = st.selectbox(question_text, [""] + suggested_questions, key="selected_question")
+        if st.button("Submit Suggested Question" if lang_code == "en" else "إرسال السؤال المقترح", key="submit_suggested_query"):
+            if selected_question:
+                process_query(selected_question, document_text, lang_code)
+            else:
+                st.warning("Please select a question." if lang_code == "en" else "الرجاء اختيار سؤال.")
+
 def translate_to_arabic(text):
     translator = GoogleTranslator(source='auto', target='ar')
     translated = translator.translate(text)
     return translated
+
+def automated_document_creation(lang_code):
+    st.header("Automated Document Creation" if lang_code == "en" else "إنشاء المستندات الآلي")
+    
+    with st.expander("Create Document" if lang_code == "en" else "إنشاء مستند", expanded=True):
+        templates = [f for f in os.listdir(TEMPLATE_DIR) if f.endswith('.txt')]
+        selected_template = st.selectbox(
+            "Select a template:" if lang_code == "en" else "اختر نموذجًا:",
+            templates,
+            key="template_select"
+        )
+        
+        if selected_template:
+            with open(os.path.join(TEMPLATE_DIR, selected_template), 'r', encoding='utf-8') as file:
+                template_content = file.read()
+            
+            placeholders = extract_placeholders(template_content)
+            st.subheader("Fill in the details:" if lang_code == "en" else "املأ التفاصيل:")
+            
+            inputs = {}
+            for i, placeholder in enumerate(placeholders):
+                inputs[placeholder] = st.text_input(
+                    f"Enter {placeholder}:" if lang_code == "en" else f"أدخل {placeholder}:",
+                    key=f"input_{placeholder}_{i}"
+                )
+            
+            if st.button("Generate Document" if lang_code == "en" else "إنشاء المستند", key="generate_doc_button"):
+                filled_document = fill_template(template_content, inputs)
+                st.text_area("Generated Document", filled_document, height=300, key="generated_doc_area")
+                st.download_button(
+                    label="Download Document" if lang_code == "en" else "تحميل المستند",
+                    data=filled_document.encode('utf-8'),
+                    file_name=f"filled_{selected_template}",
+                    mime="text/plain",
+                    key="download_doc_button"
+                )
 
 def extract_placeholders(template_content):
     return re.findall(r'\{(\w+)\}', template_content)
@@ -335,14 +276,20 @@ def fill_template(template_content, inputs):
         template_content = template_content.replace(f"{{{placeholder}}}", value)
     return template_content
 
-def process_query(query, context=None, lang_code="en"):
-    with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
-        try:
-            response = get_legal_advice(query, context, lang_code)
-            st.markdown("### Response:")
-            st.markdown(format_response(response))
-        except Exception as e:
-            st.error(f"An error occurred: {str(e)}")
+def grade_legal_document(lang_code):
+    st.header("Grade Legal Document" if lang_code == "en" else "تقييم الوثيقة القانونية")
+    
+    with st.expander("Upload and Grade Document" if lang_code == "en" else "تحميل وتقييم الوثيقة", expanded=True):
+        upload_text = "Upload a legal document to grade" if lang_code == "en" else "قم بتحميل وثيقة قانونية للتقييم"
+        uploaded_file = st.file_uploader(upload_text, type=["docx", "pdf", "txt"], key="grade_file_uploader")
+        
+        if uploaded_file:
+            document_text = process_uploaded_file(uploaded_file, lang_code)
+            if document_text:
+                if st.button("Grade Document" if lang_code == "en" else "تقييم الوثيقة", key="grade_button"):
+                    with st.spinner("Grading document..." if lang_code == "en" else "جاري تقييم الوثيقة..."):
+                        grade_result = get_document_grade(document_text, lang_code)
+                    display_grade_result(grade_result, lang_code)
 
 def get_document_grade(document_text, lang_code):
     prompt = {
