@@ -14,21 +14,13 @@ TEMPLATE_DIR = "templates"
 def main():
     st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
 
-    # Sidebar
+    # Sidebar for language selection
     with st.sidebar:
         st.image("logo.png", width=200)
         language = st.selectbox("Choose Language / اختر اللغة", ["English", "العربية"], key="language_select")
         lang_code = "en" if language == "English" else "ar"
-        st.markdown("---")
-        st.markdown("### Navigation")
-        option = st.radio(
-            "Choose a feature" if lang_code == "en" else "اختر ميزة",
-            ('Legal Query Assistant', 'Oman Laws', 'Legal Translation Service', 'Automated Document Creation', 'Grade Legal Document') if lang_code == "en" else
-            ('مساعد الاستفسارات القانونية', 'قوانين عمان', 'خدمة الترجمة القانونية', 'إنشاء المستندات الآلي', 'تقييم الوثيقة القانونية'),
-            key="feature_select"
-        )
 
-    # Main content
+    # Main content with tabs
     title = "Astraea - Legal Query Assistant" if lang_code == "en" else "أسترايا - مساعد الاستفسارات القانونية"
     st.title(title)
 
@@ -38,15 +30,17 @@ def main():
     }
     st.info(disclaimer[lang_code])
 
-    if option in ['Legal Query Assistant', 'مساعد الاستفسارات القانونية']:
+    tabs = st.tabs(["Legal Query Assistant", "Oman Laws", "Legal Translation Service", "Automated Document Creation", "Grade Legal Document"])
+
+    with tabs[0]:
         legal_query_assistant(lang_code)
-    elif option in ['Oman Laws', 'قوانين عمان']:
+    with tabs[1]:
         oman_laws_feature(lang_code)
-    elif option in ['Legal Translation Service', 'خدمة الترجمة القانونية']:
+    with tabs[2]:
         legal_translation_service(lang_code)
-    elif option in ['Automated Document Creation', 'إنشاء المستندات الآلي']:
+    with tabs[3]:
         automated_document_creation(lang_code)
-    elif option in ['Grade Legal Document', 'تقييم الوثيقة القانونية']:
+    with tabs[4]:
         grade_legal_document(lang_code)
 
 def legal_query_assistant(lang_code):
@@ -70,7 +64,6 @@ def legal_query_assistant(lang_code):
                 suggested_questions = generate_suggested_questions(document_text, lang_code)
                 handle_document_queries(document_text, suggested_questions, lang_code)
 
-@st.cache_data
 def process_uploaded_file(uploaded_file, lang_code):
     file_type = uploaded_file.type
     spinner_text = "Reading document..." if lang_code == "en" else "جاري قراءة الوثيقة..."
@@ -109,38 +102,18 @@ def handle_document_queries(document_text, suggested_questions, lang_code):
         
 def oman_laws_feature(lang_code):
     st.header("Oman Laws" if lang_code == "en" else "قوانين عمان")
-    
     laws = get_oman_laws()
     if laws:
         law_select_text = "Select a law:" if lang_code == "en" else "اختر قانونًا:"
         selected_law = st.selectbox(law_select_text, list(laws.keys()), key="select_law")
-        
         if selected_law:
             law_text = read_oman_law(laws[selected_law])
             if law_text:
-                # Generate suggested questions
-                suggested_questions = generate_suggested_questions(law_text, lang_code)
-                
-                # Custom query section
-                st.subheader("Custom Query" if lang_code == "en" else "استفسار مخصص")
-                custom_query = st.text_input("Enter your query about this law:" if lang_code == "en" else "أدخل استفسارك حول هذا القانون:", key="oman_law_query")
-                if st.button("Submit Custom Query" if lang_code == "en" else "إرسال الاستفسار الخاص", key="submit_oman_law_query"):
-                    if custom_query:
-                        process_query(custom_query, law_text, lang_code)
-                    else:
-                        st.warning("Please enter a query." if lang_code == "en" else "الرجاء إدخال استفسار.")
-                
-                st.markdown("---")
-                
-                # Suggested questions section
-                st.subheader("Suggested Questions" if lang_code == "en" else "الأسئلة المقترحة")
-                question_text = "Select a suggested question:" if lang_code == "en" else "اختر سؤالاً مقترحًا:"
-                selected_question = st.selectbox(question_text, [""] + suggested_questions, key="selected_question_oman")
-                if st.button("Submit Suggested Question" if lang_code == "en" else "إرسال السؤال المقترح", key="submit_suggested_query_oman"):
-                    if selected_question:
-                        process_query(selected_question, law_text, lang_code)
-                    else:
-                        st.warning("Please select a question." if lang_code == "en" else "الرجاء اختيار سؤال.")
+                query = st.text_input("Enter your query about this law:" if lang_code == "en" else "أدخل استفسارك حول هذا القانون:", key="oman_law_query")
+                if query and st.button("Submit" if lang_code == "en" else "إرسال", key="submit_oman_law_query"):
+                    process_query(query, law_text, lang_code)
+                elif not query and st.button("Submit" if lang_code == "en" else "إرسال", key="submit_oman_law_query"):
+                    st.warning("Please enter a query." if lang_code == "en" else "الرجاء إدخال استفسار.")
             else:
                 st.error("Failed to read the selected law. Please try again or choose a different law." if lang_code == "en" else "فشل في قراءة القانون المحدد. يرجى المحاولة مرة أخرى أو اختيار قانون آخر.")
     else:
