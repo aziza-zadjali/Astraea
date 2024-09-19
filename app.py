@@ -113,12 +113,23 @@ def oman_laws_feature(lang_code):
         if selected_law:
             law_text = read_oman_law(laws[selected_law])
             if law_text:
-                st.markdown(f"### {selected_law}")
-                st.text_area("Law Content", law_text, height=300)
+                # Custom query section
+                st.subheader("Custom Query" if lang_code == "en" else "استفسار مخصص")
+                custom_query = st.text_input("Enter your custom query:" if lang_code == "en" else "أدخل استفسارك الخاص:", key="custom_query")
+                submit_custom = st.button("Submit Custom Query" if lang_code == "en" else "إرسال الاستفسار الخاص", key="submit_custom_query")
+                if custom_query and submit_custom:
+                    process_query(custom_query, law_text, lang_code)
                 
-                query = st.text_input("Enter your query about this law:" if lang_code == "en" else "أدخل استفسارك حول هذا القانون:", key="oman_law_query")
-                if query and st.button("Submit" if lang_code == "en" else "إرسال", key="submit_oman_law_query"):
-                    process_query(query, law_text, lang_code)
+                st.markdown("---")
+                
+                # Suggested questions section
+                st.subheader("Suggested Questions" if lang_code == "en" else "الأسئلة المقترحة")
+                suggested_questions = generate_suggested_questions(law_text, lang_code)
+                question_text = "Select a suggested question:" if lang_code == "en" else "اختر سؤالاً مقترحًا:"
+                selected_question = st.selectbox(question_text, [""] + suggested_questions, key="selected_question")
+                submit_suggested = st.button("Submit Suggested Question" if lang_code == "en" else "إرسال السؤال المقترح", key="submit_suggested_query")
+                if selected_question and submit_suggested:
+                    process_query(selected_question, law_text, lang_code)
             else:
                 st.error("Failed to read the selected law. Please try again or choose a different law." if lang_code == "en" else "فشل في قراءة القانون المحدد. يرجى المحاولة مرة أخرى أو اختيار قانون آخر.")
     else:
