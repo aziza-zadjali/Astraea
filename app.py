@@ -340,7 +340,7 @@ def analyze_case_for_prediction(case_details: str) -> Dict[str, Any]:
 
     for i, chunk in enumerate(chunks):
         analysis_prompt = f"""
-        Analyze the following case details (part {i+1}/{len(chunks)}) in the context of the US legal system and provide a predictive analysis.
+        Analyze the following case details (part {i+1}/{len(chunks)}) in the context of the Oman legal system and provide a predictive analysis.
 
         Case Details (Part {i+1}/{len(chunks)}):
         ```
@@ -349,11 +349,11 @@ def analyze_case_for_prediction(case_details: str) -> Dict[str, Any]:
 
         Your analysis should address the following:
         * **Case Summary:** Briefly summarize the key facts, legal claims, and parties involved in the case.
-        * **Predicted Outcome:** What is the most likely outcome of this case based on the provided information, US legal precedents, and similar cases? Explain your reasoning.
+        * **Predicted Outcome:** What is the most likely outcome of this case based on the provided information, Oman legal precedents, and similar cases? Explain your reasoning.
         * **Strengths of the Case:** Identify the most compelling arguments and evidence that support a favorable outcome.
         * **Weaknesses of the Case:** What are potential weaknesses in the case, or areas where the opposing party might have strong arguments?
         * **Areas of Caution:** What potential pitfalls or challenges should be considered? What strategies could the opposing party use?
-        * **Relevant US Case Law:** Cite specific US legal precedents and similar cases that support your analysis and predicted outcome.
+        * **Relevant Oman Case Law:** Cite specific Oman legal precedents and similar cases that support your analysis and predicted outcome.
         * **Recommended Strategies:** Offer specific, actionable recommendations on how to strengthen the case and increase the likelihood of a positive result.
 
         Please maintain a neutral and objective tone throughout your analysis. The goal is to provide a realistic assessment of the case, not to advocate for a particular side.
@@ -399,10 +399,10 @@ def predictive_analysis_ui():
 
     * Facts: Briefly describe the key events that led to the legal dispute.
     * Legal Issues: State the specific legal questions or claims in the case.
-    * Relevant Law: Identify any relevant US laws, statutes, or regulations.
-    * Jurisdiction: Specify the US state where the case is filed.
+    * Relevant Law: Identify any relevant Oman laws, statutes, or regulations.
+    * Jurisdiction: Specify the Oman city where the case is filed.
 
-    LexAI will provide a predictive analysis, outlining potential outcomes, strengths and weaknesses of the case, and relevant US case law.
+    LexAI will provide a predictive analysis, outlining potential outcomes, strengths and weaknesses of the case, and relevant Oman case law.
     ''')
 
     st.warning("Please do not upload files larger than 5MB as it may cause issues and consume all available tokens.")
