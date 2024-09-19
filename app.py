@@ -76,7 +76,7 @@ def main():
     with tabs[1]:
         oman_laws_feature(lang_code)
     with tabs[2]:
-        legal_translation_service(lang_code)
+        legal_translation_service(lang_code)  # Ensure this function is called here
     with tabs[3]:
         automated_document_creation(lang_code)
     with tabs[4]:
@@ -177,6 +177,143 @@ def oman_laws_feature(lang_code):
                 st.error("Failed to read the selected law. Please try again or choose a different law." if lang_code == "en" else "فشل في قراءة القانون المحدد. يرجى المحاولة مرة أخرى أو اختيار قانون آخر.")
     else:
         st.error("No laws found in the database directory." if lang_code == "en" else "لم يتم العثور على قوانين في دليل قاعدة البيانات.")
+
+def legal_translation_service(lang_code):
+    st.header("Legal Translation Service" if lang_code == 'en' else 'خدمة الترجمة القانونية')
+    upload_text = 'Upload a document for translation to Arabic' if lang_code == 'en' else 'قم بتحميل وثيقة للترجمة إلى العربية'
+    uploaded_file = st.file_uploader(upload_text, type=["docx", "pdf", "txt"], key="translation_file_uploader")
+    
+    if uploaded_file:
+        saved_file_path = save_uploaded_file(uploaded_file)
+        if saved_file_path:
+            document_text = process_uploaded_file(saved_file_path, lang_code)
+            if document_text:
+                if st.button("Translate to Arabic" if lang_code == 'en' else 'ترجمة إلى العربية', key="translate_button"):
+                    translated_text = translate_to_arabic(document_text)
+                    st.text_area("Translated Text", translated_text, height=300)
+                    st.download_button(
+                        label="Download Arabic Translation" if lang_code == 'en' else 'تحميل الترجمة العربية',
+                        data=translated_text.encode('utf-8'),
+                        file_name="arabic_translation.txt",
+                        mime="text/plain"
+                    )
+
+def translate_to_arabic(text):
+    translator = GoogleTranslator(source='auto', target='ar')
+    translated = translator.translate(text)
+    return translated
+
+def automated_document_creation(lang_code):
+    st.header("Automated Document Creation" if lang_code == "en" else "إنشاء المستندات الآلي")
+    # Get list of available templates
+    templates = [f for f in os.listdir(TEMPLATE_DIR) if f.endswith('.txt')]
+    selected_template = st.selectbox(
+        "Select a template:" if lang_code == "en" else "اختر نموذجًا:",
+        templates,
+        key="template_select"
+    )
+    
+    if selected_template:
+        with open(os.path.join(TEMPLATE_DIR, selected_template), 'r', encoding='utf-8') as file:
+            template_content = file.read()
+        
+        placeholders = extract_placeholders(template_content)
+        st.subheader("Fill in the details:" if lang_code == "en" else "املأ التفاصيل:")
+        inputs = {}
+        for i, placeholder in enumerate(placeholders):
+            inputs[placeholder] = st.text_input(
+                f"Enter {placeholder}:" if lang_code == "en" else f"أدخل {placeholder}:",
+                key=f"input_{placeholder}_{i}"
+            )
+        
+        if st.button("Generate Document" if lang_code == "en" else "إنشاء المستند", key="generate_doc_button"):
+            filled_document = fill_template(template_content, inputs)
+            st.text_area("Generated Document", filled_document, height=300, key="generated_doc_area")
+            st.download_button(
+                label="Download Document" if lang_code == "en" else "تحميل المستند",
+                data=filled_document.encode('utf-8'),
+                file_name=f"filled_{selected_template}",
+                mime="text/plain",
+                key="download_doc_button"
+            )
+
+def extract_placeholders(template_content):
+    import re
+    return re.findall(r'\{(\w+)\}', template_content)
+
+def fill_template(template_content, inputs):
+    for placeholder, value in inputs.items():
+        template_content = template_content.replace(f"{{{placeholder}}}", value)
+    return template_content
+
+def process_query(query, context=None, lang_code="en"):
+    with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
+        try:
+            # Split the context into smaller chunks if it exceeds the token limit
+            context_chunks = split_text_into_chunks(context, max_tokens=3000) if context else ["No additional context provided."]
+            
+            responses = []
+            for chunk in context_chunks:
+                prompt = {
+                    "en": f"Provide a clear and direct answer to the following legal query. Avoid ambiguity and ensure the response is certain:\n\nQuery: {query}\n\nContext: {chunk}",
+                    "ar": f"قدم إجابة واضحة ومباشرة للاستفسار القانوني التالي. تجنب الغموض وتأكد من أن الإجابة مؤكدة:\n\nالاستفسار: {query}\n\nالسياق: {chunk}"
+                }
+                
+                response = openai.ChatCompletion.create(
+                    model="gpt-4o",
+                    messages=[
+                        {"role": "system", "content": "You are an expert legal advisor. Provide a clear, direct, and certain answer to the given query."},
+                        {"role": "user", "content": prompt[lang_code]}
+                    ],
+                    max_tokens=1000,
+                    temperature=0.7
+                )
+                
+                responses.append(response.choices[0].message['content'].strip())
+            
+            # Combine the responses from all chunks
+            final_response = "\n\n".join(responses)
+            st.markdown("### Response:")
+            st.markdown(format_response(final_response))
+        except Exception as e:
+            st.error(f"An error occurred: {str(e)}")
+
+def split_text_into_chunks(text, max_tokens=3000):
+    # Split the text into chunks of max_tokens length
+    words = text.split()
+    chunks = []
+    current_chunk = []
+    current_length = 0
+    
+    for word in words:
+        current_length += len(word) + 1  # +1 for the space
+        if current_length > max_tokens:
+            chunks.append(" ".join(current_chunk))
+            current_chunk = [word]
+            current_length = len(word) + 1
+        else:
+            current_chunk.append(word)
+    
+    if current_chunk:
+        chunks.append(" ".join(current_chunk))
+    
+    return chunks
+
+def grade_legal_document(lang_code):
+    st.header("Grade Legal Document" if lang_code == "en" else "تقييم الوثيقة القانونية")
+    
+    upload_text = "Upload a legal document to grade" if lang_code == "en" else "قم بتحميل وثيقة قانونية للتقييم"
+    uploaded_file = st.file_uploader(upload_text, type=["docx", "pdf", "txt"], key="grade_file_uploader")
+    
+    if uploaded_file:
+        saved_file_path = save_uploaded_file(uploaded_file)
+        if saved_file_path:
+            document_text = process_uploaded_file(saved_file_path, lang_code)
+            if document_text:
+                if st.button("Grade Document" if lang_code == "en" else "تقييم الوثيقة", key="grade_button"):
+                    grade_result = get_document_grade(document_text, lang_code)
+                    display_grade_result(grade_result, lang_code)
+
 def get_document_grade(document_text, lang_code):
     prompt = {
         "en": f"Grade the following legal document on a scale of 1-10 for clarity, completeness, and legal accuracy. Provide a brief explanation for each aspect:\n\n{document_text[:4000]}...",
