@@ -48,8 +48,8 @@ def main():
     st.title(title)
 
     disclaimer = {
-        "en": "This assistant uses GPT-3.5-turbo to provide general legal information. Please note that this is not a substitute for professional legal advice.",
-        "ar": "يستخدم هذا المساعد نموذج GPT-3.5-turbo لتقديم معلومات قانونية عامة. يرجى ملاحظة أن هذا ليس بديلاً عن المشورة القانونية المهنية."
+        "en": "This assistant uses GPT-4.0 to provide general legal information. Please note that this is not a substitute for professional legal advice.",
+        "ar": "يستخدم هذا المساعد نموذج GPT-4.0 لتقديم معلومات قانونية عامة. يرجى ملاحظة أن هذا ليس بديلاً عن المشورة القانونية المهنية."
     }
     st.info(disclaimer[lang_code])
 
@@ -240,7 +240,7 @@ def process_query(query, context=None, lang_code="en"):
                 }
                 
                 response = openai.ChatCompletion.create(
-                    model="gpt-3.5-turbo-16k",
+                    model="gpt-4o",
                     messages=[
                         {"role": "system", "content": "You are an expert legal advisor. Provide a clear, direct, and certain answer to the given query."},
                         {"role": "user", "content": prompt[lang_code]}
@@ -319,7 +319,7 @@ def get_document_grade(document_text, lang_code):
     }
     
     response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo-16k",
+        model="gpt-4o",
         messages=[
             {"role": "system", "content": "You are an expert legal document grader. Provide a detailed assessment of the given document."},
             {"role": "user", "content": prompt[lang_code]}
@@ -370,7 +370,7 @@ def analyze_case_for_prediction(case_details: str) -> Dict[str, Any]:
 
 def get_ai_response(prompt: str) -> str:
     response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo-16k",
+        model="gpt-4o",
         messages=[
             {"role": "system", "content": "You are an expert legal analyst."},
             {"role": "user", "content": prompt}
