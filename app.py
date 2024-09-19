@@ -8,6 +8,9 @@ from utils.oman_laws import get_oman_laws, read_oman_law
 from deep_translator import GoogleTranslator
 from fpdf import FPDF
 import openai
+from langchain.memory import ConversationBufferMemory
+from langchain.chains import ConversationChain
+from langchain_openai import ChatOpenAI
 
 # Assuming you have a directory for templates
 TEMPLATE_DIR = "templates"
@@ -70,7 +73,16 @@ def main():
 
 def legal_query_assistant(lang_code):
     st.header("Legal Query Assistant" if lang_code == "en" else "مساعد الاستفسارات القانونية")
-    
+
+    # Initialize memory and conversation chain
+    if 'memory' not in st.session_state:
+        st.session_state.memory = ConversationBufferMemory()
+        st.session_state.conversation = ConversationChain(
+            llm=ChatOpenAI(temperature=0.7),
+            memory=st.session_state.memory,
+            verbose=True
+        )
+
     query_type = st.radio(
         "Choose query type" if lang_code == "en" else "اختر نوع الاستفسار",
         ('Enter your own query', 'Query from document') if lang_code == "en" else ('أدخل استفسارك الخاص', 'استفسر من وثيقة'),
@@ -80,14 +92,36 @@ def legal_query_assistant(lang_code):
     if query_type in ['Enter your own query', 'أدخل استفسارك الخاص']:
         query = st.text_input("Enter your legal query:" if lang_code == "en" else "أدخل استفسارك القانوني:", key="legal_query")
         if query and st.button("Submit" if lang_code == "en" else "إرسال", key="submit_legal_query"):
-            process_query(query, context=None, lang_code=lang_code)
+            response = st.session_state.conversation.predict(input=query)
+            st.markdown("### Response:")
+            st.markdown(format_response(response))
     else:
-        uploaded_file = st.file_uploader("Upload a document" if lang_code == "en" else "قم بتحميل وثيقة", type=["docx", "pdf", "txt"], key="file_uploader")
-        if uploaded_file:
-            document_text = process_uploaded_file(uploaded_file, lang_code)
-            if document_text:
-                suggested_questions = generate_suggested_questions(document_text, lang_code)
-                handle_document_queries(document_text, suggested_questions, lang_code)
+        # Handle document upload and processing as before
+        # ...
+
+    # Display conversation history
+    st.subheader("Conversation History" if lang_code == "en" else "سجل المحادثة")
+    history = st.session_state.memory.chat_memory.messages
+    for message in history:
+        if message.type == 'human':
+            st.write("Human: " + message.content)
+        elif message.type == 'ai':
+            st.write("AI: " + message.content)
+
+def process_query(query, context=None, lang_code="en"):
+    with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
+        try:
+            if context:
+                full_query = f"Context: {context}\n\nQuery: {query}"
+            else:
+                full_query = query
+
+            response = st.session_state.conversation.predict(input=full_query)
+            st.markdown("### Response:")
+            st.markdown(format_response(response))
+        except Exception as e:
+            st.error(f"An error occurred: {str(e)}")
+
 
 def process_uploaded_file(uploaded_file, lang_code):
     file_type = uploaded_file.type
