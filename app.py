@@ -8,21 +8,9 @@ from utils.oman_laws import get_oman_laws, read_oman_law
 from deep_translator import GoogleTranslator
 from fpdf import FPDF
 import openai
-from langchain.chains import ConversationChain
-from langchain.memory import ConversationBufferMemory
-from langchain_openai import OpenAI
 
 # Assuming you have a directory for templates
 TEMPLATE_DIR = "templates"
-
-# Initialize the OpenAI model
-llm = OpenAI(model="gpt-4o", temperature=0.7)
-
-# Initialize the conversation memory
-memory = ConversationBufferMemory()
-
-# Initialize the conversation chain
-conversation = ConversationChain(llm=llm, memory=memory, verbose=True)
 
 def main():
     st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
@@ -264,11 +252,32 @@ def fill_template(template_content, inputs):
 def process_query(query, context=None, lang_code="en"):
     with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
         try:
-            # Use the conversation chain to process the query
-            response = conversation.predict(input=query)
+            # Split the context into smaller chunks if it exceeds the token limit
+            context_chunks = split_text_into_chunks(context, max_tokens=3000) if context else ["No additional context provided."]
             
+            responses = []
+            for chunk in context_chunks:
+                prompt = {
+                    "en": f"Provide a clear and direct answer to the following legal query. Avoid ambiguity and ensure the response is certain:\n\nQuery: {query}\n\nContext: {chunk}",
+                    "ar": f"قدم إجابة واضحة ومباشرة للاستفسار القانوني التالي. تجنب الغموض وتأكد من أن الإجابة مؤكدة:\n\nالاستفسار: {query}\n\nالسياق: {chunk}"
+                }
+                
+                response = openai.ChatCompletion.create(
+                    model="gpt-4o",
+                    messages=[
+                        {"role": "system", "content": "You are an expert legal advisor. Provide a clear, direct, and certain answer to the given query."},
+                        {"role": "user", "content": prompt[lang_code]}
+                    ],
+                    max_tokens=1000,
+                    temperature=0.7
+                )
+                
+                responses.append(response.choices[0].message['content'].strip())
+            
+            # Combine the responses from all chunks
+            final_response = "\n\n".join(responses)
             st.markdown("### Response:")
-            st.markdown(format_response(response))
+            st.markdown(format_response(final_response))
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
 
