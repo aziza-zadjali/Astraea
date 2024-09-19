@@ -12,9 +12,9 @@ fpdf
 deep-translator
 PyPDF2
 langchain==0.0.1
-langchain_community==0.2.10
+langchain_community==0.0.1
 pytesseract
 Pillow
 pdfplumber
-langchain_openai==0.1.23
+langchain_openai==0.0.2
 pydantic==1.10.7
