@@ -99,7 +99,7 @@ def handle_document_queries(document_text, suggested_questions, lang_code):
     
     if selected_question and submit_suggested:
         process_query(selected_question, document_text, lang_code)
-        
+
 def oman_laws_feature(lang_code):
     st.header("Oman Laws" if lang_code == "en" else "قوانين عمان")
     laws = get_oman_laws()
@@ -109,11 +109,27 @@ def oman_laws_feature(lang_code):
         if selected_law:
             law_text = read_oman_law(laws[selected_law])
             if law_text:
-                query = st.text_input("Enter your query about this law:" if lang_code == "en" else "أدخل استفسارك حول هذا القانون:", key="oman_law_query")
-                if query and st.button("Submit" if lang_code == "en" else "إرسال", key="submit_oman_law_query"):
-                    process_query(query, law_text, lang_code)
-                elif not query and st.button("Submit" if lang_code == "en" else "إرسال", key="submit_oman_law_query"):
-                    st.warning("Please enter a query." if lang_code == "en" else "الرجاء إدخال استفسار.")
+                st.success("Law loaded successfully!" if lang_code == "en" else "تم تحميل القانون بنجاح!")
+                
+                # Custom query section
+                st.subheader("Custom Query" if lang_code == "en" else "استفسار مخصص")
+                custom_query = st.text_input("Enter your custom query:" if lang_code == "en" else "أدخل استفسارك الخاص:", key="oman_law_custom_query")
+                submit_custom = st.button("Submit Custom Query" if lang_code == "en" else "إرسال الاستفسار الخاص", key="submit_oman_law_custom_query")
+                
+                if custom_query and submit_custom:
+                    process_query(custom_query, law_text, lang_code)
+                
+                st.markdown("---")
+                
+                # Suggested questions section
+                st.subheader("Suggested Questions" if lang_code == "en" else "الأسئلة المقترحة")
+                suggested_questions = generate_suggested_questions(law_text, lang_code)
+                question_text = "Select a suggested question:" if lang_code == "en" else "اختر سؤالاً مقترحًا:"
+                selected_question = st.selectbox(question_text, [""] + suggested_questions, key="oman_law_selected_question")
+                submit_suggested = st.button("Submit Suggested Question" if lang_code == "en" else "إرسال السؤال المقترح", key="submit_oman_law_suggested_query")
+                
+                if selected_question and submit_suggested:
+                    process_query(selected_question, law_text, lang_code)
             else:
                 st.error("Failed to read the selected law. Please try again or choose a different law." if lang_code == "en" else "فشل في قراءة القانون المحدد. يرجى المحاولة مرة أخرى أو اختيار قانون آخر.")
     else:
