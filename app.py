@@ -188,26 +188,55 @@ def fill_template(template_content, inputs):
 def process_query(query, context=None, lang_code="en"):
     with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
         try:
-            # Modify the prompt to request a clear and certain answer
-            prompt = {
-                "en": f"Provide a clear and direct answer to the following legal query. Avoid ambiguity and ensure the response is certain:\n\nQuery: {query}\n\nContext: {context if context else 'No additional context provided.'}",
-                "ar": f"قدم إجابة واضحة ومباشرة للاستفسار القانوني التالي. تجنب الغموض وتأكد من أن الإجابة مؤكدة:\n\nالاستفسار: {query}\n\nالسياق: {context if context else 'لم يتم توفير سياق إضافي.'}"
-            }
+            # Split the context into smaller chunks if it exceeds the token limit
+            context_chunks = split_text_into_chunks(context, max_tokens=3000) if context else ["No additional context provided."]
             
-            response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo-16k",
-                messages=[
-                    {"role": "system", "content": "You are an expert legal advisor. Provide a clear, direct, and certain answer to the given query."},
-                    {"role": "user", "content": prompt[lang_code]}
-                ],
-                max_tokens=1000,
-                temperature=0.7
-            )
+            responses = []
+            for chunk in context_chunks:
+                prompt = {
+                    "en": f"Provide a clear and direct answer to the following legal query. Avoid ambiguity and ensure the response is certain:\n\nQuery: {query}\n\nContext: {chunk}",
+                    "ar": f"قدم إجابة واضحة ومباشرة للاستفسار القانوني التالي. تجنب الغموض وتأكد من أن الإجابة مؤكدة:\n\nالاستفسار: {query}\n\nالسياق: {chunk}"
+                }
+                
+                response = openai.ChatCompletion.create(
+                    model="gpt-3.5-turbo-16k",
+                    messages=[
+                        {"role": "system", "content": "You are an expert legal advisor. Provide a clear, direct, and certain answer to the given query."},
+                        {"role": "user", "content": prompt[lang_code]}
+                    ],
+                    max_tokens=1000,
+                    temperature=0.7
+                )
+                
+                responses.append(response.choices[0].message['content'].strip())
             
+            # Combine the responses from all chunks
+            final_response = "\n\n".join(responses)
             st.markdown("### Response:")
-            st.markdown(format_response(response.choices[0].message['content'].strip()))
+            st.markdown(format_response(final_response))
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
+
+def split_text_into_chunks(text, max_tokens=3000):
+    # Split the text into chunks of max_tokens length
+    words = text.split()
+    chunks = []
+    current_chunk = []
+    current_length = 0
+    
+    for word in words:
+        current_length += len(word) + 1  # +1 for the space
+        if current_length > max_tokens:
+            chunks.append(" ".join(current_chunk))
+            current_chunk = [word]
+            current_length = len(word) + 1
+        else:
+            current_chunk.append(word)
+    
+    if current_chunk:
+        chunks.append(" ".join(current_chunk))
+    
+    return chunks
 
 def grade_legal_document(lang_code):
     st.header("Grade Legal Document" if lang_code == "en" else "تقييم الوثيقة القانونية")
