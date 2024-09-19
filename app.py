@@ -8,20 +8,11 @@ from utils.oman_laws import get_oman_laws, read_oman_law
 from deep_translator import GoogleTranslator
 from fpdf import FPDF
 import openai
-from langchain.memory import ConversationBufferMemory
-from langchain.chains import ConversationChain
-from langchain.llms import OpenAI
 
 # Assuming you have a directory for templates
 TEMPLATE_DIR = "templates"
 
-# Initialize Langchain memory and conversation chain
-memory = ConversationBufferMemory()
-llm = OpenAI(temperature=0.7)  # Assuming you are using OpenAI API for LLM
-conversation = ConversationChain(llm=llm, memory=memory)
-
 def main():
-    
     st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
 
     # Sidebar for language selection
