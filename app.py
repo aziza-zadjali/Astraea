@@ -147,24 +147,15 @@ def legal_query_assistant(lang_code):
     query_type = st.radio(
         "Choose query type" if lang_code == "en" else "اختر نوع الاستفسار",
         ('Enter your own query', 'Query from document') if lang_code == "en" else ('أدخل استفسارك الخاص', 'استفسر من وثيقة'),
-        key="query_type"
+        key="legal_query_type"  # Changed from "query_type" to "legal_query_type"
     )
 
     if query_type in ['Enter your own query', 'أدخل استفسارك الخاص']:
-        query = st.text_input("Enter your legal query:" if lang_code == "en" else "أدخل استفسارك القانوني:", key="legal_query")
-        col1, col2 = st.columns([1, 5])
-        with col1:
-            submit = st.button("Submit" if lang_code == "en" else "إرسال", key="submit_legal_query")
-        with col2:
-            clear = st.button("Clear" if lang_code == "en" else "مسح", key="clear_legal_query")
-        
-        if clear:
-            st.session_state.legal_query = ""
-        
-        if query and submit:
+        query = st.text_input("Enter your legal query:" if lang_code == "en" else "أدخل استفسارك القانوني:", key="legal_query_input")
+        if query and st.button("Submit" if lang_code == "en" else "إرسال", key="submit_legal_query"):
             process_query(query, context=None, lang_code=lang_code)
     else:
-        uploaded_file = st.file_uploader("Upload a document" if lang_code == "en" else "قم بتحميل وثيقة", type=["docx", "pdf", "txt"], key="file_uploader")
+        uploaded_file = st.file_uploader("Upload a document" if lang_code == "en" else "قم بتحميل وثيقة", type=["docx", "pdf", "txt"], key="legal_file_uploader")
         if uploaded_file:
             document_text = process_uploaded_file(uploaded_file, lang_code)
             if document_text:
