@@ -8,14 +8,12 @@ from utils.oman_laws import get_oman_laws, read_oman_law
 from deep_translator import GoogleTranslator
 from fpdf import FPDF
 import openai
-
-# Assuming you have a directory for templates
-TEMPLATE_DIR = "templates"
-
-
 from langchain.memory import ConversationBufferMemory
 from langchain.chains import ConversationChain
 from langchain.llms import OpenAI
+
+# Assuming you have a directory for templates
+TEMPLATE_DIR = "templates"
 
 # Initialize Langchain memory and conversation chain
 memory = ConversationBufferMemory()
