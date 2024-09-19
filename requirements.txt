@@ -12,3 +12,4 @@ python-bidi
 fpdf
 deep-translator
 PyPDF2
+langchain
