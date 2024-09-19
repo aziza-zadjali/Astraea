@@ -104,27 +104,37 @@ def subscription_options(lang_code):
 def legal_query_assistant(lang_code):
     st.header("Legal Query Assistant" if lang_code == "en" else "مساعد الاستفسارات القانونية")
     
-    with st.expander("Enter Your Query" if lang_code == "en" else "أدخل استفسارك", expanded=True):
-        query_type = st.radio(
-            "Choose query type" if lang_code == "en" else "اختر نوع الاستفسار",
-            ('Enter your own query', 'Query from document') if lang_code == "en" else ('أدخل استفسارك الخاص', 'استفسر من وثيقة'),
-            key=f"legal_query_type_{st.session_state.get('counter', 0)}"
-        )
+    query_type = st.radio(
+        "Choose query type" if lang_code == "en" else "اختر نوع الاستفسار",
+        ('Enter your own query', 'Query from document') if lang_code == "en" else ('أدخل استفسارك الخاص', 'استفسر من وثيقة'),
+        key="query_type"
+    )
 
-        if query_type in ['Enter your own query', 'أدخل استفسارك الخاص']:
-            query = st.text_input("Enter your legal query:" if lang_code == "en" else "أدخل استفسارك القانوني:", key=f"legal_query_{st.session_state.get('counter', 0)}")
-            if st.button("Submit" if lang_code == "en" else "إرسال", key=f"submit_legal_query_{st.session_state.get('counter', 0)}"):
-                process_query(query, context=None, lang_code=lang_code)
-        else:
-            uploaded_file = st.file_uploader("Upload a document" if lang_code == "en" else "قم بتحميل وثيقة", type=["docx", "pdf", "txt"], key=f"file_uploader_{st.session_state.get('counter', 0)}")
-            if uploaded_file:
-                document_text = process_uploaded_file(uploaded_file, lang_code)
-                if document_text:
-                    suggested_questions = generate_suggested_questions(document_text, lang_code)
-                    handle_document_queries(document_text, suggested_questions, lang_code)
-
-    st.session_state['counter'] = st.session_state.get('counter', 0) + 1
-
+    if query_type in ['Enter your own query', 'أدخل استفسارك الخاص']:
+        query = st.text_input("Enter your legal query:" if lang_code == "en" else "أدخل استفسارك القانوني:", key="legal_query")
+        if query and st.button("Submit" if lang_code == "en" else "إرسال", key="submit_legal_query"):
+            process_query(query, context=None, lang_code=lang_code)
+    else:
+        uploaded_file = st.file_uploader("Upload a document" if lang_code == "en" else "قم بتحميل وثيقة", type=["docx", "pdf", "txt"], key="file_uploader")
+        if uploaded_file:
+            document_text = process_uploaded_file(uploaded_file, lang_code)
+            if document_text:
+                st.success("Document uploaded successfully!" if lang_code == "en" else "تم تحميل الوثيقة بنجاح!")
+                
+                # Custom query section
+                st.subheader("Custom Query" if lang_code == "en" else "استفسار مخصص")
+                custom_query = st.text_input("Enter your custom query:" if lang_code == "en" else "أدخل استفسارك الخاص:", key="custom_query")
+                if custom_query and st.button("Submit Custom Query" if lang_code == "en" else "إرسال الاستفسار الخاص", key="submit_custom_query"):
+                    process_query(custom_query, document_text, lang_code)
+                
+                # Suggested questions section
+                st.subheader("Suggested Questions" if lang_code == "en" else "الأسئلة المقترحة")
+                suggested_questions = generate_suggested_questions(document_text, lang_code)
+                question_text = "Select a suggested question:" if lang_code == "en" else "اختر سؤالاً مقترحًا:"
+                selected_question = st.selectbox(question_text, [""] + suggested_questions, key="selected_question")
+                if selected_question and st.button("Submit Suggested Question" if lang_code == "en" else "إرسال السؤال المقترح", key="submit_suggested_query"):
+                    process_query(selected_question, document_text, lang_code)
+                    
 def oman_laws_feature(lang_code):
     st.header("Oman Laws" if lang_code == "en" else "قوانين عمان")
     
