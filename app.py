@@ -8,8 +8,8 @@ from deep_translator import GoogleTranslator
 from fpdf import FPDF
 import openai
 
-# Assuming you have a directory for templates
-TEMPLATE_DIR = "templates"
+# Set page configuration at the very top
+st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
 
 # Custom CSS for color themes
 def local_css(file_name):
@@ -49,8 +49,6 @@ def apply_custom_css():
 def main():
     # Apply custom CSS
     apply_custom_css()
-
-    st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
 
     # Sidebar
     with st.sidebar:
