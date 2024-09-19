@@ -30,8 +30,14 @@ def main():
         background-color: white;
         border-radius: 5px;
     }
+    .stTextInput>div>div>input {
+        border: 1px solid #4CAF50 !important;
+        border-radius: 5px;
+        padding: 8px;
+    }
     </style>
     """, unsafe_allow_html=True)
+
 
     # Sidebar
     with st.sidebar:
