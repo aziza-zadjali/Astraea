@@ -100,8 +100,6 @@ def subscription_options(lang_code):
         st.sidebar.markdown("---")
 
 
-
-
     # Sidebar
     with st.sidebar:
         st.image("logo.png", width=200)
@@ -144,23 +142,49 @@ def subscription_options(lang_code):
 def legal_query_assistant(lang_code):
     st.header("Legal Query Assistant" if lang_code == "en" else "مساعد الاستفسارات القانونية")
     
+    # Use a session state counter to create unique keys
+    if 'legal_query_counter' not in st.session_state:
+        st.session_state.legal_query_counter = 0
+    st.session_state.legal_query_counter += 1
+    counter = st.session_state.legal_query_counter
+
     query_type = st.radio(
         "Choose query type" if lang_code == "en" else "اختر نوع الاستفسار",
         ('Enter your own query', 'Query from document') if lang_code == "en" else ('أدخل استفسارك الخاص', 'استفسر من وثيقة'),
-        key="legal_query_type"  # Changed from "query_type" to "legal_query_type"
+        key=f"legal_query_type_{counter}"
     )
 
     if query_type in ['Enter your own query', 'أدخل استفسارك الخاص']:
-        query = st.text_input("Enter your legal query:" if lang_code == "en" else "أدخل استفسارك القانوني:", key="legal_query_input")
-        if query and st.button("Submit" if lang_code == "en" else "إرسال", key="submit_legal_query"):
+        query = st.text_input("Enter your legal query:" if lang_code == "en" else "أدخل استفسارك القانوني:", key=f"legal_query_{counter}")
+        if query and st.button("Submit" if lang_code == "en" else "إرسال", key=f"submit_legal_query_{counter}"):
             process_query(query, context=None, lang_code=lang_code)
     else:
-        uploaded_file = st.file_uploader("Upload a document" if lang_code == "en" else "قم بتحميل وثيقة", type=["docx", "pdf", "txt"], key="legal_file_uploader")
+        uploaded_file = st.file_uploader("Upload a document" if lang_code == "en" else "قم بتحميل وثيقة", type=["docx", "pdf", "txt"], key=f"file_uploader_{counter}")
         if uploaded_file:
             document_text = process_uploaded_file(uploaded_file, lang_code)
             if document_text:
                 suggested_questions = generate_suggested_questions(document_text, lang_code)
-                handle_document_queries(document_text, suggested_questions, lang_code)
+                handle_document_queries(document_text, suggested_questions, lang_code, counter)
+
+def handle_document_queries(document_text, suggested_questions, lang_code, counter):
+    st.success("Document uploaded successfully!" if lang_code == "en" else "تم تحميل الوثيقة بنجاح!")
+    
+    # Custom query section
+    st.subheader("Custom Query" if lang_code == "en" else "استفسار مخصص")
+    custom_query = st.text_input("Enter your custom query:" if lang_code == "en" else "أدخل استفسارك الخاص:", key=f"custom_query_{counter}")
+    submit_custom = st.button("Submit Custom Query" if lang_code == "en" else "إرسال الاستفسار الخاص", key=f"submit_custom_query_{counter}")
+    if custom_query and submit_custom:
+        process_query(custom_query, document_text, lang_code)
+    
+    st.markdown("---")
+    
+    # Suggested questions section
+    st.subheader("Suggested Questions" if lang_code == "en" else "الأسئلة المقترحة")
+    question_text = "Select a suggested question:" if lang_code == "en" else "اختر سؤالاً مقترحًا:"
+    selected_question = st.selectbox(question_text, [""] + suggested_questions, key=f"selected_question_{counter}")
+    submit_suggested = st.button("Submit Suggested Question" if lang_code == "en" else "إرسال السؤال المقترح", key=f"submit_suggested_query_{counter}")
+    if selected_question and submit_suggested:
+        process_query(selected_question, document_text, lang_code)
 
 def oman_laws_feature(lang_code):
     st.header("Oman Laws" if lang_code == "en" else "قوانين عمان")
