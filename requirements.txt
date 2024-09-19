@@ -1,7 +1,6 @@
 streamlit
 openai==0.28.0
 python-docx
-pymupdf
 requests
 beautifulsoup4
 PyMuPDF
@@ -12,7 +11,7 @@ python-bidi
 fpdf
 deep-translator
 PyPDF2
-langchain
+langchain==0.0.1
 langchain_community
 pytesseract
 Pillow
