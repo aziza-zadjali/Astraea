@@ -66,7 +66,7 @@ def main():
             ('Legal Query Assistant', 'Oman Laws', 'Document Upload', 'Legal Translation', 'FAQs')
         )
         
-        # Adding subscription options separately
+        # Adding subscription options separately in the sidebar, away from the main feature list
         st.markdown("---")
         st.markdown("### Subscription Options")
         st.markdown("Choose from our flexible subscription plans:")
@@ -96,21 +96,21 @@ def main():
             st.write("- Dedicated support")
             st.button("Subscribe Enterprise")
 
-    # Main content
+    # Main content area
     if option == 'Legal Query Assistant':
         st.title("Legal Query Assistant")
         st.write("Get assistance with your legal queries here.")
-        # Your existing functionality for Legal Query Assistant
+        # Functionality to handle legal queries using get_legal_advice, generate_suggested_questions etc.
         
     elif option == 'Oman Laws':
         st.title("Oman Laws")
         st.write("Access Oman laws and regulations.")
-        # Your existing functionality for Oman Laws
+        # Functionality to retrieve Oman laws using get_oman_laws, read_oman_law etc.
     
     elif option == 'Document Upload':
         st.title("Document Upload")
         st.write("Upload and process legal documents.")
-        # Functionality for Document Upload
+        # Handling file upload and document processing
         uploaded_file = st.file_uploader("Choose a file", type=['pdf', 'docx', 'txt'])
         if uploaded_file is not None:
             file_type = uploaded_file.name.split('.')[-1]
@@ -121,7 +121,7 @@ def main():
             elif file_type == 'txt':
                 content = read_txt(uploaded_file)
             st.write("File content processed successfully!")
-        
+    
     elif option == 'Legal Translation':
         st.title("Legal Translation")
         st.write("Translate legal documents.")
@@ -136,10 +136,11 @@ def main():
     elif option == 'FAQs':
         st.title("Frequently Asked Questions")
         st.write("Find answers to common legal questions.")
+        # Displaying FAQs
         st.write("- How do I get legal advice?")
         st.write("- What are Oman laws about privacy?")
         st.write("- How do I upload legal documents?")
-        # More FAQs
+        # More FAQs can be added here
 
 if __name__ == '__main__':
     main()
