@@ -1,3 +1,6 @@
+import fitz  # PyMuPDF
+import pytesseract
+from PIL import Image
 import streamlit as st
 import os
 import re
@@ -9,8 +12,24 @@ from deep_translator import GoogleTranslator
 from fpdf import FPDF
 import openai
 
+# Path to the Tesseract executable
+pytesseract.pytesseract.tesseract_cmd = r'C:\\Program Files\\Tesseract-OCR\\tesseract.exe'
+
 # Assuming you have a directory for templates
 TEMPLATE_DIR = "templates"
+
+def extract_text_from_pdf(pdf_path):
+    # Open the PDF file
+    pdf_document = fitz.open(pdf_path)
+    text = ""
+
+    for page_num in range(len(pdf_document)):
+        page = pdf_document.load_page(page_num)
+        pix = page.get_pixmap()
+        img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
+        text += pytesseract.image_to_string(img, lang='ara')
+
+    return text
 
 def main():
     st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
@@ -96,7 +115,7 @@ def process_uploaded_file(uploaded_file, lang_code):
         if file_type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
             return read_docx(uploaded_file)
         elif file_type == "application/pdf":
-            return read_pdf(uploaded_file)
+            return extract_text_from_pdf(uploaded_file)  # Use the new function for PDF handling
         elif file_type == "text/plain":
             return read_txt(uploaded_file)
         else:
