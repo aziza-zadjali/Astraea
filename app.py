@@ -18,7 +18,19 @@ pytesseract.pytesseract.tesseract_cmd = r'C:\\Program Files\\Tesseract-OCR\\tess
 # Assuming you have a directory for templates
 TEMPLATE_DIR = "templates"
 
+def save_uploaded_file(uploaded_file):
+    try:
+        with open(uploaded_file.name, "wb") as f:
+            f.write(uploaded_file.getbuffer())
+        return uploaded_file.name
+    except Exception as e:
+        st.error(f"Error saving file: {e}")
+        return None
+
 def extract_text_from_pdf(pdf_path):
+    if not os.path.exists(pdf_path):
+        raise FileNotFoundError(f"No such file: '{pdf_path}'")
+    
     # Open the PDF file
     pdf_document = fitz.open(pdf_path)
     text = ""
@@ -103,21 +115,23 @@ def legal_query_assistant(lang_code):
     else:
         uploaded_file = st.file_uploader("Upload a document" if lang_code == "en" else "قم بتحميل وثيقة", type=["docx", "pdf", "txt"], key="file_uploader")
         if uploaded_file:
-            document_text = process_uploaded_file(uploaded_file, lang_code)
-            if document_text:
-                suggested_questions = generate_suggested_questions(document_text, lang_code)
-                handle_document_queries(document_text, suggested_questions, lang_code)
+            saved_file_path = save_uploaded_file(uploaded_file)
+            if saved_file_path:
+                document_text = process_uploaded_file(saved_file_path, lang_code)
+                if document_text:
+                    suggested_questions = generate_suggested_questions(document_text, lang_code)
+                    handle_document_queries(document_text, suggested_questions, lang_code)
 
-def process_uploaded_file(uploaded_file, lang_code):
-    file_type = uploaded_file.type
+def process_uploaded_file(file_path, lang_code):
+    file_type = file_path.split('.')[-1]
     spinner_text = "Reading document..." if lang_code == "en" else "جاري قراءة الوثيقة..."
     with st.spinner(spinner_text):
-        if file_type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-            return read_docx(uploaded_file)
-        elif file_type == "application/pdf":
-            return extract_text_from_pdf(uploaded_file)  # Use the new function for PDF handling
-        elif file_type == "text/plain":
-            return read_txt(uploaded_file)
+        if file_type == "docx":
+            return read_docx(file_path)
+        elif file_type == "pdf":
+            return extract_text_from_pdf(file_path)  # Use the new function for PDF handling
+        elif file_type == "txt":
+            return read_txt(file_path)
         else:
             st.error("Unsupported file type." if lang_code == "en" else "نوع الملف غير مدعوم.")
             return None
@@ -185,17 +199,19 @@ def legal_translation_service(lang_code):
     uploaded_file = st.file_uploader(upload_text, type=["docx", "pdf", "txt"], key="translation_file_uploader")
     
     if uploaded_file:
-        document_text = process_uploaded_file(uploaded_file, lang_code)
-        if document_text:
-            if st.button("Translate to Arabic" if lang_code == 'en' else 'ترجمة إلى العربية', key="translate_button"):
-                translated_text = translate_to_arabic(document_text)
-                st.text_area("Translated Text", translated_text, height=300)
-                st.download_button(
-                    label="Download Arabic Translation" if lang_code == 'en' else 'تحميل الترجمة العربية',
-                    data=translated_text.encode('utf-8'),
-                    file_name="arabic_translation.txt",
-                    mime="text/plain"
-                )
+        saved_file_path = save_uploaded_file(uploaded_file)
+        if saved_file_path:
+            document_text = process_uploaded_file(saved_file_path, lang_code)
+            if document_text:
+                if st.button("Translate to Arabic" if lang_code == 'en' else 'ترجمة إلى العربية', key="translate_button"):
+                    translated_text = translate_to_arabic(document_text)
+                    st.text_area("Translated Text", translated_text, height=300)
+                    st.download_button(
+                        label="Download Arabic Translation" if lang_code == 'en' else 'تحميل الترجمة العربية',
+                        data=translated_text.encode('utf-8'),
+                        file_name="arabic_translation.txt",
+                        mime="text/plain"
+                    )
 
 def translate_to_arabic(text):
     translator = GoogleTranslator(source='auto', target='ar')
@@ -305,11 +321,13 @@ def grade_legal_document(lang_code):
     uploaded_file = st.file_uploader(upload_text, type=["docx", "pdf", "txt"], key="grade_file_uploader")
     
     if uploaded_file:
-        document_text = process_uploaded_file(uploaded_file, lang_code)
-        if document_text:
-            if st.button("Grade Document" if lang_code == "en" else "تقييم الوثيقة", key="grade_button"):
-                grade_result = get_document_grade(document_text, lang_code)
-                display_grade_result(grade_result, lang_code)
+        saved_file_path = save_uploaded_file(uploaded_file)
+        if saved_file_path:
+            document_text = process_uploaded_file(saved_file_path, lang_code)
+            if document_text:
+                if st.button("Grade Document" if lang_code == "en" else "تقييم الوثيقة", key="grade_button"):
+                    grade_result = get_document_grade(document_text, lang_code)
+                    display_grade_result(grade_result, lang_code)
 
 def get_document_grade(document_text, lang_code):
     prompt = {
