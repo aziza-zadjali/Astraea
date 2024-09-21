@@ -53,8 +53,15 @@ def main():
     }
     st.info(disclaimer[lang_code])
 
-    tabs = st.tabs(["Legal Query Assistant", "Oman Laws", "Legal Translation Service", "Automated Document Creation", "Grade Legal Document", "Predictive Case Analysis"])
-
+    # Define tab labels in both languages
+    tab_labels = {
+        "en": ["Legal Query Assistant", "Oman Laws", "Legal Translation Service", "Automated Document Creation", "Grade Legal Document", "Predictive Case Analysis"],
+        "ar": ["مساعد الاستفسارات القانونية", "قوانين عمان", "خدمة الترجمة القانونية", "إنشاء المستندات الآلي", "تقييم الوثيقة القانونية", "التحليل التنبؤي للقضايا"]
+    }
+    
+    # Create tabs using the appropriate language
+    tabs = st.tabs(tab_labels[lang_code])
+    
     with tabs[0]:
         legal_query_assistant(lang_code)
     with tabs[1]:
