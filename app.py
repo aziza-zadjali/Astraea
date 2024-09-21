@@ -17,7 +17,7 @@ def main():
 
     # Sidebar for language selection
     with st.sidebar:
-        st.image("logo.png", width=200)
+        st.image("logo.png", width=100)
         language = st.selectbox("Choose Language / اختر اللغة", ["English", "العربية"], key="language_select")
         lang_code = "en" if language == "English" else "ar"
 
