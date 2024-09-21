@@ -237,7 +237,7 @@ def process_query(query, context=None, lang_code="en"):
     with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
         try:
             # Split the context into smaller chunks if it exceeds the token limit
-            context_chunks = split_text_into_chunks(context, max_tokens=3000) if context else ["No additional context provided."]
+            context_chunks = split_text_into_chunks(context, max_tokens=2000) if context else ["No additional context provided."]
             
             responses = []
             for chunk in context_chunks:
@@ -265,7 +265,7 @@ def process_query(query, context=None, lang_code="en"):
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
 
-def split_text_into_chunks(text, max_tokens=3000):
+def split_text_into_chunks(text, max_tokens=2000):
     # Split the text into chunks of max_tokens length
     words = text.split()
     chunks = []
