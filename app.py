@@ -136,37 +136,46 @@ def oman_laws_feature(lang_code):
     st.header("Oman Laws" if lang_code == "en" else "قوانين عمان")
     laws = get_oman_laws()
     if laws:
-        law_select_text = "Select a law:" if lang_code == "en" else "اختر قانونًا:"
-        selected_law = st.selectbox(law_select_text, list(laws.keys()), key="select_law")
+        selected_law = st.selectbox(
+            "Select a law:" if lang_code == "en" else "اختر قانونًا:",
+            list(laws.keys()),
+            key="select_law"
+        )
         if selected_law:
             law_text = read_oman_law(laws[selected_law])
             if law_text:
                 st.success("Law loaded successfully!" if lang_code == "en" else "تم تحميل القانون بنجاح!")
                 
-                # Suggested questions section
-                st.subheader("Suggested Questions" if lang_code == "en" else "الأسئلة المقترحة")
-                suggested_questions = generate_suggested_questions(law_text, lang_code)
-                question_text = "Select a suggested question:" if lang_code == "en" else "اختر سؤالاً مقترحًا:"
-                selected_question = st.selectbox(question_text, [""] + suggested_questions, key="oman_law_selected_question")
-                submit_suggested = st.button("Submit Suggested Question" if lang_code == "en" else "إرسال السؤال المقترح", key="submit_oman_law_suggested_query")
+                query = st.text_input(
+                    "Enter your query about this law:" if lang_code == "en" else "أدخل استفسارك حول هذا القانون:",
+                    key="oman_law_query"
+                )
                 
-                if selected_question and submit_suggested:
-                    process_query(selected_question, law_text, lang_code)
-                
-                st.markdown("---")
-                
-                # Custom query section
-                st.subheader("Custom Query" if lang_code == "en" else "استفسار مخصص")
-                custom_query = st.text_input("Enter your custom query:" if lang_code == "en" else "أدخل استفسارك الخاص:", key="oman_law_custom_query")
-                submit_custom = st.button("Submit Custom Query" if lang_code == "en" else "إرسال الاستفسار الخاص", key="submit_oman_law_custom_query")
-                
-                if custom_query and submit_custom:
-                    process_query(custom_query, law_text, lang_code)
-            else:
-                st.error("Failed to read the selected law. Please try again or choose a different law." if lang_code == "en" else "فشل في قراءة القانون المحدد. يرجى المحاولة مرة أخرى أو اختيار قانون آخر.")
+                if query and st.button("Get Answer" if lang_code == "en" else "الحصول على إجابة"):
+                    concise_answer = get_concise_law_answer(query, law_text, lang_code)
+                    st.markdown("### Answer:")
+                    st.markdown(concise_answer)
     else:
         st.error("No laws found in the database directory." if lang_code == "en" else "لم يتم العثور على قوانين في دليل قاعدة البيانات.")
 
+def get_concise_law_answer(query, law_text, lang_code):
+    prompt = {
+        "en": f"Provide a concise answer to the following query about Oman law. Focus on the most relevant information and limit the response to 2-3 sentences:\n\nQuery: {query}\n\nLaw text: {law_text[:3000]}...",
+        "ar": f"قدم إجابة موجزة للاستفسار التالي حول قانون عمان. ركز على المعلومات الأكثر صلة وحدد الإجابة في 2-3 جمل:\n\nالاستفسار: {query}\n\nنص القانون: {law_text[:3000]}..."
+    }
+    
+    response = openai.ChatCompletion.create(
+        model="gpt-4o",
+        messages=[
+            {"role": "system", "content": "You are a concise legal advisor specializing in Oman law."},
+            {"role": "user", "content": prompt[lang_code]}
+        ],
+        max_tokens=150,
+        temperature=0.7
+    )
+    
+    return response.choices[0].message['content'].strip()
+    
 def legal_translation_service(lang_code):
     st.header("Legal Translation Service" if lang_code == 'en' else 'خدمة الترجمة القانونية')
     upload_text = 'Upload a document for translation to Arabic' if lang_code == 'en' else 'قم بتحميل وثيقة للترجمة إلى العربية'
