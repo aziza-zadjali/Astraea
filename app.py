@@ -414,7 +414,7 @@ def predictive_analysis_ui():
     * Relevant Law: Identify any relevant Oman laws, statutes, or regulations.
     * Jurisdiction: Specify the Oman city where the case is filed.
 
-    LexAI will provide a predictive analysis, outlining potential outcomes, strengths and weaknesses of the case, and relevant Oman case law.
+    Astraea will provide a predictive analysis, outlining potential outcomes, strengths and weaknesses of the case, and relevant Oman case law.
     ''')
 
     st.warning("Please do not upload files larger than 5MB as it may cause issues and consume all available tokens.")
