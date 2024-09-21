@@ -13,5 +13,3 @@ fpdf
 deep-translator
 PyPDF2
 langchain
-langchain_community
-langchain_openai
