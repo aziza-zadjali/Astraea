@@ -8,9 +8,6 @@ from utils.oman_laws import get_oman_laws, read_oman_law
 from deep_translator import GoogleTranslator
 from fpdf import FPDF
 import openai
-from langchain.memory import ConversationBufferMemory
-from langchain.chains import ConversationChain
-from langchain_openai import ChatOpenAI
 
 # Assuming you have a directory for templates
 TEMPLATE_DIR = "templates"
@@ -31,6 +28,15 @@ def main():
             <style>
             body {
                 direction: rtl;
+                text-align: right;
+            }
+            .css-1d391kg { /* Sidebar */
+                direction: rtl;
+                text-align: right;
+            }
+            .css-1v3fvcr { /* Main content */
+                direction: rtl;
+                text-align: right;
             }
             </style>
             """,
@@ -64,16 +70,7 @@ def main():
 
 def legal_query_assistant(lang_code):
     st.header("Legal Query Assistant" if lang_code == "en" else "مساعد الاستفسارات القانونية")
-
-    # Initialize memory and conversation chain
-    if 'memory' not in st.session_state:
-        st.session_state.memory = ConversationBufferMemory()
-        st.session_state.conversation = ConversationChain(
-            llm=ChatOpenAI(temperature=0.7),
-            memory=st.session_state.memory,
-            verbose=True
-        )
-
+    
     query_type = st.radio(
         "Choose query type" if lang_code == "en" else "اختر نوع الاستفسار",
         ('Enter your own query', 'Query from document') if lang_code == "en" else ('أدخل استفسارك الخاص', 'استفسر من وثيقة'),
@@ -92,15 +89,6 @@ def legal_query_assistant(lang_code):
                 suggested_questions = generate_suggested_questions(document_text, lang_code)
                 handle_document_queries(document_text, suggested_questions, lang_code)
 
-    # Display conversation history
-    st.subheader("Conversation History" if lang_code == "en" else "سجل المحادثة")
-    history = st.session_state.memory.chat_memory.messages
-    for message in history:
-        if message.type == 'human':
-            st.write("Human: " + message.content)
-        elif message.type == 'ai':
-            st.write("AI: " + message.content)
-
 def process_uploaded_file(uploaded_file, lang_code):
     file_type = uploaded_file.type
     spinner_text = "Reading document..." if lang_code == "en" else "جاري قراءة الوثيقة..."
@@ -117,23 +105,23 @@ def process_uploaded_file(uploaded_file, lang_code):
 
 def handle_document_queries(document_text, suggested_questions, lang_code):
     st.success("Document uploaded successfully!" if lang_code == "en" else "تم تحميل الوثيقة بنجاح!")
-
+    
     # Suggested questions section
     st.subheader("Suggested Questions" if lang_code == "en" else "الأسئلة المقترحة")
     question_text = "Select a suggested question:" if lang_code == "en" else "اختر سؤالاً مقترحًا:"
     selected_question = st.selectbox(question_text, [""] + suggested_questions, key="selected_question")
     submit_suggested = st.button("Submit Suggested Question" if lang_code == "en" else "إرسال السؤال المقترح", key="submit_suggested_query")
-
+    
     if selected_question and submit_suggested:
         process_query(selected_question, document_text, lang_code)
-
+    
     st.markdown("---")
-
+    
     # Custom query section
     st.subheader("Custom Query" if lang_code == "en" else "استفسار مخصص")
     custom_query = st.text_input("Enter your custom query:" if lang_code == "en" else "أدخل استفسارك الخاص:", key="custom_query")
     submit_custom = st.button("Submit Custom Query" if lang_code == "en" else "إرسال الاستفسار الخاص", key="submit_custom_query")
-
+    
     if custom_query and submit_custom:
         process_query(custom_query, document_text, lang_code)
 
@@ -196,8 +184,8 @@ def translate_to_arabic(text):
     
     # Prompt to maintain standard legal terms
     prompt = f"""
-    Please ensure that the following translation maintains standard legal terms in Arabic.
-    Use the appropriate legal terminology and consult legal glossaries if necessary.
+    Please ensure that the following translation maintains standard legal terms in Arabic. 
+    Use the appropriate legal terminology and consult legal glossaries if necessary. 
     The translation should be accurate, clear, and consistent with legal standards.
 
     Original Text: {text}
@@ -220,7 +208,6 @@ def translate_to_arabic(text):
 
 def automated_document_creation(lang_code):
     st.header("Automated Document Creation" if lang_code == "en" else "إنشاء المستندات الآلي")
-    
     # Get list of available templates
     templates = [f for f in os.listdir(TEMPLATE_DIR) if f.endswith('.txt')]
     selected_template = st.selectbox(
@@ -234,7 +221,6 @@ def automated_document_creation(lang_code):
             template_content = file.read()
         
         placeholders = extract_placeholders(template_content)
-        
         st.subheader("Fill in the details:" if lang_code == "en" else "املأ التفاصيل:")
         inputs = {}
         for i, placeholder in enumerate(placeholders):
@@ -255,6 +241,7 @@ def automated_document_creation(lang_code):
             )
 
 def extract_placeholders(template_content):
+    import re
     return re.findall(r'\{(\w+)\}', template_content)
 
 def fill_template(template_content, inputs):
@@ -267,13 +254,14 @@ def process_query(query, context=None, lang_code="en"):
         try:
             # Split the context into smaller chunks if it exceeds the token limit
             context_chunks = split_text_into_chunks(context, max_tokens=3000) if context else ["No additional context provided."]
-            responses = []
             
+            responses = []
             for chunk in context_chunks:
                 prompt = {
                     "en": f"Provide a clear and direct answer to the following legal query. Avoid ambiguity and ensure the response is certain:\n\nQuery: {query}\n\nContext: {chunk}",
                     "ar": f"قدم إجابة واضحة ومباشرة للاستفسار القانوني التالي. تجنب الغموض وتأكد من أن الإجابة مؤكدة:\n\nالاستفسار: {query}\n\nالسياق: {chunk}"
                 }
+                
                 response = openai.ChatCompletion.create(
                     model="gpt-4o",
                     messages=[
@@ -283,8 +271,9 @@ def process_query(query, context=None, lang_code="en"):
                     max_tokens=1000,
                     temperature=0.7
                 )
+                
                 responses.append(response.choices[0].message['content'].strip())
-
+            
             # Combine the responses from all chunks
             final_response = "\n\n".join(responses)
             st.markdown("### Response:")
@@ -298,7 +287,7 @@ def split_text_into_chunks(text, max_tokens=3000):
     chunks = []
     current_chunk = []
     current_length = 0
-
+    
     for word in words:
         current_length += len(word) + 1  # +1 for the space
         if current_length > max_tokens:
@@ -307,17 +296,18 @@ def split_text_into_chunks(text, max_tokens=3000):
             current_length = len(word) + 1
         else:
             current_chunk.append(word)
-
+    
     if current_chunk:
         chunks.append(" ".join(current_chunk))
-
+    
     return chunks
 
 def grade_legal_document(lang_code):
     st.header("Grade Legal Document" if lang_code == "en" else "تقييم الوثيقة القانونية")
+    
     upload_text = "Upload a legal document to grade" if lang_code == "en" else "قم بتحميل وثيقة قانونية للتقييم"
     uploaded_file = st.file_uploader(upload_text, type=["docx", "pdf", "txt"], key="grade_file_uploader")
-
+    
     if uploaded_file:
         document_text = process_uploaded_file(uploaded_file, lang_code)
         if document_text:
@@ -350,6 +340,7 @@ def display_grade_result(grade_result, lang_code):
 def analyze_case_for_prediction(case_details: str) -> Dict[str, Any]:
     chunks = split_text_into_chunks(case_details)
     full_analysis = ""
+
     for i, chunk in enumerate(chunks):
         analysis_prompt = f"""
         Analyze the following case details (part {i+1}/{len(chunks)}) in the context of the Oman legal system and provide a predictive analysis.
@@ -370,9 +361,11 @@ def analyze_case_for_prediction(case_details: str) -> Dict[str, Any]:
 
         Please maintain a neutral and objective tone throughout your analysis. The goal is to provide a realistic assessment of the case, not to advocate for a particular side.
         """
+
         try:
             chunk_analysis = get_ai_response(analysis_prompt)
             full_analysis += chunk_analysis + "\n\n"
+
         except Exception as e:
             return {"error": f"Error analyzing case (part {i+1}): {str(e)}"}
 
@@ -406,6 +399,7 @@ def predictive_analysis_ui():
     st.subheader("Predictive Case Analysis")
     st.write('''
     Enter the details of your case, including:
+
     * Facts: Briefly describe the key events that led to the legal dispute.
     * Legal Issues: State the specific legal questions or claims in the case.
     * Relevant Law: Identify any relevant Oman laws, statutes, or regulations.
@@ -413,11 +407,12 @@ def predictive_analysis_ui():
 
     LexAI will provide a predictive analysis, outlining potential outcomes, strengths and weaknesses of the case, and relevant Oman case law.
     ''')
+
     st.warning("Please do not upload files larger than 5MB as it may cause issues and consume all available tokens.")
 
     input_method = st.radio("Choose input method:", ("Text Input", "Document Upload"))
+    
     case_details = ""
-
     if input_method == "Text Input":
         case_details = st.text_area("Enter case details:", height=200)
     else:
@@ -429,12 +424,14 @@ def predictive_analysis_ui():
         if case_details:
             with st.spinner("Analyzing your case..."):
                 analysis_results = analyze_case_for_prediction(case_details)
+
             st.write("### Case Analysis")
             if "error" in analysis_results:
                 st.error(analysis_results["error"])
             else:
                 analysis = analysis_results.get("analysis", "No analysis available.")
                 st.write(analysis)
+
                 # Download button for analysis
                 st.download_button(
                     label="Download Analysis",
