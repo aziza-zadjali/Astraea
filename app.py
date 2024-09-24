@@ -49,10 +49,13 @@ def main():
             padding: 10px 20px;
             border-radius: 5px;
         }
+        .stTabs [data-baseweb="tab-list"] button:hover [data-testid="stMarkdownContainer"] {
+            background-color: #0000FF;
+            color: white;
+        }
         .stTabs [data-baseweb="tab-list"] button[aria-selected="true"] [data-testid="stMarkdownContainer"] {
             background-color: #0000FF;
             color: white;
-            border-bottom: none;
         }
         .stTabs [data-baseweb="tab-list"] button[aria-selected="true"] [data-testid="stMarkdownContainer"] p {
             color: white;
