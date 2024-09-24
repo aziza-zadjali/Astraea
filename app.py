@@ -136,7 +136,6 @@ def main():
     with tabs[5]:
         predictive_analysis_ui()
 
-import streamlit as st
 
 def legal_query_assistant(lang_code):
     st.header("Legal Query Assistant" if lang_code == "en" else "مساعد الاستفسارات القانونية")
@@ -144,7 +143,11 @@ def legal_query_assistant(lang_code):
     # Custom CSS for radio button color
     st.markdown("""
         <style>
-        div[role='radiogroup'] > label > div:first-child {
+        div[role='radiogroup'] label div[data-testid='stMarkdownContainer'] {
+            display: flex;
+            align-items: center;
+        }
+        div[role='radiogroup'] label div[data-testid='stMarkdownContainer'] > div:first-child {
             background-color: #008080 !important; /* Teal color */
             border: 2px solid #008080 !important; /* Teal border */
         }
@@ -159,7 +162,7 @@ def legal_query_assistant(lang_code):
         </style>
     """, unsafe_allow_html=True)
 
-    # Move the query type selection to the top and align vertically
+    # Query type selection
     query_type = st.radio(
         "Choose query type" if lang_code == "en" else "اختر نوع الاستفسار",
         ('Enter your own query', 'Query from document') if lang_code == "en" else ('أدخل استفسارك الخاص', 'استفسر من وثيقة'),
@@ -177,7 +180,8 @@ def legal_query_assistant(lang_code):
             if document_text:
                 suggested_questions = generate_suggested_questions(document_text, lang_code)
                 handle_document_queries(document_text, suggested_questions, lang_code)
-                
+
+
 def process_uploaded_file(uploaded_file, lang_code):
     file_type = uploaded_file.type
     spinner_text = "Reading document..." if lang_code == "en" else "جاري قراءة الوثيقة..."
