@@ -15,27 +15,28 @@ TEMPLATE_DIR = "templates"
 def main():
     st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
 
-    # Language selection
-    col1, col2 = st.columns([3, 1])
-    with col1:
-        st.title("Astraea - Legal Query Assistant")
-    with col2:
-        language = st.selectbox(
-            "",
-            ["English", "عربي"],
-            index=0 if st.session_state.get('language', 'en') == 'en' else 1,
-            key="language_select_main"
-        )
-    
-    # Set the language based on selection
-    lang_code = "en" if language == "English" else "ar"
-    st.session_state['language'] = lang_code
+    # Fixed position for language selection
+    st.markdown(
+        """
+        <style>
+        #language-selector {
+            position: fixed;
+            top: 0.5rem;
+            right: 1rem;
+            z-index: 1000;
+            cursor: pointer;
+        }
+        #language-selector:hover {
+            opacity: 0.8;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
 
-    # Sidebar for language selection
-    with st.sidebar:
-        st.image("logo.png", width=100)
-        language = st.selectbox("Choose Language / اختر اللغة", ["English", "العربية"], key="language_select")
-        lang_code = "en" if language == "English" else "ar"
+    # Language selection
+    language = st.selectbox("Choose Language / اختر اللغة", ["English", "العربية"], key="language_select")
+    lang_code = "en" if language == "English" else "ar"
 
     # Inject custom CSS for RTL layout, font sizes, and tab styling
     st.markdown(
@@ -92,16 +93,6 @@ def main():
         .stRadio [role="radiogroup"] {{
             flex-direction: column; /* Align vertically */
             align-items: flex-start; /* Align to the left */
-        }}
-        #language-selector {{
-            position: fixed;
-            top: 0.5rem;
-            right: 1rem;
-            z-index: 1000;
-            cursor: pointer;
-        }}
-        #language-selector:hover {{
-            opacity: 0.8;
         }}
         </style>
         """,
@@ -161,7 +152,7 @@ def legal_query_assistant(lang_code):
             if document_text:
                 suggested_questions = generate_suggested_questions(document_text, lang_code)
                 handle_document_queries(document_text, suggested_questions, lang_code)
-                
+
 def process_uploaded_file(uploaded_file, lang_code):
     file_type = uploaded_file.type
     spinner_text = "Reading document..." if lang_code == "en" else "جاري قراءة الوثيقة..."
@@ -178,23 +169,23 @@ def process_uploaded_file(uploaded_file, lang_code):
 
 def handle_document_queries(document_text, suggested_questions, lang_code):
     st.success("Document uploaded successfully!" if lang_code == "en" else "تم تحميل الوثيقة بنجاح!")
-    
+
     # Suggested questions section
     st.subheader("Suggested Questions" if lang_code == "en" else "الأسئلة المقترحة")
     question_text = "Select a suggested question:" if lang_code == "en" else "اختر سؤالاً مقترحًا:"
     selected_question = st.selectbox(question_text, [""] + suggested_questions, key="selected_question")
     submit_suggested = st.button("Submit Suggested Question" if lang_code == "en" else "إرسال السؤال المقترح", key="submit_suggested_query")
-    
+
     if selected_question and submit_suggested:
         process_query(selected_question, document_text, lang_code)
-    
+
     st.markdown("---")
-    
+
     # Custom query section
     st.subheader("Custom Query" if lang_code == "en" else "استفسار مخصص")
     custom_query = st.text_input("Enter your custom query:" if lang_code == "en" else "أدخل استفسارك الخاص:", key="custom_query")
     submit_custom = st.button("Submit Custom Query" if lang_code == "en" else "إرسال الاستفسار الخاص", key="submit_custom_query")
-    
+
     if custom_query and submit_custom:
         process_query(custom_query, document_text, lang_code)
 
