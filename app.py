@@ -15,75 +15,55 @@ TEMPLATE_DIR = "templates"
 def main():
     st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
 
-    # Sidebar for language selection
-    with st.sidebar:
-        st.image("logo.png", width=100)
-        language = st.selectbox("Choose Language / اختر اللغة", ["English", "العربية"], key="language_select")
-        lang_code = "en" if language == "English" else "ar"
-
-    # Inject custom CSS for RTL layout, font sizes, and tab styling
-    st.markdown(
-        f"""
+    # Add custom CSS for the language selector icon
+    st.markdown("""
         <style>
-        html, body, [class*="css"] {{
-            font-size: 16px;
-            direction: {"rtl" if lang_code == "ar" else "ltr"};
-        }}
-        h1 {{
-            font-size: 2rem;
-        }}
-        h2 {{
-            font-size: 1.5rem;
-        }}
-        h3 {{
-            font-size: 1.17rem;
-        }}
-        .stTabs [data-baseweb="tab-list"] button [data-testid="stMarkdownContainer"] p {{
-            font-size: 1rem;
-        }}
-        .stTextArea>div>div>textarea {{
-            font-size: 1rem;
-        }}
-        .stSelectbox>div>div>div {{
-            font-size: 1rem;
-        }}
-        .stRadio [role="radiogroup"] {{
-            font-size: 1rem;
-        }}
-        .stTabs [data-baseweb="tab-list"] {{
-            gap: 8px;
-        }}
-        .stTabs [data-baseweb="tab"] {{
-            height: auto;
-            white-space: pre-wrap;
-            background-color: #F0F2F6;
-            border-radius: 4px 4px 0 0;
-            gap: 1rem;
-            padding: 10px 20px;
-        }}
-        .stTabs [data-baseweb="tab"]:hover {{
-            background-color: #008080;
-            color: white;
-        }}
-        .stTabs [data-baseweb="tab"][aria-selected="true"] {{
-            background-color: #008080;
-            color: white;
-        }}
-        .stTabs [data-baseweb="tab-list"] button:focus {{
-            box-shadow: none;
-        }}
-        .stTabs [data-baseweb="tab-highlight"] {{
-            background-color: transparent;
-        }}
-        .stTabs [data-baseweb="tab-border"] {{
-            display: none;
-        }}
+        #language-selector {
+            position: fixed;
+            top: 0.5rem;
+            right: 1rem;
+            z-index: 1000;
+            cursor: pointer;
+        }
+        #language-selector:hover {
+            opacity: 0.8;
+        }
         </style>
-        """,
-        unsafe_allow_html=True
-    )
+    """, unsafe_allow_html=True)
 
-    
+    # Add the language selector icon
+    st.markdown("""
+        <div id="language-selector">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="2" y1="12" x2="22" y2="12"></line>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+            </svg>
+        </div>
+    """, unsafe_allow_html=True)
+
+    # Use session state to store the selected language
+    if 'language' not in st.session_state:
+        st.session_state.language = 'English'
+
+    # Language selection logic
+    if st.button('Change Language', key='change_language'):
+        st.session_state.language = 'English' if st.session_state.language == 'العربية' else 'العربية'
+
+    lang_code = "en" if st.session_state.language == "English" else "ar"
+
+    # Inject custom CSS for RTL layout if Arabic is selected
+    if lang_code == "ar":
+        st.markdown(
+            """
+            <style>
+            body {
+                direction: rtl;
+            }
+            </style>
+            """,
+            unsafe_allow_html=True
+        )
 
     # Main content with tabs
     title = "Astraea - Legal Query Assistant" if lang_code == "en" else "أسترايا - مساعد الاستفسارات القانونية"
@@ -116,6 +96,7 @@ def main():
         grade_legal_document(lang_code)
     with tabs[5]:
         predictive_analysis_ui()
+
 
 def legal_query_assistant(lang_code):
     st.header("Legal Query Assistant" if lang_code == "en" else "مساعد الاستفسارات القانونية")
