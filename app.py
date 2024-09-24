@@ -15,29 +15,37 @@ TEMPLATE_DIR = "templates"
 def main():
     st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
 
-    # Sidebar for language selection
-    with st.sidebar:
-        st.image("logo.png", width=100)
-        language = st.selectbox("Choose Language / اختر اللغة", ["English", "العربية"], key="language_select")
-        lang_code = "en" if language == "English" else "ar"
-
-    # Inject custom CSS for RTL layout if Arabic is selected
-    if lang_code == "ar":
-        st.markdown(
-            """
-            <style>
-            body {
-                direction: rtl;
-            }
-            </style>
-            """,
-            unsafe_allow_html=True
-        )
-
-# Inject custom CSS for tab and radio button colors
+    # Inject custom CSS for RTL layout if Arabic is selected and add font size changes
     st.markdown(
         """
         <style>
+        html, body, [class*="css"] {
+            font-size: 16px;
+        }
+        h1 {
+            font-size: 2rem;
+        }
+        h2 {
+            font-size: 1.5rem;
+        }
+        h3 {
+            font-size: 1.17rem;
+        }
+        .stTabs [data-baseweb="tab-list"] button [data-testid="stMarkdownContainer"] p {
+            font-size: 1rem;
+        }
+        .stTextArea>div>div>textarea {
+            font-size: 1rem;
+        }
+        .stSelectbox>div>div>div {
+            font-size: 1rem;
+        }
+        .stRadio [role="radiogroup"] {
+            font-size: 1rem;
+        }
+        body {
+            direction: rtl;
+        }
         .stTabs [data-baseweb="tab-list"] {
             gap: 8px;
         }
@@ -74,6 +82,7 @@ def main():
         """,
         unsafe_allow_html=True
     )
+
     
 
     # Main content with tabs
