@@ -13,6 +13,7 @@ import openai
 TEMPLATE_DIR = "templates"
 
 
+
 def main():
     st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
 
@@ -22,7 +23,7 @@ def main():
         language = st.selectbox("Choose Language / اختر اللغة", ["English", "العربية"], key="language_select")
         lang_code = "en" if language == "English" else "ar"
 
-    # Inject custom CSS for RTL layout, font sizes, tab styling, and radio button color
+    # Inject custom CSS for RTL layout, font sizes, and tab styling
     st.markdown(
         f"""
         <style>
@@ -74,18 +75,10 @@ def main():
         .stSelectbox>div>div>div {{
             font-size: 1rem;
         }}
-        
-        /* Custom radio button color */
-        div.row-widget.stRadio > div > label > div:first-child input[type='radio']:checked + div {
-            background-color: #008080; /* Teal color */
-            border-color: #008080; /* Teal border */
-        }
-        
         .stRadio [role="radiogroup"] {{
             flex-direction: column; /* Align vertically */
             align-items: flex-start; /* Align to the left */
         }}
-        
         #language-selector {{
             position: fixed;
             top: 0.5rem;
@@ -93,11 +86,9 @@ def main():
             z-index: 1000;
             cursor: pointer;
         }}
-        
         #language-selector:hover {{
             opacity: 0.8;
         }}
-        
         </style>
         """,
         unsafe_allow_html=True
@@ -156,8 +147,6 @@ def legal_query_assistant(lang_code):
             if document_text:
                 suggested_questions = generate_suggested_questions(document_text, lang_code)
                 handle_document_queries(document_text, suggested_questions, lang_code)
-
-
                 
 def process_uploaded_file(uploaded_file, lang_code):
     file_type = uploaded_file.type
