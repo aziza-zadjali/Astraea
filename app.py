@@ -15,16 +15,22 @@ TEMPLATE_DIR = "templates"
 def main():
     st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
 
-    # Fixed position for language selection
+    # Fixed position for logo and language selection
     st.markdown(
         """
         <style>
+        #header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            background-color: #F0F2F6;
+            border-bottom: 1px solid #E0E0E0;
+        }
+        #logo {
+            width: 100px;
+        }
         #language-selector {
-            position: fixed;
-            top: 0.5rem;
-            right: 1rem;
-            z-index: 1000;
-            cursor: pointer;
             width: 120px; /* Adjust the width as needed */
         }
         #language-selector:hover {
@@ -38,6 +44,23 @@ def main():
             padding: 2px 5px; /* Adjust padding for better fit */
         }
         </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+    # Header with logo and language selection
+    st.markdown(
+        """
+        <div id="header">
+            <img id="logo" src="logo.png" alt="Logo">
+            <div id="language-selector">
+                <label for="language_select">Choose Language / اختر اللغة</label>
+                <select id="language_select" name="language_select">
+                    <option value="en">English</option>
+                    <option value="ar">العربية</option>
+                </select>
+            </div>
+        </div>
         """,
         unsafe_allow_html=True
     )
