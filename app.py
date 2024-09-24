@@ -12,44 +12,119 @@ import openai
 # Assuming you have a directory for templates
 TEMPLATE_DIR = "templates"
 
-
 def main():
     st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
 
-    # Fixed position for language selection
+    # Fixed position for logo and language selection
     st.markdown(
         """
         <style>
-        .language-select {
-            position: fixed;
-            top: 0;
-            right: 0;
-            z-index: 1000;
-            background-color: white;
-            padding: 10px;
-            border-bottom-left-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        #header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            background-color: #F0F2F6;
+            border-bottom: 1px solid #E0E0E0;
+        }
+        #logo {
+            width: 100px;
+        }
+        #language-selector {
+            width: 120px; /* Adjust the width as needed */
+        }
+        #language-selector:hover {
+            opacity: 0.8;
+        }
+        .stSelectbox>div>div>div {
+            background-color: #008080; /* Theme color */
+            color: white; /* Text color */
+        }
+        .stSelectbox>div>div>div>div {
+            padding: 2px 5px; /* Adjust padding for better fit */
         }
         </style>
         """,
         unsafe_allow_html=True
     )
 
-    # Language selection
-    with st.container():
-        st.markdown('<div class="language-select">', unsafe_allow_html=True)
-        language = st.selectbox("Choose Language / اختر اللغة", ["English", "العربية"], key="language_select")
-        st.markdown('</div>', unsafe_allow_html=True)
+    # Header with logo and language selection
+    st.markdown(
+        """
+        <div id="header">
+            <img id="logo" src="logo.png" alt="Logo">
+            <div id="language-selector">
+                <label for="language_select">Choose Language / اختر اللغة</label>
+                <select id="language_select" name="language_select">
+                    <option value="en">English</option>
+                    <option value="ar">العربية</option>
+                </select>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
+    # Language selection
+    language = st.selectbox("Choose Language / اختر اللغة", ["English", "العربية"], key="language_select")
     lang_code = "en" if language == "English" else "ar"
 
     # Inject custom CSS for RTL layout, font sizes, and tab styling
     st.markdown(
         f"""
         <style>
-        body {{ direction: {"rtl" if lang_code == "ar" else "ltr"}; }}
-        .stTab {{ font-size: 18px; }}
-        .stMarkdown {{ font-size: 16px; }}
+        html, body, [class*="css"] {{
+            font-size: 16px;
+            direction: {"rtl" if lang_code == "ar" else "ltr"};
+        }}
+        h1 {{
+            font-size: 2rem;
+        }}
+        h2 {{
+            font-size: 1.5rem;
+        }}
+        h3 {{
+            font-size: 1.17rem;
+        }}
+        .stTabs [data-baseweb="tab-list"] {{
+            gap: 8px;
+        }}
+        .stTabs [data-baseweb="tab"] {{
+            height: auto;
+            white-space: pre-wrap;
+            background-color: #F0F2F6;
+            border-radius: 4px 4px 0 0;
+            gap: 1rem;
+            padding: 10px 20px;
+            font-size: 1rem;
+        }}
+        .stTabs [data-baseweb="tab"]:hover {{
+            background-color: #008080;
+            color: white;
+        }}
+        .stTabs [data-baseweb="tab"][aria-selected="true"] {{
+            background-color: #008080;
+            color: white;
+        }}
+        .stTabs [data-baseweb="tab-list"] button:focus {{
+            box-shadow: none;
+        }}
+        .stTabs [data-baseweb="tab-highlight"] {{
+            background-color: transparent;
+        }}
+        .stTabs [data-baseweb="tab-border"] {{
+            display: none;
+        }}
+        .stTextArea>div>div>textarea {{
+            font-size: 1rem;
+        }}
+        .stSelectbox>div>div>div {{
+            font-size: 1rem;
+        }}
+        .stRadio [role="radiogroup"] {{
+            flex-direction: column; /* Align vertically */
+            align-items: flex-start; /* Align to the left */
+        }}
         </style>
         """,
         unsafe_allow_html=True
@@ -122,6 +197,7 @@ def process_uploaded_file(uploaded_file, lang_code):
         else:
             st.error("Unsupported file type." if lang_code == "en" else "نوع الملف غير مدعوم.")
             return None
+
 
 def handle_document_queries(document_text, suggested_questions, lang_code):
     st.success("Document uploaded successfully!" if lang_code == "en" else "تم تحميل الوثيقة بنجاح!")
