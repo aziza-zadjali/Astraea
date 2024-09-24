@@ -12,6 +12,8 @@ import openai
 # Assuming you have a directory for templates
 TEMPLATE_DIR = "templates"
 
+import streamlit as st
+
 def main():
     st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
 
@@ -75,9 +77,9 @@ def main():
         }}
 
         /* Custom radio button color */
-        div[role='radiogroup'] input[type='radio']:checked + div > div {
-            background-color: #008080; /* Teal color */
-            border-color: #008080; /* Teal border */
+        div[role='radiogroup'] input[type='radio']:checked + div {
+            background-color: #008080 !important; /* Teal color */
+            border-color: #008080 !important; /* Teal border */
         }
 
         .stRadio [role="radiogroup"] {{
@@ -137,6 +139,20 @@ def main():
 def legal_query_assistant(lang_code):
     st.header("Legal Query Assistant" if lang_code == "en" else "مساعد الاستفسارات القانونية")
 
+    # Custom CSS for radio button color
+    st.markdown("""
+        <style>
+        div[role='radiogroup'] input[type='radio']:checked + div {
+            background-color: #008080 !important; /* Teal color */
+            border-color: #008080 !important; /* Teal border */
+        }
+        .stRadio [role="radiogroup"] {
+            flex-direction: column; /* Align vertically */
+            align-items: flex-start; /* Align to the left */
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
     # Move the query type selection to the top and align vertically
     query_type = st.radio(
         "Choose query type" if lang_code == "en" else "اختر نوع الاستفسار",
@@ -155,6 +171,7 @@ def legal_query_assistant(lang_code):
             if document_text:
                 suggested_questions = generate_suggested_questions(document_text, lang_code)
                 handle_document_queries(document_text, suggested_questions, lang_code)
+                
 
 
 def process_uploaded_file(uploaded_file, lang_code):
