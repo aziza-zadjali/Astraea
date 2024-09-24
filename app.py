@@ -15,7 +15,26 @@ TEMPLATE_DIR = "templates"
 def main():
     st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
 
-    # Inject custom CSS for tab and radio button colors
+    # Sidebar for language selection
+    with st.sidebar:
+        st.image("logo.png", width=100)
+        language = st.selectbox("Choose Language / اختر اللغة", ["English", "العربية"], key="language_select")
+        lang_code = "en" if language == "English" else "ar"
+
+    # Inject custom CSS for RTL layout if Arabic is selected
+    if lang_code == "ar":
+        st.markdown(
+            """
+            <style>
+            body {
+                direction: rtl;
+            }
+            </style>
+            """,
+            unsafe_allow_html=True
+        )
+
+# Inject custom CSS for tab and radio button colors
     st.markdown(
         """
         <style>
