@@ -12,6 +12,8 @@ import openai
 # Assuming you have a directory for templates
 TEMPLATE_DIR = "templates"
 
+
+
 def main():
     st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
 
@@ -74,9 +76,8 @@ def main():
             font-size: 1rem;
         }}
         .stRadio [role="radiogroup"] {{
-            font-size: 1rem;
-            align-items: center;
-            justify-content: center;
+            flex-direction: column; /* Align vertically */
+            align-items: flex-start; /* Align to the left */
         }}
         #language-selector {{
             position: fixed;
@@ -128,28 +129,6 @@ def main():
 def legal_query_assistant(lang_code):
     st.header("Legal Query Assistant" if lang_code == "en" else "مساعد الاستفسارات القانونية")
 
-    # Custom CSS for vertically aligned radio buttons
-    st.markdown("""
-        <style>
-        div.row-widget.stRadio > div {
-            flex-direction: column;
-            align-items: flex-start;
-        }
-        div.row-widget.stRadio > div > label {
-            padding: 10px 0;
-            width: 100%;
-            background-color: #f0f2f6;
-            border-radius: 5px;
-            margin-bottom: 10px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        div.row-widget.stRadio > div > label:hover {
-            background-color: #e0e2e6;
-        }
-        </style>
-    """, unsafe_allow_html=True)
-
     # Move the query type selection to the top and align vertically
     query_type = st.radio(
         "Choose query type" if lang_code == "en" else "اختر نوع الاستفسار",
@@ -157,7 +136,6 @@ def legal_query_assistant(lang_code):
         key="query_type"
     )
 
-    # Rest of the function remains the same
     if query_type in ['Enter your own query', 'أدخل استفسارك الخاص']:
         query = st.text_input("Enter your legal query:" if lang_code == "en" else "أدخل استفسارك القانوني:", key="legal_query")
         if query and st.button("Submit" if lang_code == "en" else "إرسال", key="submit_legal_query"):
