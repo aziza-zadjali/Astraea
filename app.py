@@ -25,7 +25,7 @@ def main():
             right: 1rem;
             z-index: 1000;
             cursor: pointer;
-            width: 150px; /* Adjust the width as needed */
+            width: 120px; /* Adjust the width as needed */
         }
         #language-selector:hover {
             opacity: 0.8;
@@ -35,7 +35,7 @@ def main():
             color: white; /* Text color */
         }
         .stSelectbox>div>div>div>div {
-            padding: 5px 10px; /* Adjust padding for better fit */
+            padding: 2px 5px; /* Adjust padding for better fit */
         }
         </style>
         """,
@@ -196,7 +196,7 @@ def handle_document_queries(document_text, suggested_questions, lang_code):
 
     if custom_query and submit_custom:
         process_query(custom_query, document_text, lang_code)
-
+                           
 def oman_laws_feature(lang_code):
     st.header("Oman Laws" if lang_code == "en" else "قوانين عمان")
     laws = get_oman_laws()
