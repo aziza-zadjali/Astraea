@@ -25,19 +25,12 @@ def main():
     if lang_code == "ar":
         st.markdown('<style>body { direction: rtl; }</style>', unsafe_allow_html=True)
 
-    # Inject custom CSS for RTL layout, font sizes, and tab styling
+    # Inject custom CSS for tab and radio button colors
     st.markdown(
         """
         <style>
         html, body, [class*="css"] {
             font-size: 16px;
-            direction: ltr;
-        }
-        [data-testid="stSidebar"] {
-            direction: ltr;
-        }
-        .rtl {
-            direction: rtl;
         }
         h1 {
             font-size: 2rem;
@@ -98,19 +91,15 @@ def main():
         #language-selector:hover {
             opacity: 0.8;
         }
-        div.row-widget.stRadio > div {
-            flex-direction: column;
-            align-items: flex-start;
-        }
-        div.row-widget.stRadio > div > label {
-            padding: 5px 0;
-        }
         </style>
         """,
         unsafe_allow_html=True
     )
 
-   
+    # Main content with tabs
+    title = "Astraea - Legal Query Assistant" if lang_code == "en" else "أسترايا - مساعد الاستفسارات القانونية"
+    st.title(title)
+
     disclaimer = {
         "en": "This assistant uses GPT-4.0 to provide general legal information. Please note that this is not a substitute for professional legal advice.",
         "ar": "يستخدم هذا المساعد نموذج GPT-4.0 لتقديم معلومات قانونية عامة. يرجى ملاحظة أن هذا ليس بديلاً عن المشورة القانونية المهنية."
@@ -139,11 +128,25 @@ def main():
     with tabs[5]:
         predictive_analysis_ui()
 
-
 def legal_query_assistant(lang_code):
     st.header("Legal Query Assistant" if lang_code == "en" else "مساعد الاستفسارات القانونية")
 
-    # Move the query type selection to the top
+    # Custom CSS for left-aligned radio buttons
+    st.markdown("""
+        <style>
+        div.row-widget.stRadio > div {
+            flex-direction: row;
+            justify-content: flex-start;
+        }
+        div.row-widget.stRadio > div > label {
+            padding: 0 15px 0 0;
+            min-width: 200px;
+            white-space: nowrap;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+    # Move the query type selection to the top and align left
     query_type = st.radio(
         "Choose query type" if lang_code == "en" else "اختر نوع الاستفسار",
         ('Enter your own query', 'Query from document') if lang_code == "en" else ('أدخل استفسارك الخاص', 'استفسر من وثيقة'),
