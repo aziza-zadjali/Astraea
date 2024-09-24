@@ -66,16 +66,39 @@ def set_custom_css():
         border: 1px solid #ced4da;
         border-radius: 4px;
         padding: 0.5rem;
-    }
-    
+    }    
     .stSelectbox > div > div > select {
         background-color: #f8f9fa;
         border: 1px solid #ced4da;
         border-radius: 4px;
         padding: 0.5rem;
     }
+    .stAlert {
+        background-color: #f0f2f6;
+        color: #31333F;
+        border: none;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    .stAlert > div {
+        color: #31333F;
+        font-size: 14px;
+    }
+    .stException, .stError {
+        background-color: #FFF0F0;
+        color: #5F1F1F;
+    }
+    .stWarning {
+        background-color: #FFFAEB;
+        color: #74480F;
+    }
+    .stInfo {
+        background-color: #EEF6FF;
+        color: #1D4ED8;
+    }
     </style>
     """, unsafe_allow_html=True)
+
 
 def main():
     st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
