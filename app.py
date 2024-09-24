@@ -34,7 +34,7 @@ def main():
             unsafe_allow_html=True
         )
 
-    # Inject custom CSS for tab and radio button colors
+   # Inject custom CSS for tab and radio button colors
     st.markdown(
         """
         <style>
@@ -47,18 +47,21 @@ def main():
         .stTabs [data-baseweb="tab-list"] button [data-testid="stMarkdownContainer"] {
             background-color: #F0F2F6;
             padding: 10px 20px;
-            border-radius: 5px;
+            border-radius: 5px 5px 0 0;
         }
         .stTabs [data-baseweb="tab-list"] button:hover [data-testid="stMarkdownContainer"] {
-            background-color: #0000FF;
+            background-color: #008080;
             color: white;
         }
         .stTabs [data-baseweb="tab-list"] button[aria-selected="true"] [data-testid="stMarkdownContainer"] {
-            background-color: #0000FF;
+            background-color: #008080;
             color: white;
         }
         .stTabs [data-baseweb="tab-list"] button[aria-selected="true"] [data-testid="stMarkdownContainer"] p {
             color: white;
+        }
+        .stTabs [data-baseweb="tab"] {
+            border-top: 2px solid #008080;
         }
         .stRadio [role="radiogroup"] {
             align-items: center;
