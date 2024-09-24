@@ -98,6 +98,13 @@ def main():
         #language-selector:hover {
             opacity: 0.8;
         }
+        div.row-widget.stRadio > div {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        div.row-widget.stRadio > div > label {
+            padding: 5px 0;
+        }
         </style>
         """,
         unsafe_allow_html=True
