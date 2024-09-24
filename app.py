@@ -1,34 +1,30 @@
-import streamlit as st
-import os
-import re
-from typing import Dict, Any
-from utils.document_processing import read_docx, read_pdf, read_txt, preprocess_arabic_text, format_response
-from utils.legal_advice import get_legal_advice, generate_suggested_questions
-from utils.oman_laws import get_oman_laws, read_oman_law
-from deep_translator import GoogleTranslator
-from fpdf import FPDF
-import openai
-
-# Assuming you have a directory for templates
-TEMPLATE_DIR = "templates"
-
 def main():
     st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
 
-    # Inject custom CSS for language selection box
-    st.markdown("""
+    # Fixed position for language selection
+    st.markdown(
+        """
         <style>
-        div[data-baseweb="select"] > div {
-            width: 200px;
-            font-size: 14px;
+        .language-select {
+            position: fixed;
+            top: 0;
+            right: 0;
+            z-index: 1000;
+            background-color: white;
+            padding: 10px;
+            border-bottom-left-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
         </style>
-    """, unsafe_allow_html=True)
+        """,
+        unsafe_allow_html=True
+    )
 
-    # Language selection using columns for better positioning
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
+    # Language selection
+    with st.container():
+        st.markdown('<div class="language-select">', unsafe_allow_html=True)
         language = st.selectbox("Choose Language / اختر اللغة", ["English", "العربية"], key="language_select")
+        st.markdown('</div>', unsafe_allow_html=True)
 
     lang_code = "en" if language == "English" else "ar"
 
@@ -75,7 +71,6 @@ def main():
         grade_legal_document(lang_code)
     with tabs[5]:
         predictive_analysis_ui()
-
 
 def legal_query_assistant(lang_code):
     st.header("Legal Query Assistant" if lang_code == "en" else "مساعد الاستفسارات القانونية")
