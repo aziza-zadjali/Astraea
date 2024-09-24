@@ -15,7 +15,7 @@ TEMPLATE_DIR = "templates"
 def main():
     st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
 
-    # Fixed position for language selection
+    # Fixed position for language selection icon
     st.markdown(
         """
         <style>
@@ -25,25 +25,30 @@ def main():
             right: 1rem;
             z-index: 1000;
             cursor: pointer;
-            width: 120px; /* Adjust the width as needed */
+        }
+        #language-selector img {
+            width: 30px; /* Adjust the size as needed */
         }
         #language-selector:hover {
             opacity: 0.8;
-        }
-        .stSelectbox>div>div>div {
-            background-color: #008080; /* Theme color */
-            color: white; /* Text color */
-        }
-        .stSelectbox>div>div>div>div {
-            padding: 2px 5px; /* Adjust padding for better fit */
         }
         </style>
         """,
         unsafe_allow_html=True
     )
 
-    # Language selection
-    language = st.selectbox("Choose Language / اختر اللغة", ["English", "العربية"], key="language_select")
+    # Language selection icon
+    st.markdown(
+        """
+        <div id="language-selector">
+            <img src="https://img.icons8.com/ios-filled/50/000000/language.png" alt="Language Icon" onclick="document.getElementById('language_select').click();">
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    # Hidden selectbox for language selection
+    language = st.selectbox("Choose Language / اختر اللغة", ["English", "العربية"], key="language_select", label_visibility="collapsed")
     lang_code = "en" if language == "English" else "ar"
 
     # Inject custom CSS for RTL layout, font sizes, and tab styling
