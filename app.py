@@ -137,11 +137,21 @@ def legal_query_assistant(lang_code):
         div.row-widget.stRadio > div {
             flex-direction: row;
             justify-content: flex-start;
+            align-items: center;
+            gap: 2rem;
         }
         div.row-widget.stRadio > div > label {
-            padding: 0 15px 0 0;
-            min-width: 200px;
-            white-space: nowrap;
+            padding: 10px 15px;
+            background-color: #f0f2f6;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        div.row-widget.stRadio > div > label:hover {
+            background-color: #e0e2e6;
+        }
+        div.row-widget.stRadio > div > label > div:first-child {
+            display: none;
         }
         </style>
     """, unsafe_allow_html=True)
@@ -150,9 +160,11 @@ def legal_query_assistant(lang_code):
     query_type = st.radio(
         "Choose query type" if lang_code == "en" else "اختر نوع الاستفسار",
         ('Enter your own query', 'Query from document') if lang_code == "en" else ('أدخل استفسارك الخاص', 'استفسر من وثيقة'),
-        key="query_type"
+        key="query_type",
+        horizontal=True  # This will make the radio buttons horizontal
     )
 
+    # Rest of the function remains the same
     if query_type in ['Enter your own query', 'أدخل استفسارك الخاص']:
         query = st.text_input("Enter your legal query:" if lang_code == "en" else "أدخل استفسارك القانوني:", key="legal_query")
         if query and st.button("Submit" if lang_code == "en" else "إرسال", key="submit_legal_query"):
