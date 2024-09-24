@@ -38,6 +38,33 @@ def main():
     st.markdown(
         """
         <style>
+        html, body, [class*="css"] {
+            font-size: 16px;
+        }
+        h1 {
+            font-size: 2rem;
+        }
+        h2 {
+            font-size: 1.5rem;
+        }
+        h3 {
+            font-size: 1.17rem;
+        }
+        .stTabs [data-baseweb="tab-list"] button [data-testid="stMarkdownContainer"] p {
+            font-size: 1rem;
+        }
+        .stTextArea>div>div>textarea {
+            font-size: 1rem;
+        }
+        .stSelectbox>div>div>div {
+            font-size: 1rem;
+        }
+        .stRadio [role="radiogroup"] {
+            font-size: 1rem;
+        }
+        body {
+            direction: rtl;
+        }
         .stTabs [data-baseweb="tab-list"] {
             gap: 8px;
         }
