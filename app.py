@@ -75,7 +75,7 @@ def main():
         }}
 
         /* Custom radio button color */
-        div.row-widget.stRadio > div > label > div:first-child input[type='radio']:checked + div {
+        div[role='radiogroup'] input[type='radio']:checked + div > div {
             background-color: #008080; /* Teal color */
             border-color: #008080; /* Teal border */
         }
