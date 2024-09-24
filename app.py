@@ -25,7 +25,7 @@ def main():
             right: 1rem;
             z-index: 1000;
             cursor: pointer;
-            width: 200px; /* Adjust the width as needed */
+            width: 150px; /* Adjust the width as needed */
         }
         #language-selector:hover {
             opacity: 0.8;
@@ -33,6 +33,9 @@ def main():
         .stSelectbox>div>div>div {
             background-color: #008080; /* Theme color */
             color: white; /* Text color */
+        }
+        .stSelectbox>div>div>div>div {
+            padding: 5px 10px; /* Adjust padding for better fit */
         }
         </style>
         """,
