@@ -12,7 +12,6 @@ import openai
 # Assuming you have a directory for templates
 TEMPLATE_DIR = "templates"
 
-import streamlit as st
 
 def main():
     st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
@@ -143,11 +142,7 @@ def legal_query_assistant(lang_code):
     # Custom CSS for radio button color
     st.markdown("""
         <style>
-        div[role='radiogroup'] label div[data-testid='stMarkdownContainer'] {
-            display: flex;
-            align-items: center;
-        }
-        div[role='radiogroup'] label div[data-testid='stMarkdownContainer'] > div:first-child {
+        div[role='radiogroup'] label div:first-child {
             background-color: #008080 !important; /* Teal color */
             border: 2px solid #008080 !important; /* Teal border */
         }
@@ -180,6 +175,7 @@ def legal_query_assistant(lang_code):
             if document_text:
                 suggested_questions = generate_suggested_questions(document_text, lang_code)
                 handle_document_queries(document_text, suggested_questions, lang_code)
+
 
 
 def process_uploaded_file(uploaded_file, lang_code):
