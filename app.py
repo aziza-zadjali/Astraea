@@ -13,6 +13,27 @@ import openai
 TEMPLATE_DIR = "templates"
 
 
+# Create two columns in the header area
+col1, col2 = st.columns([3, 1])
+
+with col1:
+    st.title("Astraea - Legal Query Assistant")
+
+with col2:
+    # Language selector in the top right
+    language = st.selectbox(
+        "",
+        ["English", "عربي"],
+        key="language_select",
+        index=0 if st.session_state.get('language', 'en') == 'en' else 1
+    )
+
+# Set the language based on selection
+lang_code = "en" if language == "English" else "ar"
+st.session_state['language'] = lang_code
+
+# Rest of your app code...
+
 
 def main():
     st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
