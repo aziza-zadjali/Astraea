@@ -28,15 +28,6 @@ def main():
             <style>
             body {
                 direction: rtl;
-                text-align: right;
-            }
-            .css-1d391kg { /* Sidebar */
-                direction: rtl;
-                text-align: right;
-            }
-            .css-1v3fvcr { /* Main content */
-                direction: rtl;
-                text-align: right;
             }
             </style>
             """,
@@ -47,24 +38,27 @@ def main():
     st.markdown(
         """
         <style>
-        /* Change selected tab color to blue (#4F8BF9) */
-        .stTabs [role="tablist"] > div[aria-selected="true"] {
-            color: #4F8BF9 !important;
-            border-bottom: 3px solid #4F8BF9 !important;
+        .stTabs [data-baseweb="tab-list"] button [data-testid="stMarkdownContainer"] p {
+            font-size: 18px;
         }
-
-        /* Change radio button colors */
-        .stRadio > div > div {
-            color: #4F8BF9;
+        .stTabs [data-baseweb="tab-list"] {
+            gap: 8px;
         }
-        .stRadio > div > div:hover {
-            color: #4F8BF9;
+        .stTabs [data-baseweb="tab-list"] button [data-testid="stMarkdownContainer"] {
+            background-color: #F0F2F6;
+            padding: 10px 20px;
+            border-radius: 5px;
         }
-        .stRadio > div > div[data-baseweb="radio"] > label > div:first-child {
-            border: 2px solid #4F8BF9;
+        .stTabs [data-baseweb="tab-list"] button[aria-selected="true"] [data-testid="stMarkdownContainer"] {
+            background-color: #0000FF;
+            color: white;
         }
-        .stRadio > div > div[data-baseweb="radio"] > label > div:first-child > div {
-            background-color: #4F8BF9;
+        .stTabs [data-baseweb="tab-list"] button[aria-selected="true"] [data-testid="stMarkdownContainer"] p {
+            color: white;
+        }
+        .stRadio [role="radiogroup"] {
+            align-items: center;
+            justify-content: center;
         }
         </style>
         """,
@@ -86,10 +80,10 @@ def main():
         "en": ["Legal Query Assistant", "Oman Laws", "Legal Translation Service", "Automated Document Creation", "Grade Legal Document", "Predictive Case Analysis"],
         "ar": ["مساعد الاستفسارات القانونية", "قوانين عمان", "خدمة الترجمة القانونية", "إنشاء المستندات الآلي", "تقييم الوثيقة القانونية", "التحليل التنبؤي للقضايا"]
     }
-    
+
     # Create tabs using the appropriate language
     tabs = st.tabs(tab_labels[lang_code])
-    
+
     with tabs[0]:
         legal_query_assistant(lang_code)
     with tabs[1]:
