@@ -12,7 +12,6 @@ import openai
 # Assuming you have a directory for templates
 TEMPLATE_DIR = "templates"
 
-
 def main():
     st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
 
@@ -76,15 +75,15 @@ def main():
         }}
 
         /* Custom radio button color */
-        div[role='radiogroup'] input[type='radio']:checked + div > div:first-child {
-            background-color: #008080 !important; /* Teal color */
-            border-color: #008080 !important; /* Teal border */
+        div[role='radiogroup'] input[type='radio']:checked + div > div {
+            background-color: #008080; /* Teal color */
+            border-color: #008080; /* Teal border */
         }
 
-        .stRadio [role="radiogroup"] {
+        .stRadio [role="radiogroup"] {{
             flex-direction: column; /* Align vertically */
             align-items: flex-start; /* Align to the left */
-        }
+        }}
 
         #language-selector {{
             position: fixed;
@@ -138,6 +137,7 @@ def main():
 def legal_query_assistant(lang_code):
     st.header("Legal Query Assistant" if lang_code == "en" else "مساعد الاستفسارات القانونية")
 
+    # Move the query type selection to the top and align vertically
     query_type = st.radio(
         "Choose query type" if lang_code == "en" else "اختر نوع الاستفسار",
         ('Enter your own query', 'Query from document') if lang_code == "en" else ('أدخل استفسارك الخاص', 'استفسر من وثيقة'),
@@ -146,9 +146,17 @@ def legal_query_assistant(lang_code):
 
     if query_type in ['Enter your own query', 'أدخل استفسارك الخاص']:
         query = st.text_input("Enter your legal query:" if lang_code == "en" else "أدخل استفسارك القانوني:", key="legal_query")
-        
+        if query and st.button("Submit" if lang_code == "en" else "إرسال", key="submit_legal_query"):
+            process_query(query, context=None, lang_code=lang_code)
+    else:
+        uploaded_file = st.file_uploader("Upload a document" if lang_code == "en" else "قم بتحميل وثيقة", type=["docx", "pdf", "txt"], key="file_uploader")
+        if uploaded_file:
+            document_text = process_uploaded_file(uploaded_file, lang_code)
+            if document_text:
+                suggested_questions = generate_suggested_questions(document_text, lang_code)
+                handle_document_queries(document_text, suggested_questions, lang_code)
 
-
+                
 def process_uploaded_file(uploaded_file, lang_code):
     file_type = uploaded_file.type
     spinner_text = "Reading document..." if lang_code == "en" else "جاري قراءة الوثيقة..."
