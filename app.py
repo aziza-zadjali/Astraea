@@ -52,6 +52,7 @@ def main():
         .stTabs [data-baseweb="tab-list"] button[aria-selected="true"] [data-testid="stMarkdownContainer"] {
             background-color: #0000FF;
             color: white;
+            border-bottom: none;
         }
         .stTabs [data-baseweb="tab-list"] button[aria-selected="true"] [data-testid="stMarkdownContainer"] p {
             color: white;
@@ -64,6 +65,7 @@ def main():
         """,
         unsafe_allow_html=True
     )
+    
 
     # Main content with tabs
     title = "Astraea - Legal Query Assistant" if lang_code == "en" else "أسترايا - مساعد الاستفسارات القانونية"
