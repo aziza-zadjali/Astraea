@@ -12,6 +12,7 @@ import openai
 # Assuming you have a directory for templates
 TEMPLATE_DIR = "templates"
 
+
 def main():
     st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
 
@@ -75,11 +76,6 @@ def main():
         }}
 
         /* Custom radio button color */
-        div[role='radiogroup'] label div:first-child {
-            background-color: #008080 !important; /* Teal color */
-            border-color: #008080 !important; /* Teal border */
-        }
-        
         div[role='radiogroup'] input[type='radio']:checked + div > div:first-child {
             background-color: #008080 !important; /* Teal color */
             border-color: #008080 !important; /* Teal border */
@@ -150,6 +146,8 @@ def legal_query_assistant(lang_code):
 
     if query_type in ['Enter your own query', 'أدخل استفسارك الخاص']:
         query = st.text_input("Enter your legal query:" if lang_code == "en" else "أدخل استفسارك القانوني:", key="legal_query")
+        
+
 
 def process_uploaded_file(uploaded_file, lang_code):
     file_type = uploaded_file.type
