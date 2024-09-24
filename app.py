@@ -25,9 +25,19 @@ def main():
             right: 1rem;
             z-index: 1000;
             cursor: pointer;
+            display: flex;
+            align-items: center;
         }
         #language-selector img {
             width: 30px; /* Adjust the size as needed */
+            margin-right: 10px;
+        }
+        #language-selector select {
+            background-color: #008080; /* Theme color */
+            color: white; /* Text color */
+            border: none;
+            padding: 5px;
+            border-radius: 5px;
         }
         #language-selector:hover {
             opacity: 0.8;
@@ -37,11 +47,15 @@ def main():
         unsafe_allow_html=True
     )
 
-    # Language selection icon
+    # Language selection icon with dropdown
     st.markdown(
         """
         <div id="language-selector">
-            <img src="https://img.icons8.com/ios-filled/50/000000/language.png" alt="Language Icon" onclick="document.getElementById('language_select').click();">
+            <img src="https://img.icons8.com/ios-filled/50/000000/language.png" alt="Language Icon">
+            <select id="language_select" onchange="document.getElementById('language_select').dispatchEvent(new Event('change'));">
+                <option value="en">English</option>
+                <option value="ar">العربية</option>
+            </select>
         </div>
         """,
         unsafe_allow_html=True
