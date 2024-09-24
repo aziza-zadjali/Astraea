@@ -1,3 +1,4 @@
+
 import streamlit as st
 import os
 import re
@@ -12,113 +13,36 @@ import openai
 # Assuming you have a directory for templates
 TEMPLATE_DIR = "templates"
 
-def set_custom_css():
-    st.markdown("""
-    <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-    
-    html, body, [class*="css"] {
-        font-family: 'Inter', sans-serif;
-        font-size: 16px;
-        line-height: 1.6;
-        color: #333;
-    }
-    
-    h1 {
-        font-size: 2.5rem;
-        font-weight: 700;
-        margin-bottom: 1rem;
-    }
-    
-    h2 {
-        font-size: 2rem;
-        font-weight: 600;
-        margin-top: 2rem;
-        margin-bottom: 1rem;
-    }
-    
-    h3 {
-        font-size: 1.5rem;
-        font-weight: 600;
-        margin-top: 1.5rem;
-        margin-bottom: 0.75rem;
-    }
-    
-    p {
-        margin-bottom: 1rem;
-    }
-    
-    .stButton > button {
-        background-color: #0056b3;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        padding: 0.5rem 1rem;
-        font-weight: 500;
-    }
-    
-    .stButton > button:hover {
-        background-color: #003d82;
-    }
-    
-    .stTextInput > div > div > input {
-        background-color: #f8f9fa;
-        border: 1px solid #ced4da;
-        border-radius: 4px;
-        padding: 0.5rem;
-    }    
-    .stSelectbox > div > div > select {
-        background-color: #f8f9fa;
-        border: 1px solid #ced4da;
-        border-radius: 4px;
-        padding: 0.5rem;
-    }
-    .stAlert {
-        background-color: #f0f2f6;
-        color: #31333F;
-        border: none;
-        padding: 10px;
-        border-radius: 5px;
-    }
-    .stAlert > div {
-        color: #31333F;
-        font-size: 14px;
-    }
-    .stException, .stError {
-        background-color: #FFF0F0;
-        color: #5F1F1F;
-    }
-    .stWarning {
-        background-color: #FFFAEB;
-        color: #74480F;
-    }
-    .stInfo {
-        background-color: #EEF6FF;
-        color: #1D4ED8;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-
-
 def main():
     st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
-    set_custom_css()
 
     # Sidebar for language selection
     with st.sidebar:
-        st.image("logo.png", width=200)
+        st.image("logo.png", width=100)
         language = st.selectbox("Choose Language / اختر اللغة", ["English", "العربية"], key="language_select")
         lang_code = "en" if language == "English" else "ar"
 
     # Inject custom CSS for RTL layout if Arabic is selected
     if lang_code == "ar":
-        st.markdown("""
-        <style>
-        body {
-            direction: rtl;
-        }
-        </style>
-        """, unsafe_allow_html=True)
+        st.markdown(
+            """
+            <style>
+            body {
+                direction: rtl;
+                text-align: right;
+            }
+            .css-1d391kg { /* Sidebar */
+                direction: rtl;
+                text-align: right;
+            }
+            .css-1v3fvcr { /* Main content */
+                direction: rtl;
+                text-align: right;
+            }
+            </style>
+            """,
+            unsafe_allow_html=True
+        )
 
     # Main content with tabs
     title = "Astraea - Legal Query Assistant" if lang_code == "en" else "أسترايا - مساعد الاستفسارات القانونية"
@@ -130,8 +54,15 @@ def main():
     }
     st.info(disclaimer[lang_code])
 
-    tabs = st.tabs(["Legal Query Assistant", "Oman Laws", "Legal Translation Service", "Automated Document Creation", "Grade Legal Document", "Predictive Case Analysis"])
-
+    # Define tab labels in both languages
+    tab_labels = {
+        "en": ["Legal Query Assistant", "Oman Laws", "Legal Translation Service", "Automated Document Creation", "Grade Legal Document", "Predictive Case Analysis"],
+        "ar": ["مساعد الاستفسارات القانونية", "قوانين عمان", "خدمة الترجمة القانونية", "إنشاء المستندات الآلي", "تقييم الوثيقة القانونية", "التحليل التنبؤي للقضايا"]
+    }
+    
+    # Create tabs using the appropriate language
+    tabs = st.tabs(tab_labels[lang_code])
+    
     with tabs[0]:
         legal_query_assistant(lang_code)
     with tabs[1]:
@@ -153,7 +84,7 @@ def legal_query_assistant(lang_code):
         ('Enter your own query', 'Query from document') if lang_code == "en" else ('أدخل استفسارك الخاص', 'استفسر من وثيقة'),
         key="query_type"
     )
-    
+
     if query_type in ['Enter your own query', 'أدخل استفسارك الخاص']:
         query = st.text_input("Enter your legal query:" if lang_code == "en" else "أدخل استفسارك القانوني:", key="legal_query")
         if query and st.button("Submit" if lang_code == "en" else "إرسال", key="submit_legal_query"):
@@ -220,12 +151,15 @@ def oman_laws_feature(lang_code):
                 suggested_questions = generate_suggested_questions(law_text, lang_code)
                 question_text = "Select a suggested question:" if lang_code == "en" else "اختر سؤالاً مقترحًا:"
                 selected_question = st.selectbox(question_text, [""] + suggested_questions, key="oman_law_selected_question")
+                
                 submit_suggested = st.button("Submit Suggested Question" if lang_code == "en" else "إرسال السؤال المقترح", key="submit_oman_law_suggested_query")
                 
                 if selected_question and submit_suggested:
-                    process_query(selected_question, law_text, lang_code)
-                
-                st.markdown("---")
+                    concise_answer = get_concise_law_answer(selected_question, law_text, lang_code)
+                    st.markdown("### Answer:")
+                    st.markdown(concise_answer)
+
+                st.markdown("---")  # Separator for custom query section
                 
                 # Custom query section
                 st.subheader("Custom Query" if lang_code == "en" else "استفسار مخصص")
@@ -233,12 +167,32 @@ def oman_laws_feature(lang_code):
                 submit_custom = st.button("Submit Custom Query" if lang_code == "en" else "إرسال الاستفسار الخاص", key="submit_oman_law_custom_query")
                 
                 if custom_query and submit_custom:
-                    process_query(custom_query, law_text, lang_code)
+                    concise_answer = get_concise_law_answer(custom_query, law_text, lang_code)
+                    st.markdown("### Answer:")
+                    st.markdown(concise_answer)
             else:
                 st.error("Failed to read the selected law. Please try again or choose a different law." if lang_code == "en" else "فشل في قراءة القانون المحدد. يرجى المحاولة مرة أخرى أو اختيار قانون آخر.")
     else:
         st.error("No laws found in the database directory." if lang_code == "en" else "لم يتم العثور على قوانين في دليل قاعدة البيانات.")
 
+def get_concise_law_answer(query, law_text, lang_code):
+    prompt = {
+        "en": f"Provide a concise answer to the following query about Oman law. Focus on the most relevant information and limit the response to 2-3 sentences:\n\nQuery: {query}\n\nLaw text: {law_text[:3000]}...",
+        "ar": f"قدم إجابة موجزة للاستفسار التالي حول قانون عمان. ركز على المعلومات الأكثر صلة وحدد الإجابة في 2-3 جمل:\n\nالاستفسار: {query}\n\nنص القانون: {law_text[:3000]}..."
+    }
+    
+    response = openai.ChatCompletion.create(
+        model="gpt-4o",
+        messages=[
+            {"role": "system", "content": "You are a concise legal advisor specializing in Oman law."},
+            {"role": "user", "content": prompt[lang_code]}
+        ],
+        max_tokens=150,
+        temperature=0.7
+    )
+    
+    return response.choices[0].message['content'].strip()
+    
 def legal_translation_service(lang_code):
     st.header("Legal Translation Service" if lang_code == 'en' else 'خدمة الترجمة القانونية')
     upload_text = 'Upload a document for translation to Arabic' if lang_code == 'en' else 'قم بتحميل وثيقة للترجمة إلى العربية'
@@ -260,34 +214,10 @@ def legal_translation_service(lang_code):
 def translate_to_arabic(text):
     translator = GoogleTranslator(source='auto', target='ar')
     translated = translator.translate(text)
-    
-    # Prompt to maintain standard legal terms
-    prompt = f"""
-    Please ensure that the following translation maintains standard legal terms in Arabic.
-    Use the appropriate legal terminology and consult legal glossaries if necessary.
-    The translation should be accurate, clear, and consistent with legal standards.
-
-    Original Text: {text}
-    Translated Text: {translated}
-    """
-    
-    # Use OpenAI to refine the translation
-    response = openai.ChatCompletion.create(
-        model="gpt-4o",
-        messages=[
-            {"role": "system", "content": "You are an expert legal translator. Ensure the translation maintains standard legal terms in Arabic."},
-            {"role": "user", "content": prompt}
-        ],
-        max_tokens=1000,
-        temperature=0.7
-    )
-    
-    refined_translation = response.choices[0].message['content'].strip()
-    return refined_translation
+    return translated
 
 def automated_document_creation(lang_code):
     st.header("Automated Document Creation" if lang_code == "en" else "إنشاء المستندات الآلي")
-    
     # Get list of available templates
     templates = [f for f in os.listdir(TEMPLATE_DIR) if f.endswith('.txt')]
     selected_template = st.selectbox(
@@ -302,7 +232,6 @@ def automated_document_creation(lang_code):
         
         placeholders = extract_placeholders(template_content)
         st.subheader("Fill in the details:" if lang_code == "en" else "املأ التفاصيل:")
-        
         inputs = {}
         for i, placeholder in enumerate(placeholders):
             inputs[placeholder] = st.text_input(
@@ -322,6 +251,7 @@ def automated_document_creation(lang_code):
             )
 
 def extract_placeholders(template_content):
+    import re
     return re.findall(r'\{(\w+)\}', template_content)
 
 def fill_template(template_content, inputs):
@@ -332,13 +262,16 @@ def fill_template(template_content, inputs):
 def process_query(query, context=None, lang_code="en"):
     with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
         try:
-            context_chunks = split_text_into_chunks(context, max_tokens=3000) if context else ["No additional context provided."]
+            # Split the context into smaller chunks if it exceeds the token limit
+            context_chunks = split_text_into_chunks(context, max_tokens=2000) if context else ["No additional context provided."]
+            
             responses = []
             for chunk in context_chunks:
                 prompt = {
                     "en": f"Provide a clear and direct answer to the following legal query. Avoid ambiguity and ensure the response is certain:\n\nQuery: {query}\n\nContext: {chunk}",
                     "ar": f"قدم إجابة واضحة ومباشرة للاستفسار القانوني التالي. تجنب الغموض وتأكد من أن الإجابة مؤكدة:\n\nالاستفسار: {query}\n\nالسياق: {chunk}"
                 }
+                
                 response = openai.ChatCompletion.create(
                     model="gpt-4o",
                     messages=[
@@ -348,19 +281,23 @@ def process_query(query, context=None, lang_code="en"):
                     max_tokens=1000,
                     temperature=0.7
                 )
+                
                 responses.append(response.choices[0].message['content'].strip())
             
+            # Combine the responses from all chunks
             final_response = "\n\n".join(responses)
             st.markdown("### Response:")
             st.markdown(format_response(final_response))
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
 
-def split_text_into_chunks(text, max_tokens=3000):
+def split_text_into_chunks(text, max_tokens=2000):
+    # Split the text into chunks of max_tokens length
     words = text.split()
     chunks = []
     current_chunk = []
     current_length = 0
+    
     for word in words:
         current_length += len(word) + 1  # +1 for the space
         if current_length > max_tokens:
@@ -369,12 +306,15 @@ def split_text_into_chunks(text, max_tokens=3000):
             current_length = len(word) + 1
         else:
             current_chunk.append(word)
+    
     if current_chunk:
         chunks.append(" ".join(current_chunk))
+    
     return chunks
 
 def grade_legal_document(lang_code):
     st.header("Grade Legal Document" if lang_code == "en" else "تقييم الوثيقة القانونية")
+    
     upload_text = "Upload a legal document to grade" if lang_code == "en" else "قم بتحميل وثيقة قانونية للتقييم"
     uploaded_file = st.file_uploader(upload_text, type=["docx", "pdf", "txt"], key="grade_file_uploader")
     
@@ -390,6 +330,7 @@ def get_document_grade(document_text, lang_code):
         "en": f"Grade the following legal document on a scale of 1-10 for clarity, completeness, and legal accuracy. Provide a brief explanation for each aspect:\n\n{document_text[:4000]}...",
         "ar": f"قيّم الوثيقة القانونية التالية على مقياس من 1 إلى 10 من حيث الوضوح والاكتمال والدقة القانونية. قدم شرحًا موجزًا لكل جانب:\n\n{document_text[:4000]}..."
     }
+    
     response = openai.ChatCompletion.create(
         model="gpt-4o",
         messages=[
@@ -399,13 +340,117 @@ def get_document_grade(document_text, lang_code):
         max_tokens=1000,
         temperature=0.7
     )
+    
     return response.choices[0].message['content'].strip()
 
 def display_grade_result(grade_result, lang_code):
     st.subheader("Grading Result:" if lang_code == "en" else "نتيجة التقييم:")
-    st.markdown(f"<div style='background-color: #f8f9fa; padding: 1rem; border-radius: 4px;'>{grade_result}</div>", unsafe_allow_html=True)
+    st.markdown(grade_result)
 
-# ... (rest of the functions remain the same)
+def analyze_case_for_prediction(case_details: str) -> Dict[str, Any]:
+    chunks = split_text_into_chunks(case_details)
+    full_analysis = ""
+
+    for i, chunk in enumerate(chunks):
+        analysis_prompt = f"""
+        Analyze the following case details (part {i+1}/{len(chunks)}) in the context of the Oman legal system and provide a predictive analysis.
+
+        Case Details (Part {i+1}/{len(chunks)}):
+        ```
+        {chunk}
+        ```
+
+        Your analysis should address the following:
+        * **Case Summary:** Briefly summarize the key facts, legal claims, and parties involved in the case.
+        * **Predicted Outcome:** What is the most likely outcome of this case based on the provided information, Oman legal precedents, and similar cases? Explain your reasoning.
+        * **Strengths of the Case:** Identify the most compelling arguments and evidence that support a favorable outcome.
+        * **Weaknesses of the Case:** What are potential weaknesses in the case, or areas where the opposing party might have strong arguments?
+        * **Areas of Caution:** What potential pitfalls or challenges should be considered? What strategies could the opposing party use?
+        * **Relevant Oman Case Law:** Cite specific Oman legal precedents and similar cases that support your analysis and predicted outcome.
+        * **Recommended Strategies:** Offer specific, actionable recommendations on how to strengthen the case and increase the likelihood of a positive result.
+
+        Please maintain a neutral and objective tone throughout your analysis. The goal is to provide a realistic assessment of the case, not to advocate for a particular side.
+        """
+
+        try:
+            chunk_analysis = get_ai_response(analysis_prompt)
+            full_analysis += chunk_analysis + "\n\n"
+
+        except Exception as e:
+            return {"error": f"Error analyzing case (part {i+1}): {str(e)}"}
+
+    return {"analysis": full_analysis}
+
+def get_ai_response(prompt: str) -> str:
+    response = openai.ChatCompletion.create(
+        model="gpt-4o",
+        messages=[
+            {"role": "system", "content": "You are an expert legal analyst."},
+            {"role": "user", "content": prompt}
+        ],
+        max_tokens=1000,
+        temperature=0.7
+    )
+    return response.choices[0].message['content'].strip()
+
+def extract_text_from_document(uploaded_file) -> str:
+    file_type = uploaded_file.type
+    if file_type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+        return read_docx(uploaded_file)
+    elif file_type == "application/pdf":
+        return read_pdf(uploaded_file)
+    elif file_type == "text/plain":
+        return read_txt(uploaded_file)
+    else:
+        st.error("Unsupported file type.")
+        return ""
+
+def predictive_analysis_ui():
+    st.subheader("Predictive Case Analysis")
+    st.write('''
+    Enter the details of your case, including:
+
+    * Facts: Briefly describe the key events that led to the legal dispute.
+    * Legal Issues: State the specific legal questions or claims in the case.
+    * Relevant Law: Identify any relevant Oman laws, statutes, or regulations.
+    * Jurisdiction: Specify the Oman city where the case is filed.
+
+    Astraea will provide a predictive analysis, outlining potential outcomes, strengths and weaknesses of the case, and relevant Oman case law.
+    ''')
+
+    st.warning("Please do not upload files larger than 5MB as it may cause issues and consume all available tokens.")
+
+    input_method = st.radio("Choose input method:", ("Text Input", "Document Upload"))
+    
+    case_details = ""
+    if input_method == "Text Input":
+        case_details = st.text_area("Enter case details:", height=200)
+    else:
+        uploaded_file = st.file_uploader("Upload a document containing case details (PDF, DOCX, or TXT)", type=["pdf", "docx", "txt"])
+        if uploaded_file is not None:
+            case_details = extract_text_from_document(uploaded_file)
+
+    if st.button("Analyze Case"):
+        if case_details:
+            with st.spinner("Analyzing your case..."):
+                analysis_results = analyze_case_for_prediction(case_details)
+
+            st.write("### Case Analysis")
+            if "error" in analysis_results:
+                st.error(analysis_results["error"])
+            else:
+                analysis = analysis_results.get("analysis", "No analysis available.")
+                st.write(analysis)
+
+                # Download button for analysis
+                st.download_button(
+                    label="Download Analysis",
+                    data=analysis,
+                    file_name="case_analysis.txt",
+                    mime="text/plain"
+                )
+        else:
+            st.warning("Please enter case details or upload a document to analyze.")
 
 if __name__ == "__main__":
     main()
