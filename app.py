@@ -21,86 +21,68 @@ def main():
         language = st.selectbox("Choose Language / اختر اللغة", ["English", "العربية"], key="language_select")
         lang_code = "en" if language == "English" else "ar"
 
-    # Inject custom CSS for RTL layout if Arabic is selected
-    if lang_code == "ar":
-        st.markdown(
-            """
-            <style>
-            body {
-                direction: rtl;
-            }
-            </style>
-            """,
-            unsafe_allow_html=True
-        )
-
-# Inject custom CSS for tab and radio button colors
+    # Inject custom CSS for RTL layout, font sizes, and tab styling
     st.markdown(
-        """
+        f"""
         <style>
-        html, body, [class*="css"] {
+        html, body, [class*="css"] {{
             font-size: 16px;
-        }
-        h1 {
+            direction: {"rtl" if lang_code == "ar" else "ltr"};
+        }}
+        h1 {{
             font-size: 2rem;
-        }
-        h2 {
+        }}
+        h2 {{
             font-size: 1.5rem;
-        }
-        h3 {
+        }}
+        h3 {{
             font-size: 1.17rem;
-        }
-        .stTabs [data-baseweb="tab-list"] button [data-testid="stMarkdownContainer"] p {
+        }}
+        .stTabs [data-baseweb="tab-list"] button [data-testid="stMarkdownContainer"] p {{
             font-size: 1rem;
-        }
-        .stTextArea>div>div>textarea {
+        }}
+        .stTextArea>div>div>textarea {{
             font-size: 1rem;
-        }
-        .stSelectbox>div>div>div {
+        }}
+        .stSelectbox>div>div>div {{
             font-size: 1rem;
-        }
-        .stRadio [role="radiogroup"] {
+        }}
+        .stRadio [role="radiogroup"] {{
             font-size: 1rem;
-        }
-        body {
-            direction: rtl;
-        }
-        .stTabs [data-baseweb="tab-list"] {
+        }}
+        .stTabs [data-baseweb="tab-list"] {{
             gap: 8px;
-        }
-        .stTabs [data-baseweb="tab"] {
+        }}
+        .stTabs [data-baseweb="tab"] {{
             height: auto;
             white-space: pre-wrap;
             background-color: #F0F2F6;
             border-radius: 4px 4px 0 0;
             gap: 1rem;
             padding: 10px 20px;
-        }
-        .stTabs [data-baseweb="tab"]:hover {
+        }}
+        .stTabs [data-baseweb="tab"]:hover {{
             background-color: #008080;
             color: white;
-        }
-        .stTabs [data-baseweb="tab"][aria-selected="true"] {
+        }}
+        .stTabs [data-baseweb="tab"][aria-selected="true"] {{
             background-color: #008080;
             color: white;
-        }
-        .stTabs [data-baseweb="tab-list"] button:focus {
+        }}
+        .stTabs [data-baseweb="tab-list"] button:focus {{
             box-shadow: none;
-        }
-        .stTabs [data-baseweb="tab-highlight"] {
+        }}
+        .stTabs [data-baseweb="tab-highlight"] {{
             background-color: transparent;
-        }
-        .stTabs [data-baseweb="tab-border"] {
+        }}
+        .stTabs [data-baseweb="tab-border"] {{
             display: none;
-        }
-        .stRadio [role="radiogroup"] {
-            align-items: center;
-            justify-content: center;
-        }
+        }}
         </style>
         """,
         unsafe_allow_html=True
     )
+
     
 
     # Main content with tabs
