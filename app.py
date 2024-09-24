@@ -38,36 +38,33 @@ def main():
     st.markdown(
         """
         <style>
-        .stTabs [data-baseweb="tab-list"] button [data-testid="stMarkdownContainer"] p {
-            font-size: 18px;
-        }
         .stTabs [data-baseweb="tab-list"] {
             gap: 8px;
         }
-        .stTabs [data-baseweb="tab-list"] button [data-testid="stMarkdownContainer"] {
+        .stTabs [data-baseweb="tab"] {
+            height: auto;
+            white-space: pre-wrap;
             background-color: #F0F2F6;
+            border-radius: 4px 4px 0 0;
+            gap: 1rem;
             padding: 10px 20px;
-            border-radius: 5px 5px 0 0;
         }
-        .stTabs [data-baseweb="tab-list"] button:hover [data-testid="stMarkdownContainer"] {
+        .stTabs [data-baseweb="tab"]:hover {
             background-color: #008080;
             color: white;
         }
-        .stTabs [data-baseweb="tab-list"] button[aria-selected="true"] [data-testid="stMarkdownContainer"] {
+        .stTabs [data-baseweb="tab"][aria-selected="true"] {
             background-color: #008080;
             color: white;
         }
-        .stTabs [data-baseweb="tab-list"] button[aria-selected="true"] [data-testid="stMarkdownContainer"] p {
-            color: white;
+        .stTabs [data-baseweb="tab-list"] button:focus {
+            box-shadow: none;
         }
-        .stTabs [data-baseweb="tab-list"] button::before {
+        .stTabs [data-baseweb="tab-highlight"] {
             background-color: transparent;
         }
-        .stTabs [data-baseweb="tab-list"] button[aria-selected="true"]::before {
-            background-color: #008080;
-        }
-        .stTabs [data-baseweb="tab"] {
-            border-top: 2px solid #008080;
+        .stTabs [data-baseweb="tab-border"] {
+            display: none;
         }
         .stRadio [role="radiogroup"] {
             align-items: center;
