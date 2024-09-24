@@ -48,15 +48,9 @@ def main():
         """
         <style>
         /* Change selected tab color to blue (#4F8BF9) */
-        .stTabs [data-baseweb="tab"] {
-            color: #4F8BF9;
-        }
-        .stTabs [data-baseweb="tab"]:hover {
-            color: #4F8BF9;
-        }
-        .stTabs [data-baseweb="tab"][aria-selected="true"] {
-            color: #4F8BF9;
-            border-bottom: 3px solid #4F8BF9;
+        .stTabs [role="tablist"] > div[aria-selected="true"] {
+            color: #4F8BF9 !important;
+            border-bottom: 3px solid #4F8BF9 !important;
         }
 
         /* Change radio button colors */
