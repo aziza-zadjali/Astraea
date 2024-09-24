@@ -136,15 +136,21 @@ def main():
     with tabs[5]:
         predictive_analysis_ui()
 
+import streamlit as st
+
 def legal_query_assistant(lang_code):
     st.header("Legal Query Assistant" if lang_code == "en" else "مساعد الاستفسارات القانونية")
 
     # Custom CSS for radio button color
     st.markdown("""
         <style>
-        div[role='radiogroup'] input[type='radio']:checked + div {
+        div[role='radiogroup'] > label > div:first-child {
             background-color: #008080 !important; /* Teal color */
-            border-color: #008080 !important; /* Teal border */
+            border: 2px solid #008080 !important; /* Teal border */
+        }
+        div[role='radiogroup'] input[type='radio']:checked + div > div:first-child {
+            background-color: #008080 !important; /* Teal color */
+            border: 2px solid #008080 !important; /* Teal border */
         }
         .stRadio [role="radiogroup"] {
             flex-direction: column; /* Align vertically */
