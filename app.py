@@ -21,30 +21,27 @@ def main():
         language = st.selectbox("Choose Language / اختر اللغة", ["English", "العربية"], key="language_select")
         lang_code = "en" if language == "English" else "ar"
 
-    # Apply RTL for Arabic
-    if lang_code == "ar":
-        st.markdown('<style>body { direction: rtl; }</style>', unsafe_allow_html=True)
-
-    # Inject custom CSS for tab and radio button colors
+    # Inject custom CSS for RTL layout, font sizes, and tab styling
     st.markdown(
-        """
+        f"""
         <style>
-        html, body, [class*="css"] {
+        html, body, [class*="css"] {{
             font-size: 16px;
-        }
-        h1 {
+            direction: {"rtl" if lang_code == "ar" else "ltr"};
+        }}
+        h1 {{
             font-size: 2rem;
-        }
-        h2 {
+        }}
+        h2 {{
             font-size: 1.5rem;
-        }
-        h3 {
+        }}
+        h3 {{
             font-size: 1.17rem;
-        }
-        .stTabs [data-baseweb="tab-list"] {
+        }}
+        .stTabs [data-baseweb="tab-list"] {{
             gap: 8px;
-        }
-        .stTabs [data-baseweb="tab"] {
+        }}
+        .stTabs [data-baseweb="tab"] {{
             height: auto;
             white-space: pre-wrap;
             background-color: #F0F2F6;
@@ -52,45 +49,45 @@ def main():
             gap: 1rem;
             padding: 10px 20px;
             font-size: 1rem;
-        }
-        .stTabs [data-baseweb="tab"]:hover {
+        }}
+        .stTabs [data-baseweb="tab"]:hover {{
             background-color: #008080;
             color: white;
-        }
-        .stTabs [data-baseweb="tab"][aria-selected="true"] {
+        }}
+        .stTabs [data-baseweb="tab"][aria-selected="true"] {{
             background-color: #008080;
             color: white;
-        }
-        .stTabs [data-baseweb="tab-list"] button:focus {
+        }}
+        .stTabs [data-baseweb="tab-list"] button:focus {{
             box-shadow: none;
-        }
-        .stTabs [data-baseweb="tab-highlight"] {
+        }}
+        .stTabs [data-baseweb="tab-highlight"] {{
             background-color: transparent;
-        }
-        .stTabs [data-baseweb="tab-border"] {
+        }}
+        .stTabs [data-baseweb="tab-border"] {{
             display: none;
-        }
-        .stTextArea>div>div>textarea {
+        }}
+        .stTextArea>div>div>textarea {{
             font-size: 1rem;
-        }
-        .stSelectbox>div>div>div {
+        }}
+        .stSelectbox>div>div>div {{
             font-size: 1rem;
-        }
-        .stRadio [role="radiogroup"] {
+        }}
+        .stRadio [role="radiogroup"] {{
             font-size: 1rem;
             align-items: center;
             justify-content: center;
-        }
-        #language-selector {
+        }}
+        #language-selector {{
             position: fixed;
             top: 0.5rem;
             right: 1rem;
             z-index: 1000;
             cursor: pointer;
-        }
-        #language-selector:hover {
+        }}
+        #language-selector:hover {{
             opacity: 0.8;
-        }
+        }}
         </style>
         """,
         unsafe_allow_html=True
@@ -131,37 +128,33 @@ def main():
 def legal_query_assistant(lang_code):
     st.header("Legal Query Assistant" if lang_code == "en" else "مساعد الاستفسارات القانونية")
 
-    # Custom CSS for left-aligned radio buttons
+    # Custom CSS for vertically aligned radio buttons
     st.markdown("""
         <style>
         div.row-widget.stRadio > div {
-            flex-direction: row;
-            justify-content: flex-start;
-            align-items: center;
-            gap: 2rem;
+            flex-direction: column;
+            align-items: flex-start;
         }
         div.row-widget.stRadio > div > label {
-            padding: 10px 15px;
+            padding: 10px 0;
+            width: 100%;
             background-color: #f0f2f6;
             border-radius: 5px;
+            margin-bottom: 10px;
             cursor: pointer;
             transition: background-color 0.3s;
         }
         div.row-widget.stRadio > div > label:hover {
             background-color: #e0e2e6;
         }
-        div.row-widget.stRadio > div > label > div:first-child {
-            display: none;
-        }
         </style>
     """, unsafe_allow_html=True)
 
-    # Move the query type selection to the top and align left
+    # Move the query type selection to the top and align vertically
     query_type = st.radio(
         "Choose query type" if lang_code == "en" else "اختر نوع الاستفسار",
         ('Enter your own query', 'Query from document') if lang_code == "en" else ('أدخل استفسارك الخاص', 'استفسر من وثيقة'),
-        key="query_type",
-        horizontal=True  # This will make the radio buttons horizontal
+        key="query_type"
     )
 
     # Rest of the function remains the same
@@ -176,7 +169,7 @@ def legal_query_assistant(lang_code):
             if document_text:
                 suggested_questions = generate_suggested_questions(document_text, lang_code)
                 handle_document_queries(document_text, suggested_questions, lang_code)
-
+                
 def process_uploaded_file(uploaded_file, lang_code):
     file_type = uploaded_file.type
     spinner_text = "Reading document..." if lang_code == "en" else "جاري قراءة الوثيقة..."
