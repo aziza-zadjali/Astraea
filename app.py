@@ -15,6 +15,16 @@ TEMPLATE_DIR = "templates"
 def main():
     st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
 
+    # Sidebar for language selection
+    with st.sidebar:
+        st.image("logo.png", width=100)
+        language = st.selectbox("Choose Language / اختر اللغة", ["English", "العربية"], key="language_select")
+        lang_code = "en" if language == "English" else "ar"
+
+    # Apply RTL for Arabic
+    if lang_code == "ar":
+        st.markdown('<style>body { direction: rtl; }</style>', unsafe_allow_html=True)
+
     # Inject custom CSS for RTL layout, font sizes, and tab styling
     st.markdown(
         """
@@ -93,13 +103,7 @@ def main():
         unsafe_allow_html=True
     )
 
-    # Apply RTL for Arabic
-    if lang_code == "ar":
-        st.markdown('<style>body { direction: rtl; }</style>', unsafe_allow_html=True)
-        # Main content with tabs
-        title = "Astraea - Legal Query Assistant" if lang_code == "en" else "أسترايا - مساعد الاستفسارات القانونية"
-        st.title(title)
-
+   
     disclaimer = {
         "en": "This assistant uses GPT-4.0 to provide general legal information. Please note that this is not a substitute for professional legal advice.",
         "ar": "يستخدم هذا المساعد نموذج GPT-4.0 لتقديم معلومات قانونية عامة. يرجى ملاحظة أن هذا ليس بديلاً عن المشورة القانونية المهنية."
