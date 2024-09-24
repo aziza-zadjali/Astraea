@@ -15,116 +15,30 @@ TEMPLATE_DIR = "templates"
 def main():
     st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
 
-    # Fixed position for logo and language selection
-    st.markdown(
-        """
+    # Inject custom CSS for language selection box
+    st.markdown("""
         <style>
-        #header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.5rem 1rem;
-            background-color: #F0F2F6;
-            border-bottom: 1px solid #E0E0E0;
-        }
-        #logo {
-            width: 100px;
-        }
-        #language-selector {
-            width: 120px; /* Adjust the width as needed */
-        }
-        #language-selector:hover {
-            opacity: 0.8;
-        }
-        .stSelectbox>div>div>div {
-            background-color: #008080; /* Theme color */
-            color: white; /* Text color */
-        }
-        .stSelectbox>div>div>div>div {
-            padding: 2px 5px; /* Adjust padding for better fit */
+        div[data-baseweb="select"] > div {
+            width: 200px;
+            font-size: 14px;
         }
         </style>
-        """,
-        unsafe_allow_html=True
-    )
+    """, unsafe_allow_html=True)
 
-    # Header with logo and language selection
-    st.markdown(
-        """
-        <div id="header">
-            <img id="logo" src="logo.png" alt="Logo">
-            <div id="language-selector">
-                <label for="language_select">Choose Language / اختر اللغة</label>
-                <select id="language_select" name="language_select">
-                    <option value="en">English</option>
-                    <option value="ar">العربية</option>
-                </select>
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+    # Language selection using columns for better positioning
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        language = st.selectbox("Choose Language / اختر اللغة", ["English", "العربية"], key="language_select")
 
-    # Language selection
-    language = st.selectbox("Choose Language / اختر اللغة", ["English", "العربية"], key="language_select")
     lang_code = "en" if language == "English" else "ar"
 
     # Inject custom CSS for RTL layout, font sizes, and tab styling
     st.markdown(
         f"""
         <style>
-        html, body, [class*="css"] {{
-            font-size: 16px;
-            direction: {"rtl" if lang_code == "ar" else "ltr"};
-        }}
-        h1 {{
-            font-size: 2rem;
-        }}
-        h2 {{
-            font-size: 1.5rem;
-        }}
-        h3 {{
-            font-size: 1.17rem;
-        }}
-        .stTabs [data-baseweb="tab-list"] {{
-            gap: 8px;
-        }}
-        .stTabs [data-baseweb="tab"] {{
-            height: auto;
-            white-space: pre-wrap;
-            background-color: #F0F2F6;
-            border-radius: 4px 4px 0 0;
-            gap: 1rem;
-            padding: 10px 20px;
-            font-size: 1rem;
-        }}
-        .stTabs [data-baseweb="tab"]:hover {{
-            background-color: #008080;
-            color: white;
-        }}
-        .stTabs [data-baseweb="tab"][aria-selected="true"] {{
-            background-color: #008080;
-            color: white;
-        }}
-        .stTabs [data-baseweb="tab-list"] button:focus {{
-            box-shadow: none;
-        }}
-        .stTabs [data-baseweb="tab-highlight"] {{
-            background-color: transparent;
-        }}
-        .stTabs [data-baseweb="tab-border"] {{
-            display: none;
-        }}
-        .stTextArea>div>div>textarea {{
-            font-size: 1rem;
-        }}
-        .stSelectbox>div>div>div {{
-            font-size: 1rem;
-        }}
-        .stRadio [role="radiogroup"] {{
-            flex-direction: column; /* Align vertically */
-            align-items: flex-start; /* Align to the left */
-        }}
+        body {{ direction: {"rtl" if lang_code == "ar" else "ltr"}; }}
+        .stTab {{ font-size: 18px; }}
+        .stMarkdown {{ font-size: 16px; }}
         </style>
         """,
         unsafe_allow_html=True
@@ -161,6 +75,7 @@ def main():
         grade_legal_document(lang_code)
     with tabs[5]:
         predictive_analysis_ui()
+
 
 def legal_query_assistant(lang_code):
     st.header("Legal Query Assistant" if lang_code == "en" else "مساعد الاستفسارات القانونية")
