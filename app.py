@@ -12,11 +12,10 @@ import openai
 # Assuming you have a directory for templates
 TEMPLATE_DIR = "templates"
 
-
 def main():
     st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
 
-    # Add this code block for language selection
+    # Language selection
     col1, col2 = st.columns([3, 1])
     with col1:
         st.title("Astraea - Legal Query Assistant")
@@ -24,8 +23,8 @@ def main():
         language = st.selectbox(
             "",
             ["English", "عربي"],
-            key="language_select",
-            index=0 if st.session_state.get('language', 'en') == 'en' else 1
+            index=0 if st.session_state.get('language', 'en') == 'en' else 1,
+            key="language_select_main"
         )
     
     # Set the language based on selection
