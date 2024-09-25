@@ -37,32 +37,38 @@ def main():
             cursor: pointer;
             display: flex;
             align-items: center;
+            background-color: #008080; /* Theme color */
+            padding: 5px 10px;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
         #language-selector img {
             width: 20px; /* Adjust the size as needed */
             margin-right: 5px;
         }
         #language-selector select {
-            background-color: #008080; /* Theme color */
+            background-color: transparent;
             color: white; /* Text color */
             border: none;
             padding: 2px 5px;
             border-radius: 5px;
-            width: auto; /* Adjust width to fit content */
+            font-size: 14px;
+            cursor: pointer;
         }
         #language-selector select option {
-            padding: 2px 5px; /* Adjust padding for options */
+            background-color: #008080; /* Theme color */
+            color: white; /* Text color */
         }
         #language-selector select:focus {
             outline: none;
             box-shadow: 0 0 5px rgba(0, 128, 128, 0.5);
         }
         #language-selector:hover {
-            opacity: 0.8;
+            opacity: 0.9;
         }
         </style>
         <div id="language-selector">
-            <img src="https://img.icons8.com/ios-filled/50/000000/language.png" alt="Language Icon">
+            <img src="https://img.icons8.com/ios-filled/50/ffffff/language.png" alt="Language Icon">
             <select id="language_select" aria-label="Language Selector" onchange="document.getElementById('language_select').dispatchEvent(new Event('change'));">
                 <option value="en">English</option>
                 <option value="ar">العربية</option>
