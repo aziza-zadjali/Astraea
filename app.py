@@ -12,19 +12,21 @@ import openai
 # Assuming you have a directory for templates
 TEMPLATE_DIR = "templates"
 
-# Add custom CSS to hide the icons
-hide_streamlit_style = """
-    <style>
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    .stApp [data-testid="stToolbar"] {visibility: hidden;}
-    </style>
-"""
 
-st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 def main():
     st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
+
+    # Add custom CSS to hide the icons
+    hide_streamlit_style = """
+        <style>
+        #MainMenu {visibility: hidden;}
+        footer {visibility: hidden;}
+        .stApp [data-testid="stToolbar"] {visibility: hidden;}
+        </style>
+    """
+    
+    st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
     # Fixed position for language selection icon
     st.markdown(
