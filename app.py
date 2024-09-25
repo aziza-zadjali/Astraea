@@ -78,12 +78,28 @@ def main():
         unsafe_allow_html=True
     )
 
-    # Add a comment above the language selector
-    st.markdown("### Select a Language / اختر لغة")
+    # Initialize session state for language selection
+    if 'language' not in st.session_state:
+        st.session_state['language'] = 'en'
 
-    # Hidden selectbox for language selection
-    language = st.selectbox("Choose Language / اختر اللغة", ["English", "العربية"], key="language_select", label_visibility="collapsed")
-    lang_code = "en" if language == "English" else "ar"
+    # JavaScript to update session state
+    st.markdown(
+        """
+        <script>
+        document.getElementById('language_select').addEventListener('change', function() {
+            var selectedLanguage = this.value;
+            window.parent.postMessage({type: 'streamlit:setSessionState', key: 'language', value: selectedLanguage}, '*');
+        });
+        </script>
+        """,
+        unsafe_allow_html=True
+    )
+
+    # Update language based on session state
+    language = st.session_state['language']
+
+    # Translation logic
+    lang_code = 'en' if language == 'English' else 'ar'
 
     # Inject custom CSS for RTL layout, font sizes, and tab styling
     st.markdown(
@@ -184,7 +200,6 @@ def main():
     with tabs[5]:
         predictive_analysis_ui()
 
-
 def legal_query_assistant(lang_code):
     st.header("Legal Query Assistant" if lang_code == "en" else "مساعد الاستفسارات القانونية")
 
@@ -242,7 +257,7 @@ def handle_document_queries(document_text, suggested_questions, lang_code):
 
     if custom_query and submit_custom:
         process_query(custom_query, document_text, lang_code)
-                           
+
 def oman_laws_feature(lang_code):
     st.header("Oman Laws" if lang_code == "en" else "قوانين عمان")
     laws = get_oman_laws()
