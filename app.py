@@ -143,11 +143,14 @@ def main():
     title = "Astraea - Legal Query Assistant" if lang_code == "en" else "أسترايا - مساعد الاستفسارات القانونية"
     st.title(title)
 
-    disclaimer = {
-        "en": "This assistant uses GPT-4.0 to provide general legal information. Please note that this is not a substitute for professional legal advice.",
-        "ar": "يستخدم هذا المساعد نموذج GPT-4.0 لتقديم معلومات قانونية عامة. يرجى ملاحظة أن هذا ليس بديلاً عن المشورة القانونية المهنية."
-    }
-    st.info(disclaimer[lang_code])
+    # Disclaimer
+    st.markdown(
+        """
+        **Disclaimer:** This assistant uses GPT-4.0 to provide general legal information.
+        Please note that this is not a substitute for professional legal advice.
+        """,
+        unsafe_allow_html=True
+    )
 
     # Define tab labels in both languages
     tab_labels = {
