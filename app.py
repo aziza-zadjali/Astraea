@@ -13,7 +13,7 @@ import openai
 TEMPLATE_DIR = "templates"
 
 def main():
-    # st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
+    st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
 
     # Add custom CSS to hide the icons
     hide_streamlit_style = """
@@ -62,11 +62,6 @@ def main():
         unsafe_allow_html=True
     )
 
-    # Set title based on language
-    if st.session_state.language == 'en':
-        st.title("Astraea - Legal Query Assistant")
-    else:
-        st.title("أسترايا - مساعد الاستفسارات القانونية")
 
     # Add custom CSS to hide the icons
     hide_streamlit_style = """
