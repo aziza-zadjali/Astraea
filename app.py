@@ -12,9 +12,6 @@ import openai
 # Assuming you have a directory for templates
 TEMPLATE_DIR = "templates"
 
-
-import streamlit as st
-
 def main():
     st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
 
@@ -28,7 +25,7 @@ def main():
     """
     st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
-    # Improved language selection dropdown
+    # Improved language selection
     st.markdown(
         """
         <style>
@@ -42,14 +39,14 @@ def main():
             align-items: center;
         }
         #language-selector img {
-            width: 30px; /* Adjust the size as needed */
-            margin-right: 10px;
+            width: 20px; /* Adjust the size as needed */
+            margin-right: 5px;
         }
         #language-selector select {
             background-color: #008080; /* Theme color */
             color: white; /* Text color */
             border: none;
-            padding: 5px;
+            padding: 2px 5px;
             border-radius: 5px;
         }
         #language-selector select:focus {
@@ -70,6 +67,9 @@ def main():
         """,
         unsafe_allow_html=True
     )
+
+    # Add a comment above the language selector
+    st.markdown("### Select a Language / اختر لغة")
 
     # Hidden selectbox for language selection
     language = st.selectbox("Choose Language / اختر اللغة", ["English", "العربية"], key="language_select", label_visibility="collapsed")
