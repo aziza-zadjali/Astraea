@@ -146,6 +146,20 @@ def main():
     title = "Astraea - Legal Query Assistant" if lang_code == "en" else "أسترايا - مساعد الاستفسارات القانونية"
     st.title(title)
 
+    # Language selection with icons
+    st.sidebar.markdown("## Language / اللغة")
+    language = st.sidebar.radio(
+        "Select Language",
+        options=["English", "Arabic"],
+        format_func=lambda x: "🇬🇧 English" if x == "English" else "🇦🇪 Arabic"
+    )
+
+    def translate(text: str) -> str:
+        if language == 'Arabic':
+            translator = GoogleTranslator(source='en', target='ar')
+            return translator.translate(text)
+        return text
+
     # Disclaimer
     st.markdown(
         """
