@@ -68,11 +68,6 @@ def main():
     else:
         st.title("أسترايا - مساعد الاستفسارات القانونية")
 
-    # Display the main sections
-    display_chat_interface()
-    display_document_upload()
-    display_oman_laws()
-
 def translate_text(text: str) -> str:
     if st.session_state.language != 'en':
         translator = GoogleTranslator(source='auto', target=st.session_state.language)
@@ -82,71 +77,6 @@ def translate_text(text: str) -> str:
         # Remove the prompt from the translated text
         return translated[len(translator.translate(legal_prompt)):]
     return text
-
-def display_chat_interface():
-    st.subheader(translate_text("Chat Interface"))
-    
-    # Initialize chat history
-    if "messages" not in st.session_state:
-        st.session_state.messages = []
-
-    # Display chat messages
-    for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            st.markdown(translate_text(message["content"]))
-
-    # User input
-    user_input = st.chat_input(translate_text("Enter your legal query here:"))
-
-    if user_input:
-        # Add user message to chat history
-        st.session_state.messages.append({"role": "user", "content": user_input})
-        
-        # Display user message
-        with st.chat_message("user"):
-            st.markdown(translate_text(user_input))
-        
-        # Get AI response
-        ai_response = get_legal_advice(user_input)
-        
-        # Add AI response to chat history
-        st.session_state.messages.append({"role": "assistant", "content": ai_response})
-        
-        # Display AI response
-        with st.chat_message("assistant"):
-            st.markdown(translate_text(ai_response))
-
-def display_document_upload():
-    st.subheader(translate_text("Document Upload"))
-    uploaded_file = st.file_uploader(translate_text("Choose a file"), type=["txt", "pdf", "docx"])
-    
-    if uploaded_file is not None:
-        file_contents = ""
-        file_extension = uploaded_file.name.split(".")[-1].lower()
-        
-        if file_extension == "txt":
-            file_contents = read_txt(uploaded_file)
-        elif file_extension == "pdf":
-            file_contents = read_pdf(uploaded_file)
-        elif file_extension == "docx":
-            file_contents = read_docx(uploaded_file)
-        
-        st.text_area(translate_text("File Contents"), file_contents, height=300)
-        
-        if st.button(translate_text("Analyze Document")):
-            analysis = get_legal_advice(file_contents)
-            st.markdown(translate_text("## Document Analysis"))
-            st.markdown(translate_text(analysis))
-
-def display_oman_laws():
-    st.subheader(translate_text("Oman Laws"))
-    laws = get_oman_laws()
-    selected_law = st.selectbox(translate_text("Select a law"), laws)
-    
-    if selected_law:
-        law_content = read_oman_law(selected_law)
-        st.markdown(translate_text(f"## {selected_law}"))
-        st.markdown(translate_text(law_content))
 
 
 
