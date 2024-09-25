@@ -140,8 +140,7 @@ def main():
     # Add a comment above the language selector
     st.markdown("### Select a Language / اختر لغة")
 
-    # Hidden selectbox for language selection
-    language = st.selectbox("Choose Language / اختر اللغة", ["English", "العربية"], key="language_select", label_visibility="collapsed")
+    # language = st.selectbox("Choose Language / اختر اللغة", ["English", "العربية"], key="language_select", label_visibility="collapsed")
     lang_code = "en" if language == "English" else "ar"
 
     # Inject custom CSS for RTL layout, font sizes, and tab styling
@@ -243,6 +242,13 @@ def main():
     with tabs[5]:
         predictive_analysis_ui()
 
+def translate_text(text: str) -> str:
+    if st.session_state.language != 'en':
+        translator = GoogleTranslator(source='auto', target='ar')
+        legal_prompt = "Translate the following text using certified legal standards and terminologies: "
+        translated = translator.translate(legal_prompt + text)
+        return translated[len(translator.translate(legal_prompt)):]
+    return text
 
 def legal_query_assistant(lang_code):
     st.header("Legal Query Assistant" if lang_code == "en" else "مساعد الاستفسارات القانونية")
