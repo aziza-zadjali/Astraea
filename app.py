@@ -18,11 +18,51 @@ def main():
     # Add custom CSS to hide the icons
     hide_streamlit_style = """
         <style>
+<style>
+    .stTabs {{
+        background-color: #f0f8ff; /* Light background for the tab bar */
+    }}
+    .st-df {{ /* Default state of the tabs */
+        border: none;
+        padding: 10px;
+        color: #1b434f; /* Dark teal color for text */
+        background-color: #f0f8ff; /* Match tab bar background */
+    }}
+    .st-df:hover {{ /* Hover state of the tabs */
+        background-color: #e0f0f8; /* Slightly darker background on hover */
+    }}
+    .st-at {{ /* Active tab state */
+        font-weight: bold;
+        color: #ffffff; /* White text for active tab */
+        background-color: #1b434f; /* Dark teal for active tab background */
+    }}
+</style>
+
         #MainMenu {visibility: hidden;}
         footer {visibility: hidden;}
         .stApp [data-testid="stToolbar"] {visibility: hidden;}
         
 <style>
+<style>
+    .stTabs {{
+        background-color: #f0f8ff; /* Light background for the tab bar */
+    }}
+    .st-df {{ /* Default state of the tabs */
+        border: none;
+        padding: 10px;
+        color: #1b434f; /* Dark teal color for text */
+        background-color: #f0f8ff; /* Match tab bar background */
+    }}
+    .st-df:hover {{ /* Hover state of the tabs */
+        background-color: #e0f0f8; /* Slightly darker background on hover */
+    }}
+    .st-at {{ /* Active tab state */
+        font-weight: bold;
+        color: #ffffff; /* White text for active tab */
+        background-color: #1b434f; /* Dark teal for active tab background */
+    }}
+</style>
+
     .stTabs {
         background-color: #f0f8ff; /* Light background for the tab bar */
     }
@@ -49,6 +89,26 @@ def main():
     st.markdown(
         """
         <style>
+<style>
+    .stTabs {{
+        background-color: #f0f8ff; /* Light background for the tab bar */
+    }}
+    .st-df {{ /* Default state of the tabs */
+        border: none;
+        padding: 10px;
+        color: #1b434f; /* Dark teal color for text */
+        background-color: #f0f8ff; /* Match tab bar background */
+    }}
+    .st-df:hover {{ /* Hover state of the tabs */
+        background-color: #e0f0f8; /* Slightly darker background on hover */
+    }}
+    .st-at {{ /* Active tab state */
+        font-weight: bold;
+        color: #ffffff; /* White text for active tab */
+        background-color: #1b434f; /* Dark teal for active tab background */
+    }}
+</style>
+
         #language-selector {
             position: fixed;
             top: 0.5rem;
@@ -88,6 +148,26 @@ def main():
         }
         
 <style>
+<style>
+    .stTabs {{
+        background-color: #f0f8ff; /* Light background for the tab bar */
+    }}
+    .st-df {{ /* Default state of the tabs */
+        border: none;
+        padding: 10px;
+        color: #1b434f; /* Dark teal color for text */
+        background-color: #f0f8ff; /* Match tab bar background */
+    }}
+    .st-df:hover {{ /* Hover state of the tabs */
+        background-color: #e0f0f8; /* Slightly darker background on hover */
+    }}
+    .st-at {{ /* Active tab state */
+        font-weight: bold;
+        color: #ffffff; /* White text for active tab */
+        background-color: #1b434f; /* Dark teal for active tab background */
+    }}
+</style>
+
     .stTabs {
         background-color: #f0f8ff; /* Light background for the tab bar */
     }
@@ -129,6 +209,26 @@ def main():
     st.markdown(
         f"""
         <style>
+<style>
+    .stTabs {{
+        background-color: #f0f8ff; /* Light background for the tab bar */
+    }}
+    .st-df {{ /* Default state of the tabs */
+        border: none;
+        padding: 10px;
+        color: #1b434f; /* Dark teal color for text */
+        background-color: #f0f8ff; /* Match tab bar background */
+    }}
+    .st-df:hover {{ /* Hover state of the tabs */
+        background-color: #e0f0f8; /* Slightly darker background on hover */
+    }}
+    .st-at {{ /* Active tab state */
+        font-weight: bold;
+        color: #ffffff; /* White text for active tab */
+        background-color: #1b434f; /* Dark teal for active tab background */
+    }}
+</style>
+
         html, body, [class*="css"] {{
             font-size: 16px;
             direction: {"rtl" if lang_code == "ar" else "ltr"};
@@ -183,6 +283,26 @@ def main():
         }}
         
 <style>
+<style>
+    .stTabs {{
+        background-color: #f0f8ff; /* Light background for the tab bar */
+    }}
+    .st-df {{ /* Default state of the tabs */
+        border: none;
+        padding: 10px;
+        color: #1b434f; /* Dark teal color for text */
+        background-color: #f0f8ff; /* Match tab bar background */
+    }}
+    .st-df:hover {{ /* Hover state of the tabs */
+        background-color: #e0f0f8; /* Slightly darker background on hover */
+    }}
+    .st-at {{ /* Active tab state */
+        font-weight: bold;
+        color: #ffffff; /* White text for active tab */
+        background-color: #1b434f; /* Dark teal for active tab background */
+    }}
+</style>
+
     .stTabs {
         background-color: #f0f8ff; /* Light background for the tab bar */
     }
