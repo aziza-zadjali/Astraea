@@ -48,7 +48,7 @@ def main():
         }
         #language-selector select {
             background-color: transparent;
-            color: white; /* Text color */
+            color: rgb(27, 67, 79); /* Text color */
             border: none;
             padding: 2px 5px;
             border-radius: 5px;
@@ -57,7 +57,7 @@ def main():
         }
         #language-selector select option {
             background-color: #008080; /* Theme color */
-            color: white; /* Text color */
+            color: rgb(27, 67, 79); /* Text color */
         }
         #language-selector select:focus {
             outline: none;
@@ -116,11 +116,11 @@ def main():
         }}
         .stTabs [data-baseweb="tab"]:hover {{
             background-color: #008080;
-            color: white;
+            color: rgb(27, 67, 79);
         }}
         .stTabs [data-baseweb="tab"][aria-selected="true"] {{
             background-color: #008080;
-            color: white;
+            color: rgb(27, 67, 79);
         }}
         .stTabs [data-baseweb="tab-list"] button:focus {{
             box-shadow: none;
