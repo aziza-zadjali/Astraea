@@ -138,7 +138,10 @@ def main():
         """,
         unsafe_allow_html=True
     )
-
+    
+    # Display the logo at the top
+    st.image("logo.png", width=100)  # Adjust width as needed
+    
     # Main content with tabs
     title = "Astraea - Legal Query Assistant" if lang_code == "en" else "أسترايا - مساعد الاستفسارات القانونية"
     st.title(title)
