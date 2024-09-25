@@ -25,6 +25,17 @@ def main():
     """
     st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
+    st.markdown("""
+    <style>
+    @media (max-width: 768px) {
+        .element-container { width: 100%; }
+        .block-container { padding: 1rem; }
+        .stButton > button { width: 100%; height: 3rem; }
+        .stTextInput > div > div > input { height: 3rem; }
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
     # Improved language selection
     st.markdown(
         """
