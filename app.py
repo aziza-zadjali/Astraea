@@ -68,18 +68,6 @@ def main():
     else:
         st.title("أسترايا - مساعد الاستفسارات القانونية")
 
-def translate_text(text: str) -> str:
-    if st.session_state.language != 'en':
-        translator = GoogleTranslator(source='auto', target=st.session_state.language)
-        # Add a prompt to ensure translation adheres to legal standards
-        legal_prompt = "Translate the following text using certified legal standards and terminologies: "
-        translated = translator.translate(legal_prompt + text)
-        # Remove the prompt from the translated text
-        return translated[len(translator.translate(legal_prompt)):]
-    return text
-
-
-
     # Add custom CSS to hide the icons
     hide_streamlit_style = """
         <style>
@@ -397,10 +385,17 @@ def legal_translation_service(lang_code):
                     mime="text/plain"
                 )
 
-def translate_to_arabic(text):
-    translator = GoogleTranslator(source='auto', target='ar')
-    translated = translator.translate(text)
-    return translated
+
+def translate_to_arabic(text: str) -> str:
+    if st.session_state.language != 'en':
+        translator = GoogleTranslator(source='auto', target=st.session_state.language)
+        # Add a prompt to ensure translation adheres to legal standards
+        legal_prompt = "Translate the following text using certified legal standards and terminologies: "
+        translated = translator.translate(legal_prompt + text)
+        # Remove the prompt from the translated text
+        return translated[len(translator.translate(legal_prompt)):]
+    return text
+
 
 def automated_document_creation(lang_code):
     st.header("Automated Document Creation" if lang_code == "en" else "إنشاء المستندات الآلي")
