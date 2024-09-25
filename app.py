@@ -41,47 +41,7 @@ def main():
         #MainMenu {visibility: hidden;}
         footer {visibility: hidden;}
         .stApp [data-testid="stToolbar"] {visibility: hidden;}
-        
-<style>
-<style>
-    .stTabs {{
-        background-color: #f0f8ff; /* Light background for the tab bar */
-    }}
-    .st-df {{ /* Default state of the tabs */
-        border: none;
-        padding: 10px;
-        color: #1b434f; /* Dark teal color for text */
-        background-color: #f0f8ff; /* Match tab bar background */
-    }}
-    .st-df:hover {{ /* Hover state of the tabs */
-        background-color: #e0f0f8; /* Slightly darker background on hover */
-    }}
-    .st-at {{ /* Active tab state */
-        font-weight: bold;
-        color: #ffffff; /* White text for active tab */
-        background-color: #1b434f; /* Dark teal for active tab background */
-    }}
-</style>
-
-    .stTabs {
-        background-color: #f0f8ff; /* Light background for the tab bar */
-    }
-    .st-df { /* Default state of the tabs */
-        border: none;
-        padding: 10px;
-        color: #1b434f; /* Dark teal color for text */
-        background-color: #f0f8ff; /* Match tab bar background */
-    }
-    .st-df:hover { /* Hover state of the tabs */
-        background-color: #e0f0f8; /* Slightly darker background on hover */
-    }
-    .st-at { /* Active tab state */
-        font-weight: bold;
-        color: #ffffff; /* White text for active tab */
-        background-color: #1b434f; /* Dark teal for active tab background */
-    }
-</style>
-</style>
+        </style>
     """
     st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
@@ -128,7 +88,7 @@ def main():
         }
         #language-selector select {
             background-color: transparent;
-            color: rgb(27, 67, 79); /* Text color */
+            color: white; /* Text color */
             border: none;
             padding: 2px 5px;
             border-radius: 5px;
@@ -137,7 +97,7 @@ def main():
         }
         #language-selector select option {
             background-color: #008080; /* Theme color */
-            color: rgb(27, 67, 79); /* Text color */
+            color: white; /* Text color */
         }
         #language-selector select:focus {
             outline: none;
@@ -146,47 +106,7 @@ def main():
         #language-selector:hover {
             opacity: 0.9;
         }
-        
-<style>
-<style>
-    .stTabs {{
-        background-color: #f0f8ff; /* Light background for the tab bar */
-    }}
-    .st-df {{ /* Default state of the tabs */
-        border: none;
-        padding: 10px;
-        color: #1b434f; /* Dark teal color for text */
-        background-color: #f0f8ff; /* Match tab bar background */
-    }}
-    .st-df:hover {{ /* Hover state of the tabs */
-        background-color: #e0f0f8; /* Slightly darker background on hover */
-    }}
-    .st-at {{ /* Active tab state */
-        font-weight: bold;
-        color: #ffffff; /* White text for active tab */
-        background-color: #1b434f; /* Dark teal for active tab background */
-    }}
-</style>
-
-    .stTabs {
-        background-color: #f0f8ff; /* Light background for the tab bar */
-    }
-    .st-df { /* Default state of the tabs */
-        border: none;
-        padding: 10px;
-        color: #1b434f; /* Dark teal color for text */
-        background-color: #f0f8ff; /* Match tab bar background */
-    }
-    .st-df:hover { /* Hover state of the tabs */
-        background-color: #e0f0f8; /* Slightly darker background on hover */
-    }
-    .st-at { /* Active tab state */
-        font-weight: bold;
-        color: #ffffff; /* White text for active tab */
-        background-color: #1b434f; /* Dark teal for active tab background */
-    }
-</style>
-</style>
+        </style>
         <div id="language-selector">
             <img src="https://img.icons8.com/ios-filled/50/ffffff/language.png" alt="Language Icon">
             <select id="language_select" aria-label="Language Selector" onchange="document.getElementById('language_select').dispatchEvent(new Event('change'));">
@@ -256,11 +176,11 @@ def main():
         }}
         .stTabs [data-baseweb="tab"]:hover {{
             background-color: #008080;
-            color: rgb(27, 67, 79);
+            color: white;
         }}
         .stTabs [data-baseweb="tab"][aria-selected="true"] {{
             background-color: #008080;
-            color: rgb(27, 67, 79);
+            color: white;
         }}
         .stTabs [data-baseweb="tab-list"] button:focus {{
             box-shadow: none;
@@ -281,47 +201,7 @@ def main():
             flex-direction: column; /* Align vertically */
             align-items: flex-start; /* Align to the left */
         }}
-        
-<style>
-<style>
-    .stTabs {{
-        background-color: #f0f8ff; /* Light background for the tab bar */
-    }}
-    .st-df {{ /* Default state of the tabs */
-        border: none;
-        padding: 10px;
-        color: #1b434f; /* Dark teal color for text */
-        background-color: #f0f8ff; /* Match tab bar background */
-    }}
-    .st-df:hover {{ /* Hover state of the tabs */
-        background-color: #e0f0f8; /* Slightly darker background on hover */
-    }}
-    .st-at {{ /* Active tab state */
-        font-weight: bold;
-        color: #ffffff; /* White text for active tab */
-        background-color: #1b434f; /* Dark teal for active tab background */
-    }}
-</style>
-
-    .stTabs {
-        background-color: #f0f8ff; /* Light background for the tab bar */
-    }
-    .st-df { /* Default state of the tabs */
-        border: none;
-        padding: 10px;
-        color: #1b434f; /* Dark teal color for text */
-        background-color: #f0f8ff; /* Match tab bar background */
-    }
-    .st-df:hover { /* Hover state of the tabs */
-        background-color: #e0f0f8; /* Slightly darker background on hover */
-    }
-    .st-at { /* Active tab state */
-        font-weight: bold;
-        color: #ffffff; /* White text for active tab */
-        background-color: #1b434f; /* Dark teal for active tab background */
-    }
-</style>
-</style>
+        </style>
         """,
         unsafe_allow_html=True
     )
