@@ -13,6 +13,7 @@ import openai
 TEMPLATE_DIR = "templates"
 
 
+import streamlit as st
 
 def main():
     st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
@@ -25,10 +26,9 @@ def main():
         .stApp [data-testid="stToolbar"] {visibility: hidden;}
         </style>
     """
-    
     st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
-    # Fixed position for language selection icon
+    # Improved language selection dropdown
     st.markdown(
         """
         <style>
@@ -52,20 +52,17 @@ def main():
             padding: 5px;
             border-radius: 5px;
         }
+        #language-selector select:focus {
+            outline: none;
+            box-shadow: 0 0 5px rgba(0, 128, 128, 0.5);
+        }
         #language-selector:hover {
             opacity: 0.8;
         }
         </style>
-        """,
-        unsafe_allow_html=True
-    )
-
-    # Language selection icon with dropdown
-    st.markdown(
-        """
         <div id="language-selector">
             <img src="https://img.icons8.com/ios-filled/50/000000/language.png" alt="Language Icon">
-            <select id="language_select" onchange="document.getElementById('language_select').dispatchEvent(new Event('change'));">
+            <select id="language_select" aria-label="Language Selector" onchange="document.getElementById('language_select').dispatchEvent(new Event('change'));">
                 <option value="en">English</option>
                 <option value="ar">العربية</option>
             </select>
@@ -138,14 +135,13 @@ def main():
         """,
         unsafe_allow_html=True
     )
-    
+
     # Display the logo at the top
     st.image("logo.png", width=100)  # Adjust width as needed
-    
+
     # Main content with tabs
     title = "Astraea - Legal Query Assistant" if lang_code == "en" else "أسترايا - مساعد الاستفسارات القانونية"
     st.title(title)
-
 
     # Disclaimer
     st.markdown(
@@ -177,6 +173,7 @@ def main():
         grade_legal_document(lang_code)
     with tabs[5]:
         predictive_analysis_ui()
+
 
 def legal_query_assistant(lang_code):
     st.header("Legal Query Assistant" if lang_code == "en" else "مساعد الاستفسارات القانونية")
