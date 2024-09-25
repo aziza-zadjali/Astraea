@@ -14,6 +14,11 @@ TEMPLATE_DIR = "templates"
 
 def main():
     st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
+    # Language selection
+        languages = {
+            "English": "en",
+            "Arabic": "ar"
+        }
 
     # Fixed position for language selection icon
     st.markdown(
