@@ -48,6 +48,10 @@ def main():
             border: none;
             padding: 2px 5px;
             border-radius: 5px;
+            width: auto; /* Adjust width to fit content */
+        }
+        #language-selector select option {
+            padding: 2px 5px; /* Adjust padding for options */
         }
         #language-selector select:focus {
             outline: none;
