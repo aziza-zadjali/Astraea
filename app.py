@@ -15,76 +15,7 @@ TEMPLATE_DIR = "templates"
 def main():
     st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
 
-    # Add custom CSS to hide the icons
-    hide_streamlit_style = """
-        <style>
-        #MainMenu {visibility: hidden;}
-        footer {visibility: hidden;}
-        </style>
-    """
-    st.markdown(hide_streamlit_style, unsafe_allow_html=True)
-
-    # Improved language selection
-    st.markdown(
-        """
-        <style>
-        .language-toggle {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            z-index: 1000;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
-
-    if 'language' not in st.session_state:
-        st.session_state.language = 'en'
-
-    def toggle_language():
-        st.session_state.language = 'ar' if st.session_state.language == 'en' else 'en'
-
-    st.markdown(
-        f"""
-        <div class="language-toggle">
-            <button onclick="toggleLanguage()" style="font-size: 24px;">🌐</button>
-        </div>
-        <script>
-        function toggleLanguage() {{
-            const languageToggle = window.parent.document.querySelector('.language-toggle button');
-            if (languageToggle) {{
-                languageToggle.click();
-            }}
-        }}
-        </script>
-        """,
-        unsafe_allow_html=True
-    )
-
-
-    # Add custom CSS to hide the icons
-    hide_streamlit_style = """
-        <style>
-        #MainMenu {visibility: hidden;}
-        footer {visibility: hidden;}
-        .stApp [data-testid="stToolbar"] {visibility: hidden;}
-        </style>
-    """
-    st.markdown(hide_streamlit_style, unsafe_allow_html=True)
-
-    st.markdown("""
-    <style>
-    @media (max-width: 768px) {
-        .element-container { width: 100%; }
-        .block-container { padding: 1rem; }
-        .stButton > button { width: 100%; height: 3rem; }
-        .stTextInput > div > div > input { height: 3rem; }
-    }
-    </style>
-    """, unsafe_allow_html=True)
-    
-    # Improved language selection
+    # Fixed position for language selection icon
     st.markdown(
         """
         <style>
@@ -96,39 +27,32 @@ def main():
             cursor: pointer;
             display: flex;
             align-items: center;
-            background-color: #008080; /* Theme color */
-            padding: 5px 10px;
-            border-radius: 5px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
         #language-selector img {
-            width: 20px; /* Adjust the size as needed */
-            margin-right: 5px;
+            width: 30px; /* Adjust the size as needed */
+            margin-right: 10px;
         }
         #language-selector select {
-            background-color: transparent;
-            color: white; /* Text color */
-            border: none;
-            padding: 2px 5px;
-            border-radius: 5px;
-            font-size: 14px;
-            cursor: pointer;
-        }
-        #language-selector select option {
             background-color: #008080; /* Theme color */
             color: white; /* Text color */
-        }
-        #language-selector select:focus {
-            outline: none;
-            box-shadow: 0 0 5px rgba(0, 128, 128, 0.5);
+            border: none;
+            padding: 5px;
+            border-radius: 5px;
         }
         #language-selector:hover {
-            opacity: 0.9;
+            opacity: 0.8;
         }
         </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+    # Language selection icon with dropdown
+    st.markdown(
+        """
         <div id="language-selector">
-            <img src="https://img.icons8.com/ios-filled/50/ffffff/language.png" alt="Language Icon">
-            <select id="language_select" aria-label="Language Selector" onchange="document.getElementById('language_select').dispatchEvent(new Event('change'));">
+            <img src="https://img.icons8.com/ios-filled/50/000000/language.png" alt="Language Icon">
+            <select id="language_select" onchange="document.getElementById('language_select').dispatchEvent(new Event('change'));">
                 <option value="en">English</option>
                 <option value="ar">العربية</option>
             </select>
@@ -137,10 +61,8 @@ def main():
         unsafe_allow_html=True
     )
 
-    # Add a comment above the language selector
-    st.markdown("### Select a Language / اختر لغة")
-
-    # language = st.selectbox("Choose Language / اختر اللغة", ["English", "العربية"], key="language_select", label_visibility="collapsed")
+    # Hidden selectbox for language selection
+    language = st.selectbox("Choose Language / اختر اللغة", ["English", "العربية"], key="language_select", label_visibility="collapsed")
     lang_code = "en" if language == "English" else "ar"
 
     # Inject custom CSS for RTL layout, font sizes, and tab styling
@@ -204,21 +126,15 @@ def main():
         unsafe_allow_html=True
     )
 
-    # Display the logo at the top
-    st.image("logo.png", width=100)  # Adjust width as needed
-
     # Main content with tabs
     title = "Astraea - Legal Query Assistant" if lang_code == "en" else "أسترايا - مساعد الاستفسارات القانونية"
     st.title(title)
 
-    # Disclaimer
-    st.markdown(
-        """
-        **Disclaimer:** This assistant uses GPT-4.0 to provide general legal information.
-        Please note that this is not a substitute for professional legal advice.
-        """,
-        unsafe_allow_html=True
-    )
+    disclaimer = {
+        "en": "This assistant uses GPT-4.0 to provide general legal information. Please note that this is not a substitute for professional legal advice.",
+        "ar": "يستخدم هذا المساعد نموذج GPT-4.0 لتقديم معلومات قانونية عامة. يرجى ملاحظة أن هذا ليس بديلاً عن المشورة القانونية المهنية."
+    }
+    st.info(disclaimer[lang_code])
 
     # Define tab labels in both languages
     tab_labels = {
@@ -241,14 +157,6 @@ def main():
         grade_legal_document(lang_code)
     with tabs[5]:
         predictive_analysis_ui()
-
-def translate_text(text: str) -> str:
-    if st.session_state.language != 'en':
-        translator = GoogleTranslator(source='auto', target='ar')
-        legal_prompt = "Translate the following text using certified legal standards and terminologies: "
-        translated = translator.translate(legal_prompt + text)
-        return translated[len(translator.translate(legal_prompt)):]
-    return text
 
 def legal_query_assistant(lang_code):
     st.header("Legal Query Assistant" if lang_code == "en" else "مساعد الاستفسارات القانونية")
@@ -386,17 +294,10 @@ def legal_translation_service(lang_code):
                     mime="text/plain"
                 )
 
-
-def translate_to_arabic(text: str) -> str:
-    if st.session_state.language != 'en':
-        translator = GoogleTranslator(source='auto', target=st.session_state.language)
-        # Add a prompt to ensure translation adheres to legal standards
-        legal_prompt = "Translate the following text using certified legal standards and terminologies: "
-        translated = translator.translate(legal_prompt + text)
-        # Remove the prompt from the translated text
-        return translated[len(translator.translate(legal_prompt)):]
-    return text
-
+def translate_to_arabic(text):
+    translator = GoogleTranslator(source='auto', target='ar')
+    translated = translator.translate(text)
+    return translated
 
 def automated_document_creation(lang_code):
     st.header("Automated Document Creation" if lang_code == "en" else "إنشاء المستندات الآلي")
