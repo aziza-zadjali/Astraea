@@ -211,6 +211,8 @@ def landing_page(lang_code):
         unsafe_allow_html=True
     )
 
+    st.image("logo.png", use_column_width=True)
+
     st.markdown(
         f"""
         <div class="landing-page">
@@ -225,6 +227,8 @@ def landing_page(lang_code):
     if st.button("Get Started" if lang_code == "en" else "ابدأ", key="start_button"):
         st.session_state.page = "main"
         st.experimental_rerun()
+
+
 
 def legal_query_assistant(lang_code):
     st.header("Legal Query Assistant" if lang_code == "en" else "مساعد الاستفسارات القانونية")
