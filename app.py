@@ -112,8 +112,8 @@ def main():
             st.session_state.show_main_app = True
 
         # Add the 'Our Team' comment and team.png image after the "Get Started" button
-        st.markdown("### Our Team", unsafe_allow_html=True)
-        st.image("team.png", use_column_width=True)
+        st.markdown("<h3 style='text-align:center;'>Our Team</h3>", unsafe_allow_html=True)
+        st.image("team.png", width=300)
 
     if st.session_state.show_main_app:
         # Main app (initially hidden)
@@ -169,17 +169,17 @@ def main():
                 background-color: #008080;
                 color: white;
             }}
-            .stTabs [data-baseweb="tab"][aria-selected="true"]] {{
+            .stTabs [data-baseweb="tab"][aria-selected="true"] {{
                 background-color: #008080;
                 color: white;
             }}
             .stTabs [data-baseweb="tab-list"] button:focus {{
                 box-shadow: none;
             }}
-            .stTabs [data-baseweb="tab-highlight"]] {{
+            .stTabs [data-baseweb="tab-highlight"] {{
                 background-color: transparent;
             }}
-            .stTabs [data-baseweb="tab-border"]] {{
+            .stTabs [data-baseweb="tab-border"] {{
                 display: none;
             }}
             .stTextArea>div>div>textarea {{
@@ -188,7 +188,7 @@ def main():
             .stSelectbox>div>div>div {{
                 font-size: 1rem;
             }}
-            .stRadio [role="radiogroup"]] {{
+            .stRadio [role="radiogroup"] {{
                 flex-direction: column; /* Align vertically */
                 align-items: flex-start; /* Align to the left */
             }}
