@@ -189,7 +189,7 @@ def landing_page(lang_code):
     """, unsafe_allow_html=True)
     
     # Display logo
-    st.image("path/to/your/logo.png", width=200)  # Adjust width as needed
+    st.image("logo.png", width=200)  # Adjust width as needed
     
     st.markdown("""
     <div class="landing-page">
