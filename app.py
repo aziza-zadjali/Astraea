@@ -111,6 +111,9 @@ def main():
         if st.button("Get Started", key="get_started_button"):
             st.session_state.show_main_app = True
 
+        # Add the team.png image after the "Get Started" button
+        st.image("team.png", caption="Our Team", use_column_width=True)
+
     if st.session_state.show_main_app:
         # Main app (initially hidden)
         st.markdown(
@@ -223,6 +226,7 @@ def main():
             grade_legal_document(lang_code)
         with tabs[5]:
             predictive_analysis_ui()
+
 
 def legal_query_assistant(lang_code):
     st.header("Legal Query Assistant" if lang_code == "en" else "مساعد الاستفسارات القانونية")
