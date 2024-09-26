@@ -71,8 +71,8 @@ def main():
             """
             <div class="landing-page" style="text-align: center; padding: 50px 0;">
                 <h1 style="color: #008080; font-size: 3em;">Welcome to Astraea</h1>
-                <h2 style="color: #008080; font-size: 1.5em;">Your AI-Powered Legal Assistant</h2>
-                <p style="font-size: 1.2em; max-width: 600px; margin: 20px auto; color: #008080;">
+                <h2 style="color: #424242; font-size: 1.5em;">Your AI-Powered Legal Assistant</h2>
+                <p style="font-size: 1.2em; max-width: 600px; margin: 20px auto; color: #424242;">
                     Astraea is here to simplify your legal queries. Get instant answers, 
                     explore Omani laws, and receive personalized legal advice.
                 </p>
@@ -228,6 +228,7 @@ def legal_query_assistant(lang_code):
             if document_text:
                 suggested_questions = generate_suggested_questions(document_text, lang_code)
                 handle_document_queries(document_text, suggested_questions, lang_code)
+
 
 def process_uploaded_file(uploaded_file, lang_code):
     file_type = uploaded_file.type
