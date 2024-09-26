@@ -44,10 +44,26 @@ def main():
             justify-content: center;
             margin-top: 20px;
         }
+        .logo-container {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 1000;
+        }
         </style>
     """
     
     st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+
+    # Add logo to the top left corner
+    st.markdown(
+        """
+        <div class="logo-container">
+            <img src="logo.png" alt="Logo" width="100">
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
     # Fixed position for language selection icon
     st.markdown(
