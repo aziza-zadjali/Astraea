@@ -226,7 +226,6 @@ def landing_page(lang_code):
         st.session_state.page = "main"
         st.experimental_rerun()
 
-
 def legal_query_assistant(lang_code):
     st.header("Legal Query Assistant" if lang_code == "en" else "مساعد الاستفسارات القانونية")
 
