@@ -69,7 +69,7 @@ def main():
         # Landing page
         st.markdown(
             """
-            <div style="text-align: center; padding: 50px 0;">
+            <div class="landing-page" style="text-align: center; padding: 50px 0;">
                 <h1 style="color: #008080; font-size: 3em;">Welcome to Astraea</h1>
                 <h2 style="color: #008080; font-size: 1.5em;">Your AI-Powered Legal Assistant</h2>
                 <p style="font-size: 1.2em; max-width: 600px; margin: 20px auto; color: #008080;">
