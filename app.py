@@ -58,6 +58,18 @@ def main():
     # Add logo to the top left corner using Streamlit's image function
     st.image("logo.png", width=100)
 
+    st.markdown("""
+        <style>
+        .container {
+            display: flex;
+            justify-content: center;
+        }
+        </style>
+        <div class="container">
+            <img src="team.png" alt="Team">
+        </div>
+        """, unsafe_allow_html=True)
+    
     # Fixed position for language selection icon
     st.markdown(
         """
