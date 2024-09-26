@@ -206,16 +206,20 @@ def landing_page(lang_code):
         .landing-page button:hover {
             background-color: #006666;
         }
+        .landing-page img {
+            width: 150px; /* Adjust the size as needed */
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
         </style>
         """,
         unsafe_allow_html=True
     )
 
-    st.image("logo.png", use_column_width=True)
-
     st.markdown(
         f"""
         <div class="landing-page">
+            <img src="logo.png" alt="Logo">
             <h1>{"Welcome to Astraea" if lang_code == "en" else "مرحبًا بكم في أسترايا"}</h1>
             <p>{"Your comprehensive legal query assistant" if lang_code == "en" else "مساعدك الشامل للاستفسارات القانونية"}</p>
             <button onclick="document.getElementById('start_button').click();">{'Get Started' if lang_code == 'en' else 'ابدأ'}</button>
@@ -227,7 +231,6 @@ def landing_page(lang_code):
     if st.button("Get Started" if lang_code == "en" else "ابدأ", key="start_button"):
         st.session_state.page = "main"
         st.experimental_rerun()
-
 
 
 def legal_query_assistant(lang_code):
