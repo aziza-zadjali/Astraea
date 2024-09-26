@@ -113,22 +113,7 @@ def main():
 
         # Add the 'Our Team' comment and team.png image after the "Get Started" button
         st.markdown("<h3 style='text-align:center;'>Our Team</h3>", unsafe_allow_html=True)
-        st.markdown("""
-            <style>
-            .container {
-                display: flex;
-                justify-content: center;
-            }
-            .container img {
-                width: 60%;
-                height: auto;
-                margin: 0 auto;
-            }
-            </style>
-            <div class="container">
-                <img src="team.png" alt="Team">
-            </div>
-            """, unsafe_allow_html=True)
+        st.image("team.png", use_column_width=True)
 
     if st.session_state.show_main_app:
         # Main app (initially hidden)
