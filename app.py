@@ -40,6 +40,14 @@ def main():
             background-color: #006666;
         }
         </style>
+.stButton.return_to_landing {
+    position: fixed;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+}
+
     """
     
     st.markdown(hide_streamlit_style, unsafe_allow_html=True)
