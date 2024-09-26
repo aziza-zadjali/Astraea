@@ -49,14 +49,27 @@ def main():
             top: 10px;
             left: 10px;
             z-index: 1000;
+            display: flex;
+            align-items: center;
+        }
+        .logo-container img {
+            margin-right: 10px;
         }
         </style>
     """
     
     st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
-    # Add logo to the top left corner using Streamlit's image function
-    st.image("logo.png", width=100)
+    # Add logo and text to the top left corner using Streamlit's image function and markdown
+    st.markdown(
+        """
+        <div class="logo-container">
+            <img src="logo.png" alt="Logo" width="100">
+            <h1 style="color: #008080; font-size: 2em; margin-left: 10px;">Astraea</h1>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
     # Fixed position for language selection icon
     st.markdown(
