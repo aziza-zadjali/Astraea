@@ -113,15 +113,11 @@ def main():
             unsafe_allow_html=True
         )
 
-        # Move the "Return to Landing Page" button to the top center
-        st.markdown(
-            """
-            <div class="return-button-container">
-                <button onclick="window.location.reload();">Return to Landing Page</button>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+        # Move the "Return to Landing Page" button to the top center using Streamlit built-in button
+        return_button_col = st.columns([1, 2, 1])[1]
+        with return_button_col:
+            if st.button("Return to Landing Page", key="return_button"):
+                st.session_state.show_main_app = False
 
         # Main content with tabs
         language = st.selectbox("Choose Language / اختر اللغة", ["English", "العربية"], key="language_select", label_visibility="collapsed")
