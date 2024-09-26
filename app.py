@@ -4,7 +4,7 @@ import re
 from typing import Dict, Any
 from utils.document_processing import read_docx, read_pdf, read_txt, preprocess_arabic_text, format_response
 from utils.legal_advice import get_legal_advice, generate_suggested_questions
-from utils.oman_laws import get_oman_laws, read_oman_law
+from utils.oman_laws import get_oman_law, read_oman_law
 from deep_translator import GoogleTranslator
 from fpdf import FPDF
 import openai
@@ -191,17 +191,6 @@ def legal_query_assistant(lang_code):
                 suggested_questions = generate_suggested_questions(document_text, lang_code)
                 handle_document_queries(document_text, suggested_questions, lang_code)
 
-        # Add summary type selection
-        st.subheader("Select Summary Type" if lang_code == "en" else "اختر نوع الملخص")
-        summary_type = st.radio(
-            "Choose summary type" if lang_code == "en" else "اختر نوع الملخص",
-            ('Brief', 'Detailed', 'Comprehensive') if lang_code == "en" else ('موجز', 'مفصل', 'شامل'),
-            key="summary_type"
-        )
-
-        if st.button("Submit request" if lang_code == "en" else "إرسال الطلب", key="submit_summary_request"):
-            st.write(f"Summary type selected: {summary_type}" if lang_code == "en" else f"نوع الملخص المختار: {summary_type}")
-
 def process_uploaded_file(uploaded_file, lang_code):
     file_type = uploaded_file.type
     spinner_text = "Reading document..." if lang_code == "en" else "جاري قراءة الوثيقة..."
@@ -215,8 +204,6 @@ def process_uploaded_file(uploaded_file, lang_code):
         else:
             st.error("Unsupported file type." if lang_code == "en" else "نوع الملف غير مدعوم.")
             return None
-
-
 
 def handle_document_queries(document_text, suggested_questions, lang_code):
     st.success("Document uploaded successfully!" if lang_code == "en" else "تم تحميل الوثيقة بنجاح!")
@@ -235,10 +222,52 @@ def handle_document_queries(document_text, suggested_questions, lang_code):
     # Custom query section
     st.subheader("Custom Query" if lang_code == "en" else "استفسار مخصص")
     custom_query = st.text_input("Enter your custom query:" if lang_code == "en" else "أدخل استفسارك الخاص:", key="custom_query")
+    
+    # Summary type selection
+    st.subheader("Select Summary Type" if lang_code == "en" else "اختر نوع الملخص")
+    summary_type = st.radio(
+        "Choose summary type" if lang_code == "en" else "اختر نوع الملخص",
+        ('Brief', 'Detailed', 'Comprehensive') if lang_code == "en" else ('موجز', 'مفصل', 'شامل'),
+        key="summary_type"
+    )
+
     submit_custom = st.button("Submit Custom Query" if lang_code == "en" else "إرسال الاستفسار الخاص", key="submit_custom_query")
 
     if custom_query and submit_custom:
-        process_query(custom_query, document_text, lang_code)
+        process_query(custom_query, document_text, lang_code, summary_type)
+
+def process_query(query, context=None, lang_code="en", summary_type="Brief"):
+    with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
+        try:
+            # Split the context into smaller chunks if it exceeds the token limit
+            context_chunks = split_text_into_chunks(context, max_tokens=2000) if context else ["No additional context provided."]
+            
+            responses = []
+            for chunk in context_chunks:
+                prompt = {
+                    "en": f"Provide a {summary_type.lower()} summary and a clear and direct answer to the following legal query. Avoid ambiguity and ensure the response is certain:\n\nQuery: {query}\n\nContext: {chunk}",
+                    "ar": f"قدم ملخصًا {summary_type.lower()} وإجابة واضحة ومباشرة للاستفسار القانوني التالي. تجنب الغموض وتأكد من أن الإجابة مؤكدة:\n\nالاستفسار: {query}\n\nالسياق: {chunk}"
+                }
+                
+                response = openai.ChatCompletion.create(
+                    model="gpt-4o",
+                    messages=[
+                        {"role": "system", "content": "You are an expert legal advisor. Provide a clear, direct, and certain answer to the given query."},
+                        {"role": "user", "content": prompt[lang_code]}
+                    ],
+                    max_tokens=1000,
+                    temperature=0.7
+                )
+                
+                responses.append(response.choices[0].message['content'].strip())
+            
+            # Combine the responses from all chunks
+            final_response = "\n\n".join(responses)
+            st.markdown("### Response:")
+            st.markdown(format_response(final_response))
+        except Exception as e:
+            st.error(f"An error occurred: {str(e)}")
+
                            
 def oman_laws_feature(lang_code):
     st.header("Oman Laws" if lang_code == "en" else "قوانين عمان")
