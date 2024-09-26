@@ -1,4 +1,23 @@
 import streamlit as st
+import os
+import re
+from typing import Dict, Any
+from utils.document_processing import read_docx, read_pdf, read_txt, preprocess_arabic_text, format_response
+from utils.legal_advice import get_legal_advice, generate_suggested_questions
+from utils.oman_laws import get_oman_laws, read_oman_law
+from deep_translator import GoogleTranslator
+from fpdf import FPDF
+import openai
+
+# Assuming you have a directory for templates
+TEMPLATE_DIR = "templates"
+
+def main():
+    st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
+
+    # Initialize session state for landing page
+    if "show_main_app" not in st.session_state:
+        st.session_state.show_main_app = False
 
 # Add custom CSS to hide the icons and style the button
 hide_streamlit_style = """
@@ -99,7 +118,7 @@ if not st.session_state.show_main_app:
 
     # Add the 'Our Team' comment and team.png image after the "Get Started" button
     st.markdown("<h3 style='text-align:center;'>Our Team</h3>", unsafe_allow_html=True)
-    st.image("team.png", width=700, use_column_width=True, caption="Our Team", class_="centered-image")
+    st.markdown('<img src="team.png" class="centered-image" width="700">', unsafe_allow_html=True)
 
 if st.session_state.show_main_app:
     # Main app (initially hidden)
