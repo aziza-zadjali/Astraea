@@ -113,6 +113,16 @@ def main():
             unsafe_allow_html=True
         )
 
+        # Move the "Return to Landing Page" button to the top center
+        st.markdown(
+            """
+            <div class="return-button-container">
+                <button onclick="window.location.reload();">Return to Landing Page</button>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
         # Main content with tabs
         language = st.selectbox("Choose Language / اختر اللغة", ["English", "العربية"], key="language_select", label_visibility="collapsed")
         lang_code = "en" if language == "English" else "ar"
@@ -208,16 +218,6 @@ def main():
             grade_legal_document(lang_code)
         with tabs[5]:
             predictive_analysis_ui()
-
-        # Move the "Return to Landing Page" button to the top center
-        st.markdown(
-            """
-            <div class="return-button-container">
-                <button onclick="window.location.reload();">Return to Landing Page</button>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
 
 def legal_query_assistant(lang_code):
     st.header("Legal Query Assistant" if lang_code == "en" else "مساعد الاستفسارات القانونية")
