@@ -12,6 +12,8 @@ import openai
 # Assuming you have a directory for templates
 TEMPLATE_DIR = "templates"
 
+
+
 def main():
     st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
 
@@ -67,7 +69,6 @@ def main():
                 <option value="en">English</option>
                 <option value="ar">العربية</option>
             </select>
-            <button onclick="document.getElementById('start_button').click();" style="margin-top: 30px; padding: 10px 20px; font-size: 1.25rem; background-color: #008080; color: white; border: none; border-radius: 5px; cursor: pointer;">{'Get Started' if lang_code == 'en' else 'ابدأ'}</button>
         </div>
         """,
         unsafe_allow_html=True
@@ -138,100 +139,37 @@ def main():
         unsafe_allow_html=True
     )
 
-    # Landing page
-    if "page" not in st.session_state:
-        st.session_state.page = "landing"
+    # Main content with tabs
+    title = "Astraea - Legal Query Assistant" if lang_code == "en" else "أسترايا - مساعد الاستفسارات القانونية"
+    st.title(title)
 
-    if st.session_state.page == "landing":
-        landing_page(lang_code)
-    else:
-        # Main content with tabs
-        title = "Astraea - Legal Query Assistant" if lang_code == "en" else "أسترايا - مساعد الاستفسارات القانونية"
-        st.title(title)
+    disclaimer = {
+        "en": "This assistant uses GPT-4.0 to provide general legal information. Please note that this is not a substitute for professional legal advice.",
+        "ar": "يستخدم هذا المساعد نموذج GPT-4.0 لتقديم معلومات قانونية عامة. يرجى ملاحظة أن هذا ليس بديلاً عن المشورة القانونية المهنية."
+    }
+    st.info(disclaimer[lang_code])
 
-        disclaimer = {
-            "en": "This assistant uses GPT-4.0 to provide general legal information. Please note that this is not a substitute for professional legal advice.",
-            "ar": "يستخدم هذا المساعد نموذج GPT-4.0 لتقديم معلومات قانونية عامة. يرجى ملاحظة أن هذا ليس بديلاً عن المشورة القانونية المهنية."
-        }
-        st.info(disclaimer[lang_code])
+    # Define tab labels in both languages
+    tab_labels = {
+        "en": ["Legal Query Assistant", "Oman Laws", "Legal Translation Service", "Automated Document Creation", "Grade Legal Document", "Predictive Case Analysis"],
+        "ar": ["مساعد الاستفسارات القانونية", "قوانين عمان", "خدمة الترجمة القانونية", "إنشاء المستندات الآلي", "تقييم الوثيقة القانونية", "التحليل التنبؤي للقضايا"]
+    }
 
-        # Define tab labels in both languages
-        tab_labels = {
-            "en": ["Legal Query Assistant", "Oman Laws", "Legal Translation Service", "Automated Document Creation", "Grade Legal Document", "Predictive Case Analysis"],
-            "ar": ["مساعد الاستفسارات القانونية", "قوانين عمان", "خدمة الترجمة القانونية", "إنشاء المستندات الآلي", "تقييم الوثيقة القانونية", "التحليل التنبؤي للقضايا"]
-        }
+    # Create tabs using the appropriate language
+    tabs = st.tabs(tab_labels[lang_code])
 
-        # Create tabs using the appropriate language
-        tabs = st.tabs(tab_labels[lang_code])
-
-        with tabs[0]:
-            legal_query_assistant(lang_code)
-        with tabs[1]:
-            oman_laws_feature(lang_code)
-        with tabs[2]:
-            legal_translation_service(lang_code)
-        with tabs[3]:
-            automated_document_creation(lang_code)
-        with tabs[4]:
-            grade_legal_document(lang_code)
-        with tabs[5]:
-            predictive_analysis_ui()
-
-def landing_page(lang_code):
-    st.title("Welcome to Astraea - Legal Query Assistant" if lang_code == "en" else "مرحبًا بكم في أسترايا - مساعد الاستفسارات القانونية")
-    st.markdown(
-        """
-        <style>
-        .landing-page {
-            text-align: center;
-            margin-top: 50px;
-        }
-        .landing-page h1 {
-            font-size: 3rem;
-            color: #008080;
-        }
-        .landing-page p {
-            font-size: 1.25rem;
-            margin-top: 20px;
-        }
-        .button-container {
-            margin-top: 30px;
-            display: flex;
-            justify-content: center;
-        }
-        .button-container button {
-            padding: 10px 20px;
-            font-size: 1.25rem;
-            background-color: #008080;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .button-container button:hover {
-            background-color: #006666;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
-
-    st.markdown(
-        f"""
-        <div class="landing-page">
-            <h1>{"Welcome to Astraea" if lang_code == "en" else "مرحبًا بكم في أسترايا"}</h1>
-            <p>{"Your comprehensive legal query assistant" if lang_code == "en" else "مساعدك الشامل للاستفسارات القانونية"}</p>
-            <div class="button-container">
-                <button onclick="document.getElementById('start_button').click();">{'Get Started' if lang_code == 'en' else 'ابدأ'}</button>
-            </div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-    if st.button("Get Started" if lang_code == "en" else "ابدأ", key="start_button"):
-        st.session_state.page = "main"
-        st.experimental_rerun()
+    with tabs[0]:
+        legal_query_assistant(lang_code)
+    with tabs[1]:
+        oman_laws_feature(lang_code)
+    with tabs[2]:
+        legal_translation_service(lang_code)
+    with tabs[3]:
+        automated_document_creation(lang_code)
+    with tabs[4]:
+        grade_legal_document(lang_code)
+    with tabs[5]:
+        predictive_analysis_ui()
 
 def legal_query_assistant(lang_code):
     st.header("Legal Query Assistant" if lang_code == "en" else "مساعد الاستفسارات القانونية")
@@ -252,14 +190,8 @@ def legal_query_assistant(lang_code):
         if uploaded_file:
             document_text = process_uploaded_file(uploaded_file, lang_code)
             if document_text:
-                summary_type = st.radio(
-                    "Choose summary type" if lang_code == "en" else "اختر نوع الملخص",
-                    ('Brief', 'Detailed', 'Comprehensive') if lang_code == "en" else ('موجز', 'مفصل', 'شامل'),
-                    key="summary_type"
-                )
-                if st.button("Submit" if lang_code == "en" else "إرسال", key="submit_summary_type"):
-                    summarized_text = summarize_document(document_text, summary_type, lang_code)
-                    st.text_area("Summary", summarized_text, height=300)
+                suggested_questions = generate_suggested_questions(document_text, lang_code)
+                handle_document_queries(document_text, suggested_questions, lang_code)
 
 def process_uploaded_file(uploaded_file, lang_code):
     file_type = uploaded_file.type
@@ -274,36 +206,6 @@ def process_uploaded_file(uploaded_file, lang_code):
         else:
             st.error("Unsupported file type." if lang_code == "en" else "نوع الملف غير مدعوم.")
             return None
-
-def summarize_document(document_text, summary_type, lang_code):
-    if summary_type.lower() == "brief":
-        prompt = {
-            "en": f"Provide a very brief summary of the following legal document using expert legal terminology and adhering to legal standards. Focus on the main points and key legal arguments. Keep it extremely concise and to the point, no more than 3-4 sentences:\n\n{document_text[:3000]}...",
-            "ar": f"قدم ملخصًا موجزًا جدًا للوثيقة القانونية التالية باستخدام المصطلحات القانونية المتخصصة والالتزام بالمعايير القانونية. ركز على النقاط الرئيسية والحجج القانونية الرئيسية. احتفظ بها مختصرة للغاية ومباشرة، لا تزيد عن 3-4 جمل:\n\n{document_text[:3000]}..."
-        }
-    elif summary_type.lower() == "detailed":
-        prompt = {
-            "en": f"Provide a detailed summary of the following legal document using expert legal terminology and adhering to legal standards. Include key points, legal arguments, evidence, and important details. Ensure clarity and thoroughness, no more than 6-8 sentences:\n\n{document_text[:3000]}...",
-            "ar": f"قدم ملخصًا مفصلًا للوثيقة القانونية التالية باستخدام المصطلحات القانونية المتخصصة والالتزام بالمعايير القانونية. قم بتضمين النقاط الرئيسية والحجج القانونية والأدلة والتفاصيل الهامة. تأكد من الوضوح والشمول، لا تزيد عن 6-8 جمل:\n\n{document_text[:3000]}..."
-        }
-    elif summary_type.lower() == "comprehensive":
-        prompt = {
-            "en": f"Provide a comprehensive summary of the following legal document using expert legal terminology and adhering to legal standards. Cover all main points, key legal arguments, evidence, relevant case law, and any other pertinent information. Ensure the summary is thorough and detailed, no more than 10-12 sentences:\n\n{document_text[:3000]}...",
-            "ar": f"قدم ملخصًا شاملًا للوثيقة القانونية التالية باستخدام المصطلحات القانونية المتخصصة والالتزام بالمعايير القانونية. غط جميع النقاط الرئيسية والحجج القانونية الرئيسية والأدلة والقوانين ذات الصلة وأي معلومات أخرى ذات صلة. تأكد من أن الملخص شامل ومفصل، لا تزيد عن 10-12 جمل:\n\n{document_text[:3000]}..."
-        }
-    
-    response = openai.ChatCompletion.create(
-        model="gpt-4o",
-        messages=[
-            {"role": "system", "content": "You are an expert legal summarizer. Use expert legal terminology and adhere to legal standards."},
-            {"role": "user", "content": prompt[lang_code]}
-        ],
-        max_tokens=1000,
-        temperature=0.7
-    )
-    
-    return response.choices[0].message['content'].strip()
-
 
 def handle_document_queries(document_text, suggested_questions, lang_code):
     st.success("Document uploaded successfully!" if lang_code == "en" else "تم تحميل الوثيقة بنجاح!")
@@ -326,7 +228,7 @@ def handle_document_queries(document_text, suggested_questions, lang_code):
 
     if custom_query and submit_custom:
         process_query(custom_query, document_text, lang_code)
-
+                           
 def oman_laws_feature(lang_code):
     st.header("Oman Laws" if lang_code == "en" else "قوانين عمان")
     laws = get_oman_laws()
