@@ -93,7 +93,9 @@ def main():
         # Main app (initially hidden)
         st.markdown(
             """
-            <div class="main-app">
+            <style>
+            .landing-page {display: none;}
+            </style>
             """,
             unsafe_allow_html=True
         )
