@@ -25,6 +25,18 @@ def main():
         #MainMenu {visibility: hidden;}
         footer {visibility: hidden;}
         .stApp [data-testid="stToolbar"] {visibility: hidden;}
+        .stButton>button {
+            background-color: #008080;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1.2em;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .stButton>button:hover {
+            background-color: #006666;
+        }
         </style>
     """
     
@@ -45,6 +57,7 @@ def main():
         unsafe_allow_html=True
     )
 
+    # Language selection icon with dropdown
     st.markdown(
         """
         <div class="language-selector">
@@ -204,6 +217,7 @@ def main():
             """,
             unsafe_allow_html=True
         )
+
 
 def legal_query_assistant(lang_code):
     st.header("Legal Query Assistant" if lang_code == "en" else "مساعد الاستفسارات القانونية")
