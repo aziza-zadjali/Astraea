@@ -33,6 +33,8 @@ def main():
             font-size: 1.2em;
             border-radius: 5px;
             cursor: pointer;
+            display: block;
+            margin: 0 auto;
         }
         .stButton>button:hover {
             background-color: #006666;
@@ -217,7 +219,6 @@ def main():
             """,
             unsafe_allow_html=True
         )
-
 
 def legal_query_assistant(lang_code):
     st.header("Legal Query Assistant" if lang_code == "en" else "مساعد الاستفسارات القانونية")
