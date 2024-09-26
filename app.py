@@ -90,8 +90,14 @@ def main():
                     Astraea is here to simplify your legal queries. Get instant answers, 
                     explore Omani laws, and receive personalized legal advice.
                 </p>
+                <button style="background-color: #008080; color: white; padding: 10px 20px; 
+                               font-size: 1.2em; border: none; border-radius: 5px; cursor: pointer;"
+                        onclick="startApp()">
+                    Get Started
+                </button>
             </div>
-            """
+            """,
+            unsafe_allow_html=True
         )
 
         if st.button("Get Started", key="get_started_button"):
