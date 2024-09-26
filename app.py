@@ -206,7 +206,7 @@ def landing_page(lang_code):
     if st.button("Get Started" if lang_code == "en" else "ابدأ", key="start_button"):
         st.session_state.page = "main"
         st.experimental_set_query_params(page="main")
-
+        st.experimental_rerun()
 
 def legal_query_assistant(lang_code):
     st.header("Legal Query Assistant" if lang_code == "en" else "مساعد الاستفسارات القانونية")
