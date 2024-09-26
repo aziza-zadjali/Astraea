@@ -9,71 +9,11 @@ from deep_translator import GoogleTranslator
 from fpdf import FPDF
 import openai
 
+# Assuming you have a directory for templates
 TEMPLATE_DIR = "templates"
 
-def show_landing_page():
-    st.markdown(
-        """
-        <div style="text-align: center; padding: 50px 0;">
-            <h1 style="color: #1E88E5; font-size: 3em;">Welcome to Astraea</h1>
-            <h2 style="color: #424242; font-size: 1.5em;">Your AI-Powered Legal Assistant</h2>
-            <p style="font-size: 1.2em; max-width: 600px; margin: 20px auto;">
-                Astraea is here to simplify your legal queries. Get instant answers, 
-                explore Omani laws, and receive personalized legal advice.
-            </p>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-    if st.button("Get Started", key="get_started"):
-        st.session_state.show_main_app = True
-
-def show_main_app():
+def main():
     st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
-
-    # Add custom CSS to hide the icons
-    hide_streamlit_style = """
-        <style>
-        #MainMenu {visibility: hidden;}
-        footer {visibility: hidden;}
-        </style>
-    """
-    st.markdown(hide_streamlit_style, unsafe_allow_html=True)
-
-    # Fixed position for language selection icon
-    st.markdown(
-        """
-        <style>
-        .language-selector {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            z-index: 1000;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
-
-    # Language selection icon with dropdown
-    st.markdown(
-        """
-        <div class="language-selector">
-            <select id="language-select" onchange="changeLanguage()">
-                <option value="en">🇬🇧 English</option>
-                <option value="ar">🇴🇲 Arabic</option>
-            </select>
-        </div>
-        <script>
-        function changeLanguage() {
-            var select = document.getElementById("language-select");
-            var selectedLanguage = select.options[select.selectedIndex].value;
-            // Implement language change logic here
-        }
-        </script>
-        """,
-        unsafe_allow_html=True
-    )
 
     # Add custom CSS to hide the icons
     hide_streamlit_style = """
@@ -286,7 +226,7 @@ def handle_document_queries(document_text, suggested_questions, lang_code):
 
     if custom_query and submit_custom:
         process_query(custom_query, document_text, lang_code)
-                           
+
 def oman_laws_feature(lang_code):
     st.header("Oman Laws" if lang_code == "en" else "قوانين عمان")
     laws = get_oman_laws()
@@ -606,64 +546,5 @@ def predictive_analysis_ui():
         else:
             st.warning("Please enter case details or upload a document to analyze.")
 
-
-def main():
-    st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
-
-    # Add custom CSS to hide the icons
-    hide_streamlit_style = """
-        <style>
-        #MainMenu {visibility: hidden;}
-        footer {visibility: hidden;}
-        </style>
-    """
-    st.markdown(hide_streamlit_style, unsafe_allow_html=True)
-
-    # Fixed position for language selection icon
-    st.markdown(
-        """
-        <style>
-        .language-selector {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            z-index: 1000;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
-
-    # Language selection icon with dropdown
-    st.markdown(
-        """
-        <div class="language-selector">
-            <select id="language-select" onchange="changeLanguage()">
-                <option value="en">🇬🇧 English</option>
-                <option value="ar">🇴🇲 Arabic</option>
-            </select>
-        </div>
-        <script>
-        function changeLanguage() {
-            var select = document.getElementById("language-select");
-            var selectedLanguage = select.options[select.selectedIndex].value;
-            // Implement language change logic here
-        }
-        </script>
-        """,
-        unsafe_allow_html=True
-    )
-
-    # Initialize session state
-    if 'show_main_app' not in st.session_state:
-        st.session_state.show_main_app = False
-
-    # Display either landing page or main app
-    if not st.session_state.show_main_app:
-        show_landing_page()
-    else:
-        show_main_app()
-
 if __name__ == "__main__":
     main()
-
