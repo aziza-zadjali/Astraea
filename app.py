@@ -9,13 +9,96 @@ from deep_translator import GoogleTranslator
 from fpdf import FPDF
 import openai
 
-# Assuming you have a directory for templates
 TEMPLATE_DIR = "templates"
-
-
 
 def main():
     st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
+
+    # Add custom CSS to hide the icons
+    hide_streamlit_style = """
+        <style>
+        #MainMenu {visibility: hidden;}
+        footer {visibility: hidden;}
+        </style>
+    """
+    st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+
+    # Fixed position for language selection icon
+    st.markdown(
+        """
+        <style>
+        .language-selector {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+    # Language selection icon with dropdown
+    st.markdown(
+        """
+        <div class="language-selector">
+            <select id="language-select" onchange="changeLanguage()">
+                <option value="en">🇬🇧 English</option>
+                <option value="ar">🇴🇲 Arabic</option>
+            </select>
+        </div>
+        <script>
+        function changeLanguage() {
+            var select = document.getElementById("language-select");
+            var selectedLanguage = select.options[select.selectedIndex].value;
+            // Implement language change logic here
+        }
+        </script>
+        """,
+        unsafe_allow_html=True
+    )
+
+    # Landing page
+    st.markdown(
+        """
+        <div style="text-align: center; padding: 50px 0;">
+            <h1 style="color: #1E88E5; font-size: 3em;">Welcome to Astraea</h1>
+            <h2 style="color: #424242; font-size: 1.5em;">Your AI-Powered Legal Assistant</h2>
+            <p style="font-size: 1.2em; max-width: 600px; margin: 20px auto;">
+                Astraea is here to simplify your legal queries. Get instant answers, 
+                explore Omani laws, and receive personalized legal advice.
+            </p>
+            <button style="background-color: #1E88E5; color: white; padding: 10px 20px; 
+                           font-size: 1.2em; border: none; border-radius: 5px; cursor: pointer;"
+                    onclick="startApp()">
+                Get Started
+            </button>
+        </div>
+        <script>
+        function startApp() {
+            // Hide landing page and show main app
+            document.querySelector('.landing-page').style.display = 'none';
+            document.querySelector('.main-app').style.display = 'block';
+        }
+        </script>
+        """,
+        unsafe_allow_html=True
+    )
+
+    # Main app (initially hidden)
+    st.markdown(
+        """
+        <div class="main-app" style="display: none;">
+        """,
+        unsafe_allow_html=True
+    )
+
+    # Your existing app code goes here
+    # ...
+
+
+
+
 
     # Add custom CSS to hide the icons
     hide_streamlit_style = """
@@ -547,6 +630,11 @@ def predictive_analysis_ui():
                 )
         else:
             st.warning("Please enter case details or upload a document to analyze.")
-
+    st.markdown(
+        """
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 if __name__ == "__main__":
     main()
