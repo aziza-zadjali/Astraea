@@ -189,7 +189,7 @@ def landing_page(lang_code):
     """, unsafe_allow_html=True)
     
     # Display logo
-    st.image("logo.png", width=200)  # Adjust width as needed
+    st.image("path/to/your/logo.png", width=200)  # Adjust width as needed
     
     st.markdown("""
     <div class="landing-page">
@@ -205,7 +205,7 @@ def landing_page(lang_code):
     
     if st.button("Get Started" if lang_code == "en" else "ابدأ", key="start_button"):
         st.session_state.page = "main"
-        st.experimental_rerun()
+        st.experimental_set_query_params(page="main")
 
 
 def legal_query_assistant(lang_code):
