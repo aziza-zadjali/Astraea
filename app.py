@@ -194,8 +194,12 @@ def landing_page(lang_code):
             font-size: 1.25rem;
             margin-top: 20px;
         }
-        .landing-page button {
+        .button-container {
             margin-top: 30px;
+            display: flex;
+            justify-content: center;
+        }
+        .button-container button {
             padding: 10px 20px;
             font-size: 1.25rem;
             background-color: #008080;
@@ -204,7 +208,7 @@ def landing_page(lang_code):
             border-radius: 5px;
             cursor: pointer;
         }
-        .landing-page button:hover {
+        .button-container button:hover {
             background-color: #006666;
         }
         </style>
@@ -217,6 +221,9 @@ def landing_page(lang_code):
         <div class="landing-page">
             <h1>{"Welcome to Astraea" if lang_code == "en" else "مرحبًا بكم في أسترايا"}</h1>
             <p>{"Your comprehensive legal query assistant" if lang_code == "en" else "مساعدك الشامل للاستفسارات القانونية"}</p>
+            <div class="button-container">
+                <button onclick="document.getElementById('start_button').click();">{'Get Started' if lang_code == 'en' else 'ابدأ'}</button>
+            </div>
         </div>
         """,
         unsafe_allow_html=True
@@ -225,8 +232,6 @@ def landing_page(lang_code):
     if st.button("Get Started" if lang_code == "en" else "ابدأ", key="start_button"):
         st.session_state.page = "main"
         st.experimental_rerun()
-
-
 
 def legal_query_assistant(lang_code):
     st.header("Legal Query Assistant" if lang_code == "en" else "مساعد الاستفسارات القانونية")
