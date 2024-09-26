@@ -214,18 +214,18 @@ def process_uploaded_file(uploaded_file, lang_code):
 def summarize_document(document_text, summary_type, lang_code):
     if summary_type.lower() == "brief":
         prompt = {
-            "en": f"Provide a brief summary of the following legal document using expert legal terminology and adhering to legal standards. Focus on the main points, key legal arguments, and conclusions. Keep it concise and to the point:\n\n{document_text[:3000]}...",
-            "ar": f"قدم ملخصًا موجزًا للوثيقة القانونية التالية باستخدام المصطلحات القانونية المتخصصة والالتزام بالمعايير القانونية. ركز على النقاط الرئيسية والحجج القانونية الرئيسية والاستنتاجات. احتفظ بها مختصرة ومباشرة:\n\n{document_text[:3000]}..."
+            "en": f"Provide a very brief summary of the following legal document using expert legal terminology and adhering to legal standards. Focus on the main points and key legal arguments. Keep it extremely concise and to the point, no more than 3-4 sentences:\n\n{document_text[:3000]}...",
+            "ar": f"قدم ملخصًا موجزًا جدًا للوثيقة القانونية التالية باستخدام المصطلحات القانونية المتخصصة والالتزام بالمعايير القانونية. ركز على النقاط الرئيسية والحجج القانونية الرئيسية. احتفظ بها مختصرة للغاية ومباشرة، لا تزيد عن 3-4 جمل:\n\n{document_text[:3000]}..."
         }
     elif summary_type.lower() == "detailed":
         prompt = {
-            "en": f"Provide a detailed summary of the following legal document using expert legal terminology and adhering to legal standards. Include key points, legal arguments, evidence, and important details. Ensure clarity and thoroughness:\n\n{document_text[:3000]}...",
-            "ar": f"قدم ملخصًا مفصلًا للوثيقة القانونية التالية باستخدام المصطلحات القانونية المتخصصة والالتزام بالمعايير القانونية. قم بتضمين النقاط الرئيسية والحجج القانونية والأدلة والتفاصيل الهامة. تأكد من الوضوح والشمول:\n\n{document_text[:3000]}..."
+            "en": f"Provide a detailed summary of the following legal document using expert legal terminology and adhering to legal standards. Include key points, legal arguments, evidence, and important details. Ensure clarity and thoroughness, no more than 6-8 sentences:\n\n{document_text[:3000]}...",
+            "ar": f"قدم ملخصًا مفصلًا للوثيقة القانونية التالية باستخدام المصطلحات القانونية المتخصصة والالتزام بالمعايير القانونية. قم بتضمين النقاط الرئيسية والحجج القانونية والأدلة والتفاصيل الهامة. تأكد من الوضوح والشمول، لا تزيد عن 6-8 جمل:\n\n{document_text[:3000]}..."
         }
     elif summary_type.lower() == "comprehensive":
         prompt = {
-            "en": f"Provide a comprehensive summary of the following legal document using expert legal terminology and adhering to legal standards. Cover all main points, key legal arguments, evidence, relevant case law, and any other pertinent information. Ensure the summary is thorough and detailed:\n\n{document_text[:3000]}...",
-            "ar": f"قدم ملخصًا شاملًا للوثيقة القانونية التالية باستخدام المصطلحات القانونية المتخصصة والالتزام بالمعايير القانونية. غط جميع النقاط الرئيسية والحجج القانونية الرئيسية والأدلة والقوانين ذات الصلة وأي معلومات أخرى ذات صلة. تأكد من أن الملخص شامل ومفصل:\n\n{document_text[:3000]}..."
+            "en": f"Provide a comprehensive summary of the following legal document using expert legal terminology and adhering to legal standards. Cover all main points, key legal arguments, evidence, relevant case law, and any other pertinent information. Ensure the summary is thorough and detailed, no more than 10-12 sentences:\n\n{document_text[:3000]}...",
+            "ar": f"قدم ملخصًا شاملًا للوثيقة القانونية التالية باستخدام المصطلحات القانونية المتخصصة والالتزام بالمعايير القانونية. غط جميع النقاط الرئيسية والحجج القانونية الرئيسية والأدلة والقوانين ذات الصلة وأي معلومات أخرى ذات صلة. تأكد من أن الملخص شامل ومفصل، لا تزيد عن 10-12 جمل:\n\n{document_text[:3000]}..."
         }
     
     response = openai.ChatCompletion.create(
@@ -239,6 +239,7 @@ def summarize_document(document_text, summary_type, lang_code):
     )
     
     return response.choices[0].message['content'].strip()
+
 
 def handle_document_queries(document_text, suggested_questions, lang_code):
     st.success("Document uploaded successfully!" if lang_code == "en" else "تم تحميل الوثيقة بنجاح!")
