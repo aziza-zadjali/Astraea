@@ -212,15 +212,26 @@ def process_uploaded_file(uploaded_file, lang_code):
             return None
 
 def summarize_document(document_text, summary_type, lang_code):
-    prompt = {
-        "en": f"Provide a {summary_type.lower()} summary of the following document:\n\n{document_text[:3000]}...",
-        "ar": f"قدم ملخصًا {summary_type.lower()} للوثيقة التالية:\n\n{document_text[:3000]}..."
-    }
+    if summary_type.lower() == "brief":
+        prompt = {
+            "en": f"Provide a brief summary of the following legal document using expert legal terminology and adhering to legal standards. Focus on the main points and keep it concise:\n\n{document_text[:3000]}...",
+            "ar": f"قدم ملخصًا موجزًا للوثيقة القانونية التالية باستخدام المصطلحات القانونية المتخصصة والالتزام بالمعايير القانونية. ركز على النقاط الرئيسية واحتفظ بها مختصرة:\n\n{document_text[:3000]}..."
+        }
+    elif summary_type.lower() == "detailed":
+        prompt = {
+            "en": f"Provide a detailed summary of the following legal document using expert legal terminology and adhering to legal standards. Include key points and important details:\n\n{document_text[:3000]}...",
+            "ar": f"قدم ملخصًا مفصلًا للوثيقة القانونية التالية باستخدام المصطلحات القانونية المتخصصة والالتزام بالمعايير القانونية. قم بتضمين النقاط الرئيسية والتفاصيل الهامة:\n\n{document_text[:3000]}..."
+        }
+    elif summary_type.lower() == "comprehensive":
+        prompt = {
+            "en": f"Provide a comprehensive summary of the following legal document using expert legal terminology and adhering to legal standards. Cover all main points, key details, and any relevant information:\n\n{document_text[:3000]}...",
+            "ar": f"قدم ملخصًا شاملًا للوثيقة القانونية التالية باستخدام المصطلحات القانونية المتخصصة والالتزام بالمعايير القانونية. غط جميع النقاط الرئيسية والتفاصيل الهامة وأي معلومات ذات صلة:\n\n{document_text[:3000]}..."
+        }
     
     response = openai.ChatCompletion.create(
         model="gpt-4o",
         messages=[
-            {"role": "system", "content": "You are an expert summarizer."},
+            {"role": "system", "content": "You are an expert legal summarizer. Use expert legal terminology and adhere to legal standards."},
             {"role": "user", "content": prompt[lang_code]}
         ],
         max_tokens=1000,
