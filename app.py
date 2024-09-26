@@ -64,7 +64,7 @@ def main():
     # Landing page
     st.markdown(
         """
-        <div style="text-align: center; padding: 50px 0;">
+        <div class="landing-page" style="text-align: center; padding: 50px 0;">
             <h1 style="color: #1E88E5; font-size: 3em;">Welcome to Astraea</h1>
             <h2 style="color: #424242; font-size: 1.5em;">Your AI-Powered Legal Assistant</h2>
             <p style="font-size: 1.2em; max-width: 600px; margin: 20px auto;">
@@ -79,7 +79,6 @@ def main():
         </div>
         <script>
         function startApp() {
-            // Hide landing page and show main app
             document.querySelector('.landing-page').style.display = 'none';
             document.querySelector('.main-app').style.display = 'block';
         }
@@ -96,8 +95,101 @@ def main():
         unsafe_allow_html=True
     )
 
-    # Your existing app code goes here
-    # ...
+    # Main content with tabs
+    language = st.selectbox("Choose Language / اختر اللغة", ["English", "العربية"], key="language_select", label_visibility="collapsed")
+    lang_code = "en" if language == "English" else "ar"
+
+    # Inject custom CSS for RTL layout, font sizes, and tab styling
+    st.markdown(
+        f"""
+        <style>
+        html, body, [class*="css"] {{
+            font-size: 16px;
+            direction: {"rtl" if lang_code == "ar" else "ltr"};
+        }}
+        h1 {{
+            font-size: 2rem;
+        }}
+        h2 {{
+            font-size: 1.5rem;
+        }}
+        h3 {{
+            font-size: 1.17rem;
+        }}
+        .stTabs [data-baseweb="tab-list"] {{
+            gap: 8px;
+        }}
+        .stTabs [data-baseweb="tab"] {{
+            height: auto;
+            white-space: pre-wrap;
+            background-color: #F0F2F6;
+            border-radius: 4px 4px 0 0;
+            gap: 1rem;
+            padding: 10px 20px;
+            font-size: 1rem;
+        }}
+        .stTabs [data-baseweb="tab"]:hover {{
+            background-color: #008080;
+            color: white;
+        }}
+        .stTabs [data-baseweb="tab"][aria-selected="true"] {{
+            background-color: #008080;
+            color: white;
+        }}
+        .stTabs [data-baseweb="tab-list"] button:focus {{
+            box-shadow: none;
+        }}
+        .stTabs [data-baseweb="tab-highlight"] {{
+            background-color: transparent;
+        }}
+        .stTabs [data-baseweb="tab-border"] {{
+            display: none;
+        }}
+        .stTextArea>div>div>textarea {{
+            font-size: 1rem;
+        }}
+        .stSelectbox>div>div>div {{
+            font-size: 1rem;
+        }}
+        .stRadio [role="radiogroup"] {{
+            flex-direction: column; /* Align vertically */
+            align-items: flex-start; /* Align to the left */
+        }}
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+    title = "Astraea - Legal Query Assistant" if lang_code == "en" else "أسترايا - مساعد الاستفسارات القانونية"
+    st.title(title)
+
+    disclaimer = {
+        "en": "This assistant uses GPT-4.0 to provide general legal information. Please note that this is not a substitute for professional legal advice.",
+        "ar": "يستخدم هذا المساعد نموذج GPT-4.0 لتقديم معلومات قانونية عامة. يرجى ملاحظة أن هذا ليس بديلاً عن المشورة القانونية المهنية."
+    }
+    st.info(disclaimer[lang_code])
+
+    # Define tab labels in both languages
+    tab_labels = {
+        "en": ["Legal Query Assistant", "Oman Laws", "Legal Translation Service", "Automated Document Creation", "Grade Legal Document", "Predictive Case Analysis"],
+        "ar": ["مساعد الاستفسارات القانونية", "قوانين عمان", "خدمة الترجمة القانونية", "إنشاء المستندات الآلي", "تقييم الوثيقة القانونية", "التحليل التنبؤي للقضايا"]
+    }
+
+    # Create tabs using the appropriate language
+    tabs = st.tabs(tab_labels[lang_code])
+
+    with tabs[0]:
+        legal_query_assistant(lang_code)
+    with tabs[1]:
+        oman_laws_feature(lang_code)
+    with tabs[2]:
+        legal_translation_service(lang_code)
+    with tabs[3]:
+        automated_document_creation(lang_code)
+    with tabs[4]:
+        grade_legal_document(lang_code)
+    with tabs[5]:
+        predictive_analysis_ui()
 
     st.markdown(
         """
@@ -127,6 +219,7 @@ def legal_query_assistant(lang_code):
             if document_text:
                 suggested_questions = generate_suggested_questions(document_text, lang_code)
                 handle_document_queries(document_text, suggested_questions, lang_code)
+
 
 def process_uploaded_file(uploaded_file, lang_code):
     file_type = uploaded_file.type
