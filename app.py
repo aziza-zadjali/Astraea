@@ -45,7 +45,6 @@ def main():
         unsafe_allow_html=True
     )
 
-    # Language selection icon with dropdown
     st.markdown(
         """
         <div class="language-selector">
@@ -195,6 +194,9 @@ def main():
             grade_legal_document(lang_code)
         with tabs[5]:
             predictive_analysis_ui()
+
+        if st.button("Return to Landing Page", key="return_button"):
+            st.session_state.show_main_app = False
 
         st.markdown(
             """
