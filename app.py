@@ -4,13 +4,15 @@ import re
 from typing import Dict, Any
 from utils.document_processing import read_docx, read_pdf, read_txt, preprocess_arabic_text, format_response
 from utils.legal_advice import get_legal_advice, generate_suggested_questions
-from utils.oman_laws import get_oman_laws, read_oman_law  # Corrected import
+from utils.oman_laws import get_oman_laws, read_oman_law
 from deep_translator import GoogleTranslator
 from fpdf import FPDF
 import openai
 
 # Assuming you have a directory for templates
 TEMPLATE_DIR = "templates"
+
+
 
 def main():
     st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
@@ -222,21 +224,138 @@ def handle_document_queries(document_text, suggested_questions, lang_code):
     # Custom query section
     st.subheader("Custom Query" if lang_code == "en" else "استفسار مخصص")
     custom_query = st.text_input("Enter your custom query:" if lang_code == "en" else "أدخل استفسارك الخاص:", key="custom_query")
-    
-    # Summary type selection
-    st.subheader("Select Summary Type" if lang_code == "en" else "اختر نوع الملخص")
-    summary_type = st.radio(
-        "Choose summary type" if lang_code == "en" else "اختر نوع الملخص",
-        ('Brief', 'Detailed', 'Comprehensive') if lang_code == "en" else ('موجز', 'مفصل', 'شامل'),
-        key="summary_type"
-    )
-
     submit_custom = st.button("Submit Custom Query" if lang_code == "en" else "إرسال الاستفسار الخاص", key="submit_custom_query")
 
     if custom_query and submit_custom:
-        process_query(custom_query, document_text, lang_code, summary_type)
+        process_query(custom_query, document_text, lang_code)
+                           
+def oman_laws_feature(lang_code):
+    st.header("Oman Laws" if lang_code == "en" else "قوانين عمان")
+    laws = get_oman_laws()
+    
+    if laws:
+        law_select_text = "Select a law:" if lang_code == "en" else "اختر قانونًا:"
+        selected_law = st.selectbox(law_select_text, list(laws.keys()), key="select_law")
+        
+        if selected_law:
+            law_text = read_oman_law(laws[selected_law])
+            if law_text:
+                st.success("Law loaded successfully!" if lang_code == "en" else "تم تحميل القانون بنجاح!")
+                
+                # Suggested questions section
+                st.subheader("Suggested Questions" if lang_code == "en" else "الأسئلة المقترحة")
+                suggested_questions = generate_suggested_questions(law_text, lang_code)
+                question_text = "Select a suggested question:" if lang_code == "en" else "اختر سؤالاً مقترحًا:"
+                selected_question = st.selectbox(question_text, [""] + suggested_questions, key="oman_law_selected_question")
+                
+                submit_suggested = st.button("Submit Suggested Question" if lang_code == "en" else "إرسال السؤال المقترح", key="submit_oman_law_suggested_query")
+                
+                if selected_question and submit_suggested:
+                    concise_answer = get_concise_law_answer(selected_question, law_text, lang_code)
+                    st.markdown("### Answer:")
+                    st.markdown(concise_answer)
 
-def process_query(query, context=None, lang_code="en", summary_type="Brief"):
+                st.markdown("---")  # Separator for custom query section
+                
+                # Custom query section
+                st.subheader("Custom Query" if lang_code == "en" else "استفسار مخصص")
+                custom_query = st.text_input("Enter your custom query:" if lang_code == "en" else "أدخل استفسارك الخاص:", key="oman_law_custom_query")
+                submit_custom = st.button("Submit Custom Query" if lang_code == "en" else "إرسال الاستفسار الخاص", key="submit_oman_law_custom_query")
+                
+                if custom_query and submit_custom:
+                    concise_answer = get_concise_law_answer(custom_query, law_text, lang_code)
+                    st.markdown("### Answer:")
+                    st.markdown(concise_answer)
+            else:
+                st.error("Failed to read the selected law. Please try again or choose a different law." if lang_code == "en" else "فشل في قراءة القانون المحدد. يرجى المحاولة مرة أخرى أو اختيار قانون آخر.")
+    else:
+        st.error("No laws found in the database directory." if lang_code == "en" else "لم يتم العثور على قوانين في دليل قاعدة البيانات.")
+
+def get_concise_law_answer(query, law_text, lang_code):
+    prompt = {
+        "en": f"Provide a concise answer to the following query about Oman law. Focus on the most relevant information and limit the response to 2-3 sentences:\n\nQuery: {query}\n\nLaw text: {law_text[:3000]}...",
+        "ar": f"قدم إجابة موجزة للاستفسار التالي حول قانون عمان. ركز على المعلومات الأكثر صلة وحدد الإجابة في 2-3 جمل:\n\nالاستفسار: {query}\n\nنص القانون: {law_text[:3000]}..."
+    }
+    
+    response = openai.ChatCompletion.create(
+        model="gpt-4o",
+        messages=[
+            {"role": "system", "content": "You are a concise legal advisor specializing in Oman law."},
+            {"role": "user", "content": prompt[lang_code]}
+        ],
+        max_tokens=150,
+        temperature=0.7
+    )
+    
+    return response.choices[0].message['content'].strip()
+
+def legal_translation_service(lang_code):
+    st.header("Legal Translation Service" if lang_code == 'en' else 'خدمة الترجمة القانونية')
+    upload_text = 'Upload a document for translation to Arabic' if lang_code == 'en' else 'قم بتحميل وثيقة للترجمة إلى العربية'
+    uploaded_file = st.file_uploader(upload_text, type=["docx", "pdf", "txt"], key="translation_file_uploader")
+    
+    if uploaded_file:
+        document_text = process_uploaded_file(uploaded_file, lang_code)
+        if document_text:
+            if st.button("Translate to Arabic" if lang_code == 'en' else 'ترجمة إلى العربية', key="translate_button"):
+                translated_text = translate_to_arabic(document_text)
+                st.text_area("Translated Text", translated_text, height=300)
+                st.download_button(
+                    label="Download Arabic Translation" if lang_code == 'en' else 'تحميل الترجمة العربية',
+                    data=translated_text.encode('utf-8'),
+                    file_name="arabic_translation.txt",
+                    mime="text/plain"
+                )
+
+def translate_to_arabic(text):
+    translator = GoogleTranslator(source='auto', target='ar')
+    translated = translator.translate(text)
+    return translated
+
+def automated_document_creation(lang_code):
+    st.header("Automated Document Creation" if lang_code == "en" else "إنشاء المستندات الآلي")
+    # Get list of available templates
+    templates = [f for f in os.listdir(TEMPLATE_DIR) if f.endswith('.txt')]
+    selected_template = st.selectbox(
+        "Select a template:" if lang_code == "en" else "اختر نموذجًا:",
+        templates,
+        key="template_select"
+    )
+    
+    if selected_template:
+        with open(os.path.join(TEMPLATE_DIR, selected_template), 'r', encoding='utf-8') as file:
+            template_content = file.read()
+        
+        placeholders = extract_placeholders(template_content)
+        st.subheader("Fill in the details:" if lang_code == "en" else "املأ التفاصيل:")
+        inputs = {}
+        for i, placeholder in enumerate(placeholders):
+            inputs[placeholder] = st.text_input(
+                f"Enter {placeholder}:" if lang_code == "en" else f"أدخل {placeholder}:",
+                key=f"input_{placeholder}_{i}"
+            )
+        
+        if st.button("Generate Document" if lang_code == "en" else "إنشاء المستند", key="generate_doc_button"):
+            filled_document = fill_template(template_content, inputs)
+            st.text_area("Generated Document", filled_document, height=300, key="generated_doc_area")
+            st.download_button(
+                label="Download Document" if lang_code == "en" else "تحميل المستند",
+                data=filled_document.encode('utf-8'),
+                file_name=f"filled_{selected_template}",
+                mime="text/plain",
+                key="download_doc_button"
+            )
+
+def extract_placeholders(template_content):
+    import re
+    return re.findall(r'\{(\w+)\}', template_content)
+
+def fill_template(template_content, inputs):
+    for placeholder, value in inputs.items():
+        template_content = template_content.replace(f"{{{placeholder}}}", value)
+    return template_content
+
+def process_query(query, context=None, lang_code="en"):
     with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
         try:
             # Split the context into smaller chunks if it exceeds the token limit
@@ -245,8 +364,8 @@ def process_query(query, context=None, lang_code="en", summary_type="Brief"):
             responses = []
             for chunk in context_chunks:
                 prompt = {
-                    "en": f"Provide a {summary_type.lower()} summary and a clear and direct answer to the following legal query. Avoid ambiguity and ensure the response is certain:\n\nQuery: {query}\n\nContext: {chunk}",
-                    "ar": f"قدم ملخصًا {summary_type.lower()} وإجابة واضحة ومباشرة للاستفسار القانوني التالي. تجنب الغموض وتأكد من أن الإجابة مؤكدة:\n\nالاستفسار: {query}\n\nالسياق: {chunk}"
+                    "en": f"Provide a clear and direct answer to the following legal query. Avoid ambiguity and ensure the response is certain:\n\nQuery: {query}\n\nContext: {chunk}",
+                    "ar": f"قدم إجابة واضحة ومباشرة للاستفسار القانوني التالي. تجنب الغموض وتأكد من أن الإجابة مؤكدة:\n\nالاستفسار: {query}\n\nالسياق: {chunk}"
                 }
                 
                 response = openai.ChatCompletion.create(
