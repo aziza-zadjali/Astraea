@@ -19,7 +19,7 @@ def main():
     if "show_main_app" not in st.session_state:
         st.session_state.show_main_app = False
 
-    # Add custom CSS to hide the icons
+    # Add custom CSS to hide the icons and style the button
     hide_streamlit_style = """
         <style>
         #MainMenu {visibility: hidden;}
@@ -38,6 +38,11 @@ def main():
         }
         .stButton>button:hover { color: white !important;
             background-color: #006666;
+        }
+        .return-button-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
         }
         </style>
     """
@@ -204,11 +209,11 @@ def main():
         with tabs[5]:
             predictive_analysis_ui()
 
-        if st.button("Return to Landing Page", key="return_button"):
-            st.session_state.show_main_app = False
-
+        # Move the "Return to Landing Page" button to the top center
         st.markdown(
             """
+            <div class="return-button-container">
+                <button onclick="window.location.reload();">Return to Landing Page</button>
             </div>
             """,
             unsafe_allow_html=True
