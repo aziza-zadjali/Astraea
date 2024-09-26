@@ -12,8 +12,6 @@ import openai
 # Assuming you have a directory for templates
 TEMPLATE_DIR = "templates"
 
-
-
 def main():
     st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
 
@@ -193,6 +191,17 @@ def legal_query_assistant(lang_code):
                 suggested_questions = generate_suggested_questions(document_text, lang_code)
                 handle_document_queries(document_text, suggested_questions, lang_code)
 
+        # Add summary type selection
+        st.subheader("Select Summary Type" if lang_code == "en" else "اختر نوع الملخص")
+        summary_type = st.radio(
+            "Choose summary type" if lang_code == "en" else "اختر نوع الملخص",
+            ('Brief', 'Detailed', 'Comprehensive') if lang_code == "en" else ('موجز', 'مفصل', 'شامل'),
+            key="summary_type"
+        )
+
+        if st.button("Submit request" if lang_code == "en" else "إرسال الطلب", key="submit_summary_request"):
+            st.write(f"Summary type selected: {summary_type}" if lang_code == "en" else f"نوع الملخص المختار: {summary_type}")
+
 def process_uploaded_file(uploaded_file, lang_code):
     file_type = uploaded_file.type
     spinner_text = "Reading document..." if lang_code == "en" else "جاري قراءة الوثيقة..."
@@ -206,6 +215,8 @@ def process_uploaded_file(uploaded_file, lang_code):
         else:
             st.error("Unsupported file type." if lang_code == "en" else "نوع الملف غير مدعوم.")
             return None
+
+
 
 def handle_document_queries(document_text, suggested_questions, lang_code):
     st.success("Document uploaded successfully!" if lang_code == "en" else "تم تحميل الوثيقة بنجاح!")
