@@ -55,15 +55,8 @@ def main():
     
     st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
-    # Add logo to the top left corner
-    st.markdown(
-        """
-        <div class="logo-container">
-            <img src="logo.png" alt="Logo" width="100">
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+    # Add logo to the top left corner using Streamlit's image function
+    st.image("logo.png", width=100)
 
     # Fixed position for language selection icon
     st.markdown(
