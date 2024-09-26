@@ -82,12 +82,6 @@ def main():
                     Get Started
                 </button>
             </div>
-            <script>
-            function startApp() {
-                document.querySelector('.landing-page').style.display = 'none';
-                document.querySelector('.main-app').style.display = 'block';
-            }
-            </script>
             """,
             unsafe_allow_html=True
         )
@@ -228,7 +222,6 @@ def legal_query_assistant(lang_code):
             if document_text:
                 suggested_questions = generate_suggested_questions(document_text, lang_code)
                 handle_document_queries(document_text, suggested_questions, lang_code)
-
 
 def process_uploaded_file(uploaded_file, lang_code):
     file_type = uploaded_file.type
