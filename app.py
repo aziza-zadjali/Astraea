@@ -137,37 +137,94 @@ def main():
         unsafe_allow_html=True
     )
 
-    # Main content with tabs
-    title = "Astraea - Legal Query Assistant" if lang_code == "en" else "أسترايا - مساعد الاستفسارات القانونية"
-    st.title(title)
+    # Landing page
+    if "page" not in st.session_state:
+        st.session_state.page = "landing"
 
-    disclaimer = {
-        "en": "This assistant uses GPT-4.0 to provide general legal information. Please note that this is not a substitute for professional legal advice.",
-        "ar": "يستخدم هذا المساعد نموذج GPT-4.0 لتقديم معلومات قانونية عامة. يرجى ملاحظة أن هذا ليس بديلاً عن المشورة القانونية المهنية."
-    }
-    st.info(disclaimer[lang_code])
+    if st.session_state.page == "landing":
+        landing_page(lang_code)
+    else:
+        # Main content with tabs
+        title = "Astraea - Legal Query Assistant" if lang_code == "en" else "أسترايا - مساعد الاستفسارات القانونية"
+        st.title(title)
 
-    # Define tab labels in both languages
-    tab_labels = {
-        "en": ["Legal Query Assistant", "Oman Laws", "Legal Translation Service", "Automated Document Creation", "Grade Legal Document", "Predictive Case Analysis"],
-        "ar": ["مساعد الاستفسارات القانونية", "قوانين عمان", "خدمة الترجمة القانونية", "إنشاء المستندات الآلي", "تقييم الوثيقة القانونية", "التحليل التنبؤي للقضايا"]
-    }
+        disclaimer = {
+            "en": "This assistant uses GPT-4.0 to provide general legal information. Please note that this is not a substitute for professional legal advice.",
+            "ar": "يستخدم هذا المساعد نموذج GPT-4.0 لتقديم معلومات قانونية عامة. يرجى ملاحظة أن هذا ليس بديلاً عن المشورة القانونية المهنية."
+        }
+        st.info(disclaimer[lang_code])
 
-    # Create tabs using the appropriate language
-    tabs = st.tabs(tab_labels[lang_code])
+        # Define tab labels in both languages
+        tab_labels = {
+            "en": ["Legal Query Assistant", "Oman Laws", "Legal Translation Service", "Automated Document Creation", "Grade Legal Document", "Predictive Case Analysis"],
+            "ar": ["مساعد الاستفسارات القانونية", "قوانين عمان", "خدمة الترجمة القانونية", "إنشاء المستندات الآلي", "تقييم الوثيقة القانونية", "التحليل التنبؤي للقضايا"]
+        }
 
-    with tabs[0]:
-        legal_query_assistant(lang_code)
-    with tabs[1]:
-        oman_laws_feature(lang_code)
-    with tabs[2]:
-        legal_translation_service(lang_code)
-    with tabs[3]:
-        automated_document_creation(lang_code)
-    with tabs[4]:
-        grade_legal_document(lang_code)
-    with tabs[5]:
-        predictive_analysis_ui()
+        # Create tabs using the appropriate language
+        tabs = st.tabs(tab_labels[lang_code])
+
+        with tabs[0]:
+            legal_query_assistant(lang_code)
+        with tabs[1]:
+            oman_laws_feature(lang_code)
+        with tabs[2]:
+            legal_translation_service(lang_code)
+        with tabs[3]:
+            automated_document_creation(lang_code)
+        with tabs[4]:
+            grade_legal_document(lang_code)
+        with tabs[5]:
+            predictive_analysis_ui()
+
+def landing_page(lang_code):
+    st.title("Welcome to Astraea - Legal Query Assistant" if lang_code == "en" else "مرحبًا بكم في أسترايا - مساعد الاستفسارات القانونية")
+    st.markdown(
+        """
+        <style>
+        .landing-page {
+            text-align: center;
+            margin-top: 50px;
+        }
+        .landing-page h1 {
+            font-size: 3rem;
+            color: #008080;
+        }
+        .landing-page p {
+            font-size: 1.25rem;
+            margin-top: 20px;
+        }
+        .landing-page button {
+            margin-top: 30px;
+            padding: 10px 20px;
+            font-size: 1.25rem;
+            background-color: #008080;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .landing-page button:hover {
+            background-color: #006666;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+    st.markdown(
+        f"""
+        <div class="landing-page">
+            <h1>{"Welcome to Astraea" if lang_code == "en" else "مرحبًا بكم في أسترايا"}</h1>
+            <p>{"Your comprehensive legal query assistant" if lang_code == "en" else "مساعدك الشامل للاستفسارات القانونية"}</p>
+            <button onclick="document.getElementById('start_button').click();">{'Get Started' if lang_code == 'en' else 'ابدأ'}</button>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    if st.button("Get Started" if lang_code == "en" else "ابدأ", key="start_button"):
+        st.session_state.page = "main"
+        st.experimental_rerun()
 
 def legal_query_assistant(lang_code):
     st.header("Legal Query Assistant" if lang_code == "en" else "مساعد الاستفسارات القانونية")
