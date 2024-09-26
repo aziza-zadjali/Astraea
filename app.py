@@ -12,8 +12,6 @@ import openai
 # Assuming you have a directory for templates
 TEMPLATE_DIR = "templates"
 
-
-
 def main():
     st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
 
@@ -190,8 +188,14 @@ def legal_query_assistant(lang_code):
         if uploaded_file:
             document_text = process_uploaded_file(uploaded_file, lang_code)
             if document_text:
-                suggested_questions = generate_suggested_questions(document_text, lang_code)
-                handle_document_queries(document_text, suggested_questions, lang_code)
+                summary_type = st.radio(
+                    "Choose summary type" if lang_code == "en" else "اختر نوع الملخص",
+                    ('Brief', 'Detailed', 'Comprehensive') if lang_code == "en" else ('موجز', 'مفصل', 'شامل'),
+                    key="summary_type"
+                )
+                if st.button("Submit" if lang_code == "en" else "إرسال", key="submit_summary_type"):
+                    summarized_text = summarize_document(document_text, summary_type, lang_code)
+                    st.text_area("Summary", summarized_text, height=300)
 
 def process_uploaded_file(uploaded_file, lang_code):
     file_type = uploaded_file.type
@@ -206,6 +210,24 @@ def process_uploaded_file(uploaded_file, lang_code):
         else:
             st.error("Unsupported file type." if lang_code == "en" else "نوع الملف غير مدعوم.")
             return None
+
+def summarize_document(document_text, summary_type, lang_code):
+    prompt = {
+        "en": f"Provide a {summary_type.lower()} summary of the following document:\n\n{document_text[:3000]}...",
+        "ar": f"قدم ملخصًا {summary_type.lower()} للوثيقة التالية:\n\n{document_text[:3000]}..."
+    }
+    
+    response = openai.ChatCompletion.create(
+        model="gpt-4o",
+        messages=[
+            {"role": "system", "content": "You are an expert summarizer."},
+            {"role": "user", "content": prompt[lang_code]}
+        ],
+        max_tokens=1000,
+        temperature=0.7
+    )
+    
+    return response.choices[0].message['content'].strip()
 
 def handle_document_queries(document_text, suggested_questions, lang_code):
     st.success("Document uploaded successfully!" if lang_code == "en" else "تم تحميل الوثيقة بنجاح!")
@@ -228,7 +250,7 @@ def handle_document_queries(document_text, suggested_questions, lang_code):
 
     if custom_query and submit_custom:
         process_query(custom_query, document_text, lang_code)
-                           
+
 def oman_laws_feature(lang_code):
     st.header("Oman Laws" if lang_code == "en" else "قوانين عمان")
     laws = get_oman_laws()
