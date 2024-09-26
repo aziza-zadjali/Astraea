@@ -39,32 +39,7 @@ def main():
         .stButton>button:hover { color: white !important;
             background-color: #006666;
         }
-        
-    /* Move the 'Return to Landing Page' button to the top center */
-    .stButton[data-testid="return_button"] {
-        position: fixed;
-        top: 10px;
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 1000;
-    }
-    </style>
-    .stButton[data-testid="return_to_landing"] {
-        position: fixed;
-        top: 10px;
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 1000;
-    }
-    
-.stButton.return_to_landing {
-    position: fixed;
-    top: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 1000;
-}
-
+        </style>
     """
     
     st.markdown(hide_streamlit_style, unsafe_allow_html=True)
