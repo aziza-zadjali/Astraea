@@ -12,6 +12,8 @@ import openai
 # Assuming you have a directory for templates
 TEMPLATE_DIR = "templates"
 
+
+
 def main():
     st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
 
@@ -222,52 +224,10 @@ def handle_document_queries(document_text, suggested_questions, lang_code):
     # Custom query section
     st.subheader("Custom Query" if lang_code == "en" else "استفسار مخصص")
     custom_query = st.text_input("Enter your custom query:" if lang_code == "en" else "أدخل استفسارك الخاص:", key="custom_query")
-    
-    # Summary type selection
-    st.subheader("Select Summary Type" if lang_code == "en" else "اختر نوع الملخص")
-    summary_type = st.radio(
-        "Choose summary type" if lang_code == "en" else "اختر نوع الملخص",
-        ('Brief', 'Detailed', 'Comprehensive') if lang_code == "en" else ('موجز', 'مفصل', 'شامل'),
-        key="summary_type"
-    )
-
     submit_custom = st.button("Submit Custom Query" if lang_code == "en" else "إرسال الاستفسار الخاص", key="submit_custom_query")
 
     if custom_query and submit_custom:
-        process_query(custom_query, document_text, lang_code, summary_type)
-
-def process_query(query, context=None, lang_code="en", summary_type="Brief"):
-    with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
-        try:
-            # Split the context into smaller chunks if it exceeds the token limit
-            context_chunks = split_text_into_chunks(context, max_tokens=2000) if context else ["No additional context provided."]
-            
-            responses = []
-            for chunk in context_chunks:
-                prompt = {
-                    "en": f"Provide a {summary_type.lower()} summary and a clear and direct answer to the following legal query. Avoid ambiguity and ensure the response is certain:\n\nQuery: {query}\n\nContext: {chunk}",
-                    "ar": f"قدم ملخصًا {summary_type.lower()} وإجابة واضحة ومباشرة للاستفسار القانوني التالي. تجنب الغموض وتأكد من أن الإجابة مؤكدة:\n\nالاستفسار: {query}\n\nالسياق: {chunk}"
-                }
-                
-                response = openai.ChatCompletion.create(
-                    model="gpt-4o",
-                    messages=[
-                        {"role": "system", "content": "You are an expert legal advisor. Provide a clear, direct, and certain answer to the given query."},
-                        {"role": "user", "content": prompt[lang_code]}
-                    ],
-                    max_tokens=1000,
-                    temperature=0.7
-                )
-                
-                responses.append(response.choices[0].message['content'].strip())
-            
-            # Combine the responses from all chunks
-            final_response = "\n\n".join(responses)
-            st.markdown("### Response:")
-            st.markdown(format_response(final_response))
-        except Exception as e:
-            st.error(f"An error occurred: {str(e)}")
-
+        process_query(custom_query, document_text, lang_code)
                            
 def oman_laws_feature(lang_code):
     st.header("Oman Laws" if lang_code == "en" else "قوانين عمان")
