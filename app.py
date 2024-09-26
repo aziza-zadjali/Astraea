@@ -27,7 +27,7 @@ def main():
         .stApp [data-testid="stToolbar"] {visibility: hidden;}
         .stButton>button {
             background-color: #008080;
-            color: white;
+            color: white !important;
             border: none;
             padding: 10px 20px;
             font-size: 1.2em;
@@ -36,7 +36,7 @@ def main():
             display: block;
             margin: 0 auto;
         }
-        .stButton>button:hover {
+        .stButton>button:hover { color: white !important;
             background-color: #006666;
         }
         </style>
