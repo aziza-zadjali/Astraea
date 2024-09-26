@@ -178,56 +178,31 @@ def main():
 
 def landing_page(lang_code):
     st.title("Welcome to Astraea - Legal Query Assistant" if lang_code == "en" else "مرحبًا بكم في أسترايا - مساعد الاستفسارات القانونية")
-    st.markdown(
-        """
-        <style>
-        .landing-page {
-            text-align: center;
-            margin-top: 50px;
-        }
-        .landing-page h1 {
-            font-size: 3rem;
-            color: #008080;
-        }
-        .landing-page p {
-            font-size: 1.25rem;
-            margin-top: 20px;
-        }
-        .landing-page button {
-            margin-top: 30px;
-            padding: 10px 20px;
-            font-size: 1.25rem;
-            background-color: #008080;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .landing-page button:hover {
-            background-color: #006666;
-        }
-        .landing-page img {
-            width: 150px; /* Adjust the size as needed */
-            margin-top: 20px;
-            margin-bottom: 20px;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
-
-    st.markdown(
-        f"""
-        <div class="landing-page">
-            <img src="logo.png" alt="Logo">
-            <h1>{"Welcome to Astraea" if lang_code == "en" else "مرحبًا بكم في أسترايا"}</h1>
-            <p>{"Your comprehensive legal query assistant" if lang_code == "en" else "مساعدك الشامل للاستفسارات القانونية"}</p>
-            <button onclick="document.getElementById('start_button').click();">{'Get Started' if lang_code == 'en' else 'ابدأ'}</button>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
+    
+    # Custom CSS for logo resizing
+    st.markdown("""
+    <style>
+    img[data-testid="stLogo"] {
+        height: 100px;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    # Display logo
+    st.image("path/to/your/logo.png", width=200)  # Adjust width as needed
+    
+    st.markdown("""
+    <div class="landing-page">
+        <h1>{}</h1>
+        <p>{}</p>
+        <button onclick="document.getElementById('start_button').click();">{}</button>
+    </div>
+    """.format(
+        "Welcome to Astraea" if lang_code == "en" else "مرحبًا بكم في أسترايا",
+        "Your comprehensive legal query assistant" if lang_code == "en" else "مساعدك الشامل للاستفسارات القانونية",
+        "Get Started" if lang_code == "en" else "ابدأ"
+    ), unsafe_allow_html=True)
+    
     if st.button("Get Started" if lang_code == "en" else "ابدأ", key="start_button"):
         st.session_state.page = "main"
         st.experimental_rerun()
