@@ -70,13 +70,13 @@ def main():
         st.markdown(
             """
             <div style="text-align: center; padding: 50px 0;">
-                <h1 style="color: #1E88E5; font-size: 3em;">Welcome to Astraea</h1>
-                <h2 style="color: #424242; font-size: 1.5em;">Your AI-Powered Legal Assistant</h2>
-                <p style="font-size: 1.2em; max-width: 600px; margin: 20px auto;">
+                <h1 style="color: #008080; font-size: 3em;">Welcome to Astraea</h1>
+                <h2 style="color: #008080; font-size: 1.5em;">Your AI-Powered Legal Assistant</h2>
+                <p style="font-size: 1.2em; max-width: 600px; margin: 20px auto; color: #008080;">
                     Astraea is here to simplify your legal queries. Get instant answers, 
                     explore Omani laws, and receive personalized legal advice.
                 </p>
-                <button style="background-color: #1E88E5; color: white; padding: 10px 20px; 
+                <button style="background-color: #008080; color: white; padding: 10px 20px; 
                                font-size: 1.2em; border: none; border-radius: 5px; cursor: pointer;"
                         onclick="startApp()">
                     Get Started
@@ -92,7 +92,7 @@ def main():
             unsafe_allow_html=True
         )
 
-        if st.button("Get Started"):
+        if st.button("Get Started", key="get_started_button"):
             st.session_state.show_main_app = True
 
     if st.session_state.show_main_app:
@@ -228,7 +228,6 @@ def legal_query_assistant(lang_code):
             if document_text:
                 suggested_questions = generate_suggested_questions(document_text, lang_code)
                 handle_document_queries(document_text, suggested_questions, lang_code)
-
 
 def process_uploaded_file(uploaded_file, lang_code):
     file_type = uploaded_file.type
