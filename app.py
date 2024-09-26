@@ -40,6 +40,14 @@ def main():
             background-color: #006666;
         }
         </style>
+    .stButton[data-testid="return_to_landing"] {
+        position: fixed;
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1000;
+    }
+    
 .stButton.return_to_landing {
     position: fixed;
     top: 10px;
