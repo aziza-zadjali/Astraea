@@ -216,10 +216,12 @@ def landing_page(lang_code):
         unsafe_allow_html=True
     )
 
+    # Ensure the image path is correct
+    st.image("path/to/logo.png", width=150)  # Adjust the path to your logo file
+
     st.markdown(
         f"""
         <div class="landing-page">
-            <img src="logo.png" alt="Logo">
             <h1>{"Welcome to Astraea" if lang_code == "en" else "مرحبًا بكم في أسترايا"}</h1>
             <p>{"Your comprehensive legal query assistant" if lang_code == "en" else "مساعدك الشامل للاستفسارات القانونية"}</p>
             <button onclick="document.getElementById('start_button').click();">{'Get Started' if lang_code == 'en' else 'ابدأ'}</button>
