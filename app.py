@@ -240,7 +240,7 @@ def legal_query_assistant(lang_code):
 
     # Add a radio button for selecting the summary type
     summary_type = st.radio(
-        "Please confirm the summary type" if lang_code == "en" else "يرجى تأكيد نوع الملخص",
+        "Please confirm the response type" if lang_code == "en" else "يرجى تأكيد نوع الملخص",
         ("Brief", "Detailed", "Comprehensive") if lang_code == "en" else ("موجز", "مفصل", "شامل"),
         key="summary_type"
     )
