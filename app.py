@@ -50,6 +50,28 @@ def main():
             left: 10px;
             z-index: 1000;
         }
+        /* Testimonial Section */
+        #testimonials {
+            background-color: #fff;
+            padding: 2em;
+            margin: 2em auto;
+            max-width: 800px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        #testimonials h2 {
+            text-align: center;
+            margin-bottom: 1em;
+        }
+        .testimonial {
+            margin-bottom: 1em;
+            padding: 1em;
+            border-bottom: 1px solid #ddd;
+        }
+        .testimonial h3 {
+            margin-top: 0.5em;
+            font-size: 1.1em;
+            color: #333;
+        }
         </style>
     """
     
@@ -114,6 +136,24 @@ def main():
         # Add the 'Our Team' comment and team.png image after the "Get Started" button
         st.markdown("<h3 style='text-align:center;'>Our Team</h3>", unsafe_allow_html=True)
         st.image("team.png", use_column_width=True)
+
+        # Add testimonial section
+        st.markdown(
+            """
+            <section id="testimonials">
+                <h2>What Our Clients Say</h2>
+                <div class="testimonial">
+                    <p>"خانة الاستفسار تعمل بشكل جيد. إن إنشاء المستندات الآلي ومراجعة الوثائق يوفران الكثير من الوقت ويزيدان من الإنتاجية والدقة بشكل ملحوظ."</p>
+                    <h3>- Client Name</h3>
+                </div>
+                <div class="testimonial">
+                    <p>"The inquiry section works very well. Automated document creation and document review are significant time-savers that noticeably increase productivity and accuracy."</p>
+                    <h3>- Client Name</h3>
+                </div>
+            </section>
+            """,
+            unsafe_allow_html=True
+        )
 
     if st.session_state.show_main_app:
         # Main app (initially hidden)
