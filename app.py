@@ -206,6 +206,12 @@ def main():
         }
         st.info(disclaimer[lang_code])
 
+        # Add a radio button for selecting the summary type
+        summary_type = st.radio(
+            "Please confirm the summary type",
+            ("Brief", "Detailed", "Comprehensive")
+        )
+
         # Define tab labels in both languages
         tab_labels = {
             "en": ["Legal Query Assistant", "Oman Laws", "Legal Translation Service", "Automated Document Creation", "Grade Legal Document", "Predictive Case Analysis"],
