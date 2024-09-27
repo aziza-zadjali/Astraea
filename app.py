@@ -1,4 +1,4 @@
-import streamlit as st
+\import streamlit as st
 import os
 import re
 from typing import Dict, Any
@@ -8,6 +8,8 @@ from utils.oman_laws import get_oman_laws, read_oman_law
 from deep_translator import GoogleTranslator
 from fpdf import FPDF
 import openai
+import requests
+from bs4 import BeautifulSoup
 
 # Assuming you have a directory for templates
 TEMPLATE_DIR = "templates"
@@ -246,7 +248,7 @@ def main():
 
         disclaimer = {
             "en": "This assistant uses GPT-4.0 to provide general legal information. Please note that this is not a substitute for professional legal advice.",
-            "ar": "يستخدم هذا المساعد نموذج GPT-4.0 لتقديم معلومات قانونية عامة. يرجى ملاحظة أن هذا ليس بديلاً عن المشورة القانونية المهنية."
+        "ar": "يستخدم هذا المساعد نموذج GPT-4.0 لتقديم معلومات قانونية عامة. يرجى ملاحظة أن هذا ليس بديلاً عن المشورة القانونية المهنية."
         }
         st.info(disclaimer[lang_code])
 
@@ -301,10 +303,33 @@ def legal_query_assistant(lang_code):
                 suggested_questions = generate_suggested_questions(document_text, lang_code)
                 handle_document_queries(document_text, suggested_questions, summary_type, lang_code)
 
+def fetch_information_from_websites(query):
+    urls = ["https://qanoon.om/", "https://www.oman.om"]
+    headers = {"User-Agent": "Mozilla/5.0"}
+    for url in urls:
+        try:
+            response = requests.get(url, headers=headers)
+            if response.status_code == 200:
+                soup = BeautifulSoup(response.content, "html.parser")
+                # Implement specific logic to search for the query in the website's content
+                # This is a placeholder for demonstration purposes
+                if query.lower() in soup.text.lower():
+                    return f"Information found on {url}: {query}"
+        except Exception as e:
+            print(f"Error fetching from {url}: {e}")
+    return None
+
 def process_query(query, summary_type, context=None, lang_code="en"):
     with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
         try:
-            # Split the context into smaller chunks if it exceeds the token limit
+            # First, try to fetch information from the specified websites
+            web_info = fetch_information_from_websites(query)
+            if web_info:
+                st.markdown("### Response:")
+                st.markdown(format_response(web_info))
+                return
+
+            # If no information is found on the websites, proceed with the usual processing
             context_chunks = split_text_into_chunks(context, max_tokens=2000) if context else ["No additional context provided."]
             
             responses = []
