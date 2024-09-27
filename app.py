@@ -50,8 +50,8 @@ def main():
             left: 10px;
             z-index: 1000;
         }
-        /* Hide the Manage App button */
-        .styles_terminalButton__JVj5T {
+        /* Hide the streamlit icon */
+        .viewerBadge_Link__qRIco {
             display: none;
         }
         /* Testimonial Section */
