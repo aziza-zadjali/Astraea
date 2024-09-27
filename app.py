@@ -206,12 +206,6 @@ def main():
         }
         st.info(disclaimer[lang_code])
 
-        # Add a radio button for selecting the summary type
-        summary_type = st.radio(
-            "Please confirm the summary type",
-            ("Brief", "Detailed", "Comprehensive")
-        )
-
         # Define tab labels in both languages
         tab_labels = {
             "en": ["Legal Query Assistant", "Oman Laws", "Legal Translation Service", "Automated Document Creation", "Grade Legal Document", "Predictive Case Analysis"],
@@ -244,33 +238,58 @@ def legal_query_assistant(lang_code):
         key="query_type"
     )
 
+    # Add a radio button for selecting the summary type
+    summary_type = st.radio(
+        "Please confirm the summary type" if lang_code == "en" else "يرجى تأكيد نوع الملخص",
+        ("Brief", "Detailed", "Comprehensive") if lang_code == "en" else ("موجز", "مفصل", "شامل"),
+        key="summary_type"
+    )
+
     if query_type in ['Enter your own query', 'أدخل استفسارك الخاص']:
         query = st.text_input("Enter your legal query:" if lang_code == "en" else "أدخل استفسارك القانوني:", key="legal_query")
         if query and st.button("Submit" if lang_code == "en" else "إرسال", key="submit_legal_query"):
-            process_query(query, context=None, lang_code=lang_code)
+            process_query(query, summary_type, context=None, lang_code=lang_code)
     else:
         uploaded_file = st.file_uploader("Upload a document" if lang_code == "en" else "قم بتحميل وثيقة", type=["docx", "pdf", "txt"], key="file_uploader")
         if uploaded_file:
             document_text = process_uploaded_file(uploaded_file, lang_code)
             if document_text:
                 suggested_questions = generate_suggested_questions(document_text, lang_code)
-                handle_document_queries(document_text, suggested_questions, lang_code)
+                handle_document_queries(document_text, suggested_questions, summary_type, lang_code)
 
-def process_uploaded_file(uploaded_file, lang_code):
-    file_type = uploaded_file.type
-    spinner_text = "Reading document..." if lang_code == "en" else "جاري قراءة الوثيقة..."
-    with st.spinner(spinner_text):
-        if file_type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-            return read_docx(uploaded_file)
-        elif file_type == "application/pdf":
-            return read_pdf(uploaded_file)
-        elif file_type == "text/plain":
-            return read_txt(uploaded_file)
-        else:
-            st.error("Unsupported file type." if lang_code == "en" else "نوع الملف غير مدعوم.")
-            return None
+def process_query(query, summary_type, context=None, lang_code="en"):
+    with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
+        try:
+            # Split the context into smaller chunks if it exceeds the token limit
+            context_chunks = split_text_into_chunks(context, max_tokens=2000) if context else ["No additional context provided."]
+            
+            responses = []
+            for chunk in context_chunks:
+                prompt = {
+                    "en": f"Provide a {summary_type.lower()} summary of the following legal query. Avoid ambiguity and ensure the response is certain:\n\nQuery: {query}\n\nContext: {chunk}",
+                    "ar": f"قدم ملخصًا {summary_type.lower()} للاستفسار القانوني التالي. تجنب الغموض وتأكد من أن الإجابة مؤكدة:\n\nالاستفسار: {query}\n\nالسياق: {chunk}"
+                }
+                
+                response = openai.ChatCompletion.create(
+                    model="gpt-4o",
+                    messages=[
+                        {"role": "system", "content": "You are an expert legal advisor. Provide a clear, direct, and certain answer to the given query."},
+                        {"role": "user", "content": prompt[lang_code]}
+                    ],
+                    max_tokens=150 if summary_type == "Brief" else 300 if summary_type == "Detailed" else 600,
+                    temperature=0.7
+                )
+                
+                responses.append(response.choices[0].message['content'].strip())
+            
+            # Combine the responses from all chunks
+            final_response = "\n\n".join(responses)
+            st.markdown("### Response:")
+            st.markdown(format_response(final_response))
+        except Exception as e:
+            st.error(f"An error occurred: {str(e)}")
 
-def handle_document_queries(document_text, suggested_questions, lang_code):
+def handle_document_queries(document_text, suggested_questions, summary_type, lang_code):
     st.success("Document uploaded successfully!" if lang_code == "en" else "تم تحميل الوثيقة بنجاح!")
 
     # Suggested questions section
@@ -280,7 +299,7 @@ def handle_document_queries(document_text, suggested_questions, lang_code):
     submit_suggested = st.button("Submit Suggested Question" if lang_code == "en" else "إرسال السؤال المقترح", key="submit_suggested_query")
 
     if selected_question and submit_suggested:
-        process_query(selected_question, document_text, lang_code)
+        process_query(selected_question, summary_type, document_text, lang_code)
 
     st.markdown("---")
 
@@ -290,7 +309,7 @@ def handle_document_queries(document_text, suggested_questions, lang_code):
     submit_custom = st.button("Submit Custom Query" if lang_code == "en" else "إرسال الاستفسار الخاص", key="submit_custom_query")
 
     if custom_query and submit_custom:
-        process_query(custom_query, document_text, lang_code)
+        process_query(custom_query, summary_type, document_text, lang_code)
 
 def oman_laws_feature(lang_code):
     st.header("Oman Laws" if lang_code == "en" else "قوانين عمان")
@@ -314,7 +333,7 @@ def oman_laws_feature(lang_code):
                 submit_suggested = st.button("Submit Suggested Question" if lang_code == "en" else "إرسال السؤال المقترح", key="submit_oman_law_suggested_query")
                 
                 if selected_question and submit_suggested:
-                    concise_answer = get_concise_law_answer(selected_question, law_text, lang_code)
+                    concise_answer = get_concise_law_answer(selected_question, law_text, summary_type, lang_code)
                     st.markdown("### Answer:")
                     st.markdown(concise_answer)
 
@@ -326,7 +345,7 @@ def oman_laws_feature(lang_code):
                 submit_custom = st.button("Submit Custom Query" if lang_code == "en" else "إرسال الاستفسار الخاص", key="submit_oman_law_custom_query")
                 
                 if custom_query and submit_custom:
-                    concise_answer = get_concise_law_answer(custom_query, law_text, lang_code)
+                    concise_answer = get_concise_law_answer(custom_query, law_text, summary_type, lang_code)
                     st.markdown("### Answer:")
                     st.markdown(concise_answer)
             else:
@@ -334,10 +353,10 @@ def oman_laws_feature(lang_code):
     else:
         st.error("No laws found in the database directory." if lang_code == "en" else "لم يتم العثور على قوانين في دليل قاعدة البيانات.")
 
-def get_concise_law_answer(query, law_text, lang_code):
+def get_concise_law_answer(query, law_text, summary_type, lang_code):
     prompt = {
-        "en": f"Provide a concise answer to the following query about Oman law. Focus on the most relevant information and limit the response to 2-3 sentences:\n\nQuery: {query}\n\nLaw text: {law_text[:3000]}...",
-        "ar": f"قدم إجابة موجزة للاستفسار التالي حول قانون عمان. ركز على المعلومات الأكثر صلة وحدد الإجابة في 2-3 جمل:\n\nالاستفسار: {query}\n\nنص القانون: {law_text[:3000]}..."
+        "en": f"Provide a {summary_type.lower()} summary of the following query about Oman law. Focus on the most relevant information and limit the response to 2-3 sentences:\n\nQuery: {query}\n\nLaw text: {law_text[:3000]}...",
+        "ar": f"قدم ملخصًا {summary_type.lower()} للاستفسار التالي حول قانون عمان. ركز على المعلومات الأكثر صلة وحدد الإجابة في 2-3 جمل:\n\nالاستفسار: {query}\n\nنص القانون: {law_text[:3000]}..."
     }
     
     response = openai.ChatCompletion.create(
@@ -346,7 +365,7 @@ def get_concise_law_answer(query, law_text, lang_code):
             {"role": "system", "content": "You are a concise legal advisor specializing in Oman law."},
             {"role": "user", "content": prompt[lang_code]}
         ],
-        max_tokens=150,
+        max_tokens=150 if summary_type == "Brief" else 300 if summary_type == "Detailed" else 600,
         temperature=0.7
     )
     
