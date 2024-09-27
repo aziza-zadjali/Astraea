@@ -110,6 +110,7 @@ def main():
 
         if st.button("Get Started", key="get_started_button"):
             st.session_state.show_main_app = True
+            st.experimental_rerun()  # Force rerun to immediately show the main app page
 
         # Add the 'Our Team' comment and team.png image after the "Get Started" button
         st.markdown("<h3 style='text-align:center;'>Our Team</h3>", unsafe_allow_html=True)
@@ -131,6 +132,7 @@ def main():
         with return_button_col:
             if st.button("Return to Landing Page", key="return_button"):
                 st.session_state.show_main_app = False
+                st.experimental_rerun()  # Force rerun to immediately show the landing page
 
         # Main content with tabs
         language = st.selectbox("Choose Language / اختر اللغة", ["English", "العربية"], key="language_select", label_visibility="collapsed")
