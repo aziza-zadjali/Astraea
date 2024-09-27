@@ -342,7 +342,7 @@ def process_query(query, summary_type, context=None, lang_code="en"):
                 response = openai.ChatCompletion.create(
                     model="gpt-4o",
                     messages=[
-                        {"role": "system", "content": "You are Astraea, which is a greece word for justice, you are an expert legal advisor. Provide a clear, direct, and certain answer to the given query, including guidance and relevant legal precedents, statutes, or case law to support the analysis. If there are specific legal risks or potential issues, please flag them and suggest mitigating strategies."},
+                        {"role": "system", "content": "You are Astraea, which is a greece word for justice, you are an expert legal advisor. Provide a clear, direct, and certain answer to the given query, including guidance and relevant legal precedents, statutes, or case law to support the analysis. If there are specific legal risks or potential issues, please flag them and suggest mitigating strategies. but always give complete response no matter what length user specifiy."},
                         {"role": "user", "content": prompt[lang_code]}
                     ],
                     max_tokens=150 if summary_type == "Brief" else 300 if summary_type == "Detailed" else 600,
