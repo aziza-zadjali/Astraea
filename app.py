@@ -50,6 +50,10 @@ def main():
             left: 10px;
             z-index: 1000;
         }
+        /* Hide the Manage App button */
+        .styles_terminalButton__JVj5T {
+            display: none;
+        }
         /* Testimonial Section */
         #testimonials {
             background-color: #fff;
