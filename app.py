@@ -89,7 +89,7 @@ def main():
     st.image("logo.png", width=100)
 
     # Load the image and resize it to make the length 50% shorter
-    image = Image.open("your_image.png")
+    image = Image.open("poster.jpeg")
     width, height = image.size
     new_height = height // 2
     resized_image = image.resize((width, new_height))
