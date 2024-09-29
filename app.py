@@ -10,6 +10,8 @@ from fpdf import FPDF
 import openai
 import requests
 from bs4 import BeautifulSoup
+from PIL import Image
+
 
 # Assuming you have a directory for templates
 TEMPLATE_DIR = "templates"
@@ -86,8 +88,14 @@ def main():
     # Add logo to the top left corner using Streamlit's image function
     st.image("logo.png", width=100)
 
-    # Add the new image at the top of the landing page
-    st.image("poster.jpeg", use_column_width=True)
+    # Load the image and resize it to make the length 50% shorter
+    image = Image.open("your_image.png")
+    width, height = image.size
+    new_height = height // 2
+    resized_image = image.resize((width, new_height))
+
+    # Add the resized image at the top of the landing page
+    st.image(resized_image, use_column_width=True)
 
     # Fixed position for language selection icon
     st.markdown(
@@ -153,11 +161,11 @@ def main():
                 <h2>What Our Clients Say</h2>
                 <div class="testimonial">
                     <p>"خانة الاستفسار تعمل بشكل جيد. إن إنشاء المستندات الآلي ومراجعة الوثائق يوفران الكثير من الوقت ويزيدان من الإنتاجية والدقة بشكل ملحوظ."</p>
-                    <h3>- Client Name</h3>
+                    <h3>- مكتب محمد الشقصي للمحاماة والاستشارات القانونية</h3>
                 </div>
                 <div class="testimonial">
                     <p>"The inquiry section works very well. Automated document creation and document review are significant time-savers that noticeably increase productivity and accuracy."</p>
-                    <h3>- Client Name</h3>
+                    <h3>- MOHD AL-SHAQSI ADV AND LEGAL CONSULTANTS</h3>
                 </div>
             </section>
             """,
@@ -248,7 +256,6 @@ def main():
 
         title = "Astraea - Legal Query Assistant" if lang_code == "en" else "أسترايا - مساعد الاستفسارات القانونية"
         st.title(title)
-
 
         disclaimer = {
             "en": "This assistant uses GPT-4.0 to provide general legal information. Please note that this is not a substitute for professional legal advice.",
