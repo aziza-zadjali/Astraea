@@ -155,7 +155,7 @@ def main():
         # Load and resize the team.png image
         team_image = Image.open("team.png")
         team_width, team_height = team_image.size
-        new_team_height = team_height // 2
+        new_team_height = team_height * 0.7
         resized_team_image = team_image.resize((team_width, new_team_height))
         
         st.image(resized_team_image, use_column_width=True)
