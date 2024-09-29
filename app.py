@@ -141,7 +141,7 @@ def main():
 
         # Add the 'Our Team' comment and team.png image after the "Get Started" button
         st.markdown("<h3 style='text-align:center;'>Our Team</h3>", unsafe_allow_html=True)
-        st.image("team.png", width=int(st.get_option("deprecation.showPyplotGlobalUse") * 0.4))
+        st.image("team.png", use_column_width=True)
 
         # Add testimonial section
         st.markdown(
