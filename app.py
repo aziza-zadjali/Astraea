@@ -152,11 +152,13 @@ def main():
 
         # Add the 'Our Team' comment and team.png image after the "Get Started" button
         st.markdown("<h3 style='text-align:center;'>Our Team</h3>", unsafe_allow_html=True)
-        # Load and resize the team.png image
+        
+       # Load and resize the team.png image while maintaining aspect ratio
         team_image = Image.open("team.png")
         team_width, team_height = team_image.size
         new_team_height = team_height // 2
-        resized_team_image = team_image.resize((team_width, new_team_height))
+        new_team_width = int((new_team_height / team_height) * team_width)
+        resized_team_image = team_image.resize((new_team_width, new_team_height))
         
         st.image(resized_team_image, use_column_width=True)
 
