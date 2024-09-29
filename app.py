@@ -91,7 +91,7 @@ def main():
     # Load the image and resize it to make the length 50% shorter
     image = Image.open("poster.jpeg")
     width, height = image.size
-    new_height = height // 2
+    new_height = height // 3
     resized_image = image.resize((width, new_height))
 
     # Add the resized image at the top of the landing page
