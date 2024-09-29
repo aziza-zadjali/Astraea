@@ -8,6 +8,8 @@ from utils.oman_laws import get_oman_laws, read_oman_law
 from deep_translator import GoogleTranslator
 from fpdf import FPDF
 import openai
+import requests
+from bs4 import BeautifulSoup
 
 # Assuming you have a directory for templates
 TEMPLATE_DIR = "templates"
@@ -18,244 +20,243 @@ def main():
     # Initialize session state for landing page
     if "show_main_app" not in st.session_state:
         st.session_state.show_main_app = False
-        
-# Add custom CSS to hide the icons and style the button
-hide_streamlit_style = """
-    <style>
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    .stApp [data-testid="stToolbar"] {visibility: hidden;}
-    .stButton>button {
-        background-color: #008080;
-        color: white !important;
-        border: none;
-        padding: 10px 20px;
-        font-size: 1.2em;
-        border-radius: 5px;
-        cursor: pointer;
-        display: block;
-        margin: 0 auto;
-    }
-    .stButton>button:hover { color: white !important;
-        background-color: #006666;
-    }
-    .return-button-container {
-        display: flex;
-        justify-content: center;
-        margin-top: 20px;
-    }
-    .logo-container {
-        position: fixed;
-        top: 10px;
-        left: 10px;
-        z-index: 1000;
-    }
-    /* Hide the streamlit icon */
-    .viewerBadge_Link__qRIco {
-        display: none;
-    }
-    /* Testimonial Section */
-    #testimonials {
-        background-color: #fff;
-        padding: 2em;
-        margin: 2em auto;
-        max-width: 800px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    }
-    #testimonials h2 {
-        text-align: center;
-        margin-bottom: 1em;
-    }
-    .testimonial {
-        margin-bottom: 1em;
-        padding: 1em;
-        border-bottom: 1px solid #ddd;
-    }
-    .testimonial h3 {
-        margin-top: 0.5em;
-        font-size: 1.1em;
-        color: #333;
-    }
-    </style>
-"""
-st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
-# Add logo to the top left corner using Streamlit's image function
-st.image("logo.png", width=100)
-
-# Fixed position for language selection icon
-st.markdown(
-    """
-    <style>
-    .language-selector {
-        position: fixed;
-        top: 10px;
-        right: 10px;
-        z-index: 1000;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
-# Language selection icon with dropdown
-st.markdown(
-    """
-    <div class="language-selector">
-        <select id="language-select" onchange="changeLanguage()">
-            <option value="en">🇬🇧 English</option>
-            <option value="ar">🇴🇲 Arabic</option>
-        </select>
-    </div>
-    <script>
-    function changeLanguage() {
-        var select = document.getElementById("language-select");
-        var selectedLanguage = select.options[select.selectedIndex].value;
-        // Implement language change logic here
-    }
-    </script>
-    """,
-    unsafe_allow_html=True
-)
-
-if not st.session_state.get("show_main_app", False):
-    # Landing page
-    st.markdown(
-        """
-        <div class="landing-page" style="text-align: center; padding: 50px 0;">
-            <h1 style="color: #008080; font-size: 3em;">Welcome to Astraea</h1>
-            <h2 style="color: #424242; font-size: 1.5em;">Your AI-Powered Legal Assistant</h2>
-            <p style="font-size: 1.2em; max-width: 600px; margin: 20px auto; color: #424242;">
-                Astraea is here to simplify your legal queries. Get instant answers, 
-                explore Omani laws, and receive personalized legal advice.
-            </p>
-        """,
-        unsafe_allow_html=True
-    )
-
-    if st.button("Get Started", key="get_started_button"):
-        st.session_state.show_main_app = True
-
-    # Add the 'Our Team' comment and team.png image after the "Get Started" button
-    st.markdown("<h3 style='text-align:center;'>Our Team</h3>", unsafe_allow_html=True)
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        st.image("team.png", width=int(st.get_option("browser.clientWidth") * 0.4))
-
-    # Add testimonial section
-    st.markdown(
-        """
-        <section id="testimonials">
-            <h2>What Our Clients Say</h2>
-            <div class="testimonial">
-                <p>"خانة الاستفسار تعمل بشكل جيد. إن إنشاء المستندات الآلي ومراجعة الوثائق يوفران الكثير من الوقت ويزيدان من الإنتاجية والدقة بشكل ملحوظ."</p>
-                <h3>- Client Name</h3>
-            </div>
-            <div class="testimonial">
-                <p>"The inquiry section works very well. Automated document creation and document review are significant time-savers that noticeably increase productivity and accuracy."</p>
-                <h3>- Client Name</h3>
-            </div>
-        </section>
-        """,
-        unsafe_allow_html=True
-    )
-
-if st.session_state.get("show_main_app", False):
-    # Main app (initially hidden)
-    st.markdown(
-        """
+    # Add custom CSS to hide the icons and style the button
+    hide_streamlit_style = """
         <style>
-        .landing-page {display: none;}
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
-
-    # Move the "Return to Landing Page" button to the top center using Streamlit built-in button
-    return_button_col = st.columns([1, 2, 1])[1]
-    with return_button_col:
-        if st.button("Return to Landing Page", key="return_button"):
-            st.session_state.show_main_app = False
-
-    # Main content with tabs
-    language = st.selectbox("Choose Language / اختر اللغة", ["English", "العربية"], key="language_select", label_visibility="collapsed")
-    lang_code = "en" if language == "English" else "ar"
-
-    # Inject custom CSS for RTL layout, font sizes, and tab styling
-    st.markdown(
-        f"""
-        <style>
-        html, body, [class*="css"] {{
-            font-size: 16px;
-            direction: {"rtl" if lang_code == "ar" else "ltr"};
-        }}
-        h1 {{
-            font-size: 2rem;
-        }}
-        h2 {{
-            font-size: 1.5rem;
-        }}
-        h3 {{
-            font-size: 1.17rem;
-        }}
-        .stTabs [data-baseweb="tab-list"] {{
-            gap: 8px;
-        }}
-        .stTabs [data-baseweb="tab"] {{
-            height: auto;
-            white-space: pre-wrap;
-            background-color: #F0F2F6;
-            border-radius: 4px 4px 0 0;
-            gap: 1rem;
+        #MainMenu {visibility: hidden;}
+        footer {visibility: hidden;}
+        .stApp [data-testid="stToolbar"] {visibility: hidden;}
+        .stButton>button {
+            background-color: #008080;
+            color: white !important;
+            border: none;
             padding: 10px 20px;
-            font-size: 1rem;
-        }}
-        .stTabs [data-baseweb="tab"]:hover {{
-            background-color: #008080;
-            color: white;
-        }}
-        .stTabs [data-baseweb="tab"][aria-selected="true"] {{
-            background-color: #008080;
-            color: white;
-        }}
-        .stTabs [data-baseweb="tab-list"] button:focus {{
-            box-shadow: none;
-        }}
-        .stTabs [data-baseweb="tab-highlight"] {{
-            background-color: transparent;
-        }}
-        .stTabs [data-baseweb="tab-border"] {{
+            font-size: 1.2em;
+            border-radius: 5px;
+            cursor: pointer;
+            display: block;
+            margin: 0 auto;
+        }
+        .stButton>button:hover { color: white !important;
+            background-color: #006666;
+        }
+        .return-button-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .logo-container {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 1000;
+        }
+        /* Hide the streamlit icon */
+        .viewerBadge_Link__qRIco {
             display: none;
-        }}
-        .stTextArea>div>div>textarea {{
-            font-size: 1rem;
-        }}
-        .stSelectbox>div>div>div {{
-            font-size: 1rem;
-        }}
-        .stRadio [role="radiogroup"] {{
-            flex-direction: column; /* Align vertically */
-            align-items: flex-start; /* Align to the left */
-        }}
+        }
+        /* Testimonial Section */
+        #testimonials {
+            background-color: #fff;
+            padding: 2em;
+            margin: 2em auto;
+            max-width: 800px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        #testimonials h2 {
+            text-align: center;
+            margin-bottom: 1em;
+        }
+        .testimonial {
+            margin-bottom: 1em;
+            padding: 1em;
+            border-bottom: 1px solid #ddd;
+        }
+        .testimonial h3 {
+            margin-top: 0.5em;
+            font-size: 1.1em;
+            color: #333;
+        }
+        </style>
+    """
+    
+    st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+
+    # Add logo to the top left corner using Streamlit's image function
+    st.image("logo.png", width=100)
+
+    # Fixed position for language selection icon
+    st.markdown(
+        """
+        <style>
+        .language-selector {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+        }
         </style>
         """,
         unsafe_allow_html=True
     )
 
-    title = "Astraea - Legal Query Assistant" if lang_code == "en" else "أسترايا - مساعد الاستفسارات القانونية"
-    st.title(title)
+    # Language selection icon with dropdown
+    st.markdown(
+        """
+        <div class="language-selector">
+            <select id="language-select" onchange="changeLanguage()">
+                <option value="en">🇬🇧 English</option>
+                <option value="ar">🇴🇲 Arabic</option>
+            </select>
+        </div>
+        <script>
+        function changeLanguage() {
+            var select = document.getElementById("language-select");
+            var selectedLanguage = select.options[select.selectedIndex].value;
+            // Implement language change logic here
+        }
+        </script>
+        """,
+        unsafe_allow_html=True
+    )
 
-    disclaimer = {
-        "en": "This assistant uses GPT-4.0 to provide general legal information. Please note that this is not a substitute for professional legal advice.",
-        "ar": "يستخدم هذا المساعد نموذج GPT-4.0 لتقديم معلومات قانونية عامة. يرجى ملاحظة أن هذا ليس بديلاً عن المشورة القانونية المهنية."
-    }
-    st.info(disclaimer[lang_code])
+    if not st.session_state.show_main_app:
+        # Landing page
+        st.markdown(
+            """
+            <div class="landing-page" style="text-align: center; padding: 50px 0;">
+                <h1 style="color: #008080; font-size: 3em;">Welcome to Astraea</h1>
+                <h2 style="color: #424242; font-size: 1.5em;">Your AI-Powered Legal Assistant</h2>
+                <p style="font-size: 1.2em; max-width: 600px; margin: 20px auto; color: #424242;">
+                    Astraea is here to simplify your legal queries. Get instant answers, 
+                    explore Omani laws, and receive personalized legal advice.
+                </p>
+            """,
+            unsafe_allow_html=True
+        )
 
-    # Define tab labels in both languages
-    tab_labels = {
-        "en": ["Legal Query Assistant", "Oman Laws", "Legal Translation Service", "Automated Document Creation", "Grade Legal Document", "Predictive Case Analysis"],
-        "ar": ["مساعد الاستفسارات القانونية", "قوانين عمان", "خدمة الترجمة القانونية", "إنشاء المستندات الآلي", "تقييم الوثيقة القانونية", "التحليل التنبؤي للقضايا"]
-    }
+        if st.button("Get Started", key="get_started_button"):
+            st.session_state.show_main_app = True
+
+        # Add the 'Our Team' comment and team.png image after the "Get Started" button
+        st.markdown("<h3 style='text-align:center;'>Our Team</h3>", unsafe_allow_html=True)
+        st.image("team.png", use_column_width=True)
+
+        # Add testimonial section
+        st.markdown(
+            """
+            <section id="testimonials">
+                <h2>What Our Clients Say</h2>
+                <div class="testimonial">
+                    <p>"خانة الاستفسار تعمل بشكل جيد. إن إنشاء المستندات الآلي ومراجعة الوثائق يوفران الكثير من الوقت ويزيدان من الإنتاجية والدقة بشكل ملحوظ."</p>
+                    <h3>- Client Name</h3>
+                </div>
+                <div class="testimonial">
+                    <p>"The inquiry section works very well. Automated document creation and document review are significant time-savers that noticeably increase productivity and accuracy."</p>
+                    <h3>- Client Name</h3>
+                </div>
+            </section>
+            """,
+            unsafe_allow_html=True
+        )
+
+    if st.session_state.show_main_app:
+        # Main app (initially hidden)
+        st.markdown(
+            """
+            <style>
+            .landing-page {display: none;}
+            </style>
+            """,
+            unsafe_allow_html=True
+        )
+
+        # Move the "Return to Landing Page" button to the top center using Streamlit built-in button
+        return_button_col = st.columns([1, 2, 1])[1]
+        with return_button_col:
+            if st.button("Return to Landing Page", key="return_button"):
+                st.session_state.show_main_app = False
+
+        # Main content with tabs
+        language = st.selectbox("Choose Language / اختر اللغة", ["English", "العربية"], key="language_select", label_visibility="collapsed")
+        lang_code = "en" if language == "English" else "ar"
+
+        # Inject custom CSS for RTL layout, font sizes, and tab styling
+        st.markdown(
+            f"""
+            <style>
+            html, body, [class*="css"] {{
+                font-size: 16px;
+                direction: {"rtl" if lang_code == "ar" else "ltr"};
+            }}
+            h1 {{
+                font-size: 2rem;
+            }}
+            h2 {{
+                font-size: 1.5rem;
+            }}
+            h3 {{
+                font-size: 1.17rem;
+            }}
+            .stTabs [data-baseweb="tab-list"] {{
+                gap: 8px;
+            }}
+            .stTabs [data-baseweb="tab"] {{
+                height: auto;
+                white-space: pre-wrap;
+                background-color: #F0F2F6;
+                border-radius: 4px 4px 0 0;
+                gap: 1rem;
+                padding: 10px 20px;
+                font-size: 1rem;
+            }}
+            .stTabs [data-baseweb="tab"]:hover {{
+                background-color: #008080;
+                color: white;
+            }}
+            .stTabs [data-baseweb="tab"][aria-selected="true"] {{
+                background-color: #008080;
+                color: white;
+            }}
+            .stTabs [data-baseweb="tab-list"] button:focus {{
+                box-shadow: none;
+            }}
+            .stTabs [data-baseweb="tab-highlight"] {{
+                background-color: transparent;
+            }}
+            .stTabs [data-baseweb="tab-border"] {{
+                display: none;
+            }}
+            .stTextArea>div>div>textarea {{
+                font-size: 1rem;
+            }}
+            .stSelectbox>div>div>div {{
+                font-size: 1rem;
+            }}
+            .stRadio [role="radiogroup"] {{
+                flex-direction: column; /* Align vertically */
+                align-items: flex-start; /* Align to the left */
+            }}
+            </style>
+            """,
+            unsafe_allow_html=True
+        )
+
+        title = "Astraea - Legal Query Assistant" if lang_code == "en" else "أسترايا - مساعد الاستفسارات القانونية"
+        st.title(title)
+
+        disclaimer = {
+            "en": "This assistant uses GPT-4.0 to provide general legal information. Please note that this is not a substitute for professional legal advice.",
+            "ar": "يستخدم هذا المساعد نموذج GPT-4.0 لتقديم معلومات قانونية عامة. يرجى ملاحظة أن هذا ليس بديلاً عن المشورة القانونية المهنية."
+        }
+        st.info(disclaimer[lang_code])
+
+        # Define tab labels in both languages
+        tab_labels = {
+            "en": ["Legal Query Assistant", "Oman Laws", "Legal Translation Service", "Automated Document Creation", "Grade Legal Document", "Predictive Case Analysis"],
+            "ar": ["مساعد الاستفسارات القانونية", "قوانين عمان", "خدمة الترجمة القانونية", "إنشاء المستندات الآلي", "تقييم الوثيقة القانونية", "التحليل التنبؤي للقضايا"]
+        }
 
         # Create tabs using the appropriate language
         tabs = st.tabs(tab_labels[lang_code])
