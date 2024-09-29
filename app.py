@@ -86,6 +86,9 @@ def main():
     # Add logo to the top left corner using Streamlit's image function
     st.image("logo.png", width=100)
 
+    # Add the new image at the top of the landing page
+    st.image("your_image.png", use_column_width=True)
+
     # Fixed position for language selection icon
     st.markdown(
         """
@@ -245,6 +248,7 @@ def main():
 
         title = "Astraea - Legal Query Assistant" if lang_code == "en" else "أسترايا - مساعد الاستفسارات القانونية"
         st.title(title)
+
 
         disclaimer = {
             "en": "This assistant uses GPT-4.0 to provide general legal information. Please note that this is not a substitute for professional legal advice.",
