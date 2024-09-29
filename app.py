@@ -87,7 +87,7 @@ def main():
     st.image("logo.png", width=100)
 
     # Add the new image at the top of the landing page
-    st.image("your_image.png", use_column_width=True)
+    st.image("poster.jpeg", use_column_width=True)
 
     # Fixed position for language selection icon
     st.markdown(
