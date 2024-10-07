@@ -302,7 +302,7 @@ def legal_query_assistant(lang_code):
         query = st.text_input("Enter your legal query:" if lang_code == "en" else "أدخل استفسارك القانوني:", key="legal_query")
         if query and st.button("Submit" if lang_code == "en" else "إرسال", key="submit_legal_query"):
             
-    # This should integrate with your existing query processing logic.
+def process_query(query, summary_type, context=None, lang_code="en"):
     # Simulating a response based on summary type for illustration.
     if summary_type == "Brief":
         response = "This is a brief response to the query."
@@ -324,6 +324,7 @@ def legal_query_assistant(lang_code):
             if document_text:
                 suggested_questions = generate_suggested_questions(document_text, lang_code)
                 
+def handle_document_queries(document_text, suggested_questions, summary_type, lang_code):
     # Simulate processing each suggested question
     responses = []
     for question in suggested_questions:
@@ -397,6 +398,7 @@ def process_query(query, summary_type, context=None, lang_code="en"):
             st.error(f"An error occurred: {str(e)}")
 
 def 
+def handle_document_queries(document_text, suggested_questions, summary_type, lang_code):
     # Simulate processing each suggested question
     responses = []
     for question in suggested_questions:
