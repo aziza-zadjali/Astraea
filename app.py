@@ -191,11 +191,11 @@ def main():
         if st.button("Get Started", key="get_started_button"):
             st.session_state.show_main_app = True
 
-        # Add the 'Our Team' section after the "Get Started" button
+        # Add the 'The Team' section after the "Get Started" button
         st.markdown(
             """
             <section id="team">
-                <h2>The Team</h2>
+                <h2 style="color: #008080; text-align: center;">The Team</h2>
                 <div style="display: flex; justify-content: center; gap: 2em;">
                     <div class="team-member">
                         <h3>Aziza Al Zadjali</h3>
@@ -220,7 +220,6 @@ def main():
             """,
             unsafe_allow_html=True
         )
- 
 
         # Add testimonial section
         st.markdown(
