@@ -111,9 +111,9 @@ def main():
         if st.button("Get Started", key="get_started_button"):
             st.session_state.show_main_app = True
 
-        # Add the 'Our Team' comment and team.png image after the "Get Started" button
-        st.markdown("<h3 style='text-align:center;'>Our Team</h3>", unsafe_allow_html=True)
-        st.image("team.png", use_column_width=True)
+        # # Add the 'Our Team' comment and team.png image after the "Get Started" button
+        # st.markdown("<h3 style='text-align:center;'>Our Team</h3>", unsafe_allow_html=True)
+        # st.image("team.png", use_column_width=True)
 
     if st.session_state.show_main_app:
         # Main app (initially hidden)
