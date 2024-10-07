@@ -1,8 +1,4 @@
 import streamlit as st
-
-
-st.title('Welcome to Astraea - Your AI Legal Assistant')
-
 import os
 import re
 from typing import Dict, Any
@@ -154,17 +150,6 @@ def main():
         if st.button("Get Started", key="get_started_button"):
             st.session_state.show_main_app = True
 
-        # Add the 'Our Team' comment and team.png image after the "Get Started" button
-        st.markdown("<h3 style='text-align:center;'>Our Team</h3>", unsafe_allow_html=True)
-        
-       # Load and resize the team.png image while maintaining aspect ratio
-        team_image = Image.open("team.png")
-        team_width, team_height = team_image.size
-        new_team_height = team_height // 2
-        new_team_width = int((new_team_height / team_height) * team_width)
-        resized_team_image = team_image.resize((new_team_width, new_team_height))
-        
-        st.image(resized_team_image, use_column_width=True)
 
         # Add testimonial section
         st.markdown(
@@ -316,7 +301,8 @@ def legal_query_assistant(lang_code):
 
     if query_type in ['Enter your own query', 'أدخل استفسارك الخاص']:
         query = st.text_input("Enter your legal query:" if lang_code == "en" else "أدخل استفسارك القانوني:", key="legal_query")
-        if query and st.button("Submit" if lang_code == "en" else "إرسال", key="submit_legal_query"):
+        if st.button("Submit" if lang_code == "en" else "إرسال", key="submit_legal_query"):
+        if query:
             process_query(query, summary_type, context=None, lang_code=lang_code)
     else:
         uploaded_file = st.file_uploader("Upload a document" if lang_code == "en" else "قم بتحميل وثيقة", type=["docx", "pdf", "txt"], key="file_uploader")
@@ -671,6 +657,3 @@ def predictive_analysis_ui():
 
 if __name__ == "__main__":
     main()
-
-if st.button('Submit'):
-    # Legal query function here
