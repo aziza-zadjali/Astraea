@@ -12,7 +12,6 @@ import requests
 from bs4 import BeautifulSoup
 from PIL import Image
 
-
 # Assuming you have a directory for templates
 TEMPLATE_DIR = "templates"
 
@@ -80,6 +79,39 @@ def main():
             font-size: 1.1em;
             color: #333;
         }
+        /* Footer Section */
+        footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background-color: #f1f1f1;
+            text-align: center;
+            padding: 10px;
+            font-size: 14px;
+            color: #333;
+        }
+        footer a {
+            color: #007bff;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+        footer a:hover {
+            text-decoration: underline;
+        }
+        </style>
+        <footer>
+            <p>© 2024 Your Company Name. All rights reserved.</p>
+            <p>
+                <a href="mailto:contact@yourcompany.com">Contact Us</a> |
+                <a href="/privacy-policy">Privacy Policy</a> |
+                <a href="/terms-of-service">Terms of Service</a>
+            </p>
+            <p>
+                <a href="https://www.facebook.com/yourcompany" target="_blank">Facebook</a> |
+                <a href="https://www.twitter.com/yourcompany" target="_blank">Twitter</a> |
+                <a href="https://www.linkedin.com/company/yourcompany" target="_blank">LinkedIn</a>
+            </p>
+        </footer>
         </style>
     """
     
@@ -192,7 +224,7 @@ def main():
         )
 
         # Move the "Return to Landing Page" button to the top center using Streamlit built-in button
-        return_button_col = st.columns([1, 2, 1])[1]
+        return_button_col = st.columns([1, 2, 1])
         with return_button_col:
             if st.button("Return to Landing Page", key="return_button"):
                 st.session_state.show_main_app = False
