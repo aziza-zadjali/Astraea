@@ -12,7 +12,6 @@ import requests
 from bs4 import BeautifulSoup
 from PIL import Image
 
-
 # Assuming you have a directory for templates
 TEMPLATE_DIR = "templates"
 
@@ -150,7 +149,6 @@ def main():
         if st.button("Get Started", key="get_started_button"):
             st.session_state.show_main_app = True
 
-
         # Add testimonial section
         st.markdown(
             """
@@ -181,7 +179,7 @@ def main():
         )
 
         # Move the "Return to Landing Page" button to the top center using Streamlit built-in button
-        return_button_col = st.columns([1, 2, 1])[1]
+        return_button_col = st.columns([1, 2, 1])
         with return_button_col:
             if st.button("Return to Landing Page", key="return_button"):
                 st.session_state.show_main_app = False
@@ -254,6 +252,9 @@ def main():
         title = "Astraea - Legal Query Assistant" if lang_code == "en" else "أسترايا - مساعد الاستفسارات القانونية"
         st.title(title)
 
+
+        
+
         disclaimer = {
             "en": "This assistant uses GPT-4.0 to provide general legal information. Please note that this is not a substitute for professional legal advice.",
             "ar": "يستخدم هذا المساعد نموذج GPT-4.0 لتقديم معلومات قانونية عامة. يرجى ملاحظة أن هذا ليس بديلاً عن المشورة القانونية المهنية."
@@ -281,6 +282,20 @@ def main():
             grade_legal_document(lang_code)
         with tabs[5]:
             predictive_analysis_ui()
+
+def team_section(lang_code):
+    st.header("The Team" if lang_code == "en" else "الفريق")
+
+    team_members = [
+        {"name": "Aziza Al Zadjali", "role": "AI/ML Solutions"},
+        {"name": "Ibtihaj Al Bahri", "role": "Business"},
+        {"name": "Muadh Al Subhi", "role": "Data and UI/UX"},
+        {"name": "Uzair Saif Udeen", "role": "Software Developer"}
+    ]
+
+    for member in team_members:
+        st.markdown(f"### {member['name']}")
+        st.markdown(f"**Role:** {member['role']}")
 
 def legal_query_assistant(lang_code):
     st.header("Legal Query Assistant" if lang_code == "en" else "مساعد الاستفسارات القانونية")
