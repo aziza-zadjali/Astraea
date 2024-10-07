@@ -330,17 +330,25 @@ def fetch_information_from_websites(query):
     return None
 
 
-def process_query(query, summary_type, context=None, lang_code="en"):
-    if summary_type == "Brief":
-        # Simulate generating a concise yet complete response
-        response = f"The primary outcome of '{query}' indicates a straightforward resolution."
-    elif summary_type == "Detailed":
-        response = f"This is a detailed analysis of '{query}', providing in-depth insights, exploring multiple facets, and discussing potential implications extensively."
-    elif summary_type == "Comprehensive":
-        response = f"A comprehensive exploration of '{query}' covers all relevant details, insights, and analyses every aspect thoroughly, including historical context, legal precedents, and potential future impact."
 
-    # Ensuring the response is a complete sentence
-    if not response.endswith('.'):
+def process_query(query, summary_type, context=None, lang_code="en"):
+    # Simulate response generation with word count limits
+    base_response = f"Analysis of '{query}' reveals several key points, including potential legal implications, related cases, and advisable actions based on current law."
+    
+    if summary_type == "Brief":
+        # Limit to about 20 words
+        words = base_response.split()[:20]
+        response = ' '.join(words) + '...'
+    elif summary_type == "Detailed":
+        # Limit to about 50 words
+        words = base_response.split()[:50]
+        response = ' '.join(words) + '...'
+    elif summary_type == "Comprehensive":
+        # No word limit for comprehensive
+        response = base_response
+    
+    # Ensure the response ends with a period if it's a full sentence
+    if response[-1].isalnum():  # Check if the last character is alphanumeric
         response += '.'
 
     st.write(response)
