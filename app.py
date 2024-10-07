@@ -287,32 +287,32 @@ def main():
 def legal_query_assistant(lang_code):
     st.header("Legal Query Assistant" if lang_code == "en" else "مساعد الاستفسارات القانونية")
 
+    # Move the query type selection to the top and align vertically
     query_type = st.radio(
         "Choose query type" if lang_code == "en" else "اختر نوع الاستفسار",
         ('Enter your own query', 'Query from document') if lang_code == "en" else ('أدخل استفسارك الخاص', 'استفسر من وثيقة'),
         key="query_type"
     )
 
+    # Add a radio button for selecting the summary type
     summary_type = st.radio(
         "Please confirm the response type" if lang_code == "en" else "يرجى تأكيد نوع الملخص",
         ("Brief", "Detailed", "Comprehensive") if lang_code == "en" else ("موجز", "مفصل", "شامل"),
         key="summary_type"
     )
 
-    query = st.text_input("Enter your legal query:" if lang_code == "en" else "أدخل استفسارك القانوني:", key="legal_query")
-    if st.button("Submit" if lang_code == "en" else "إرسال", key="submit_legal_query"):
-        if query:
+    if query_type in ['Enter your own query', 'أدخل استفسارك الخاص']:
+        query = st.text_input("Enter your legal query:" if lang_code == "en" else "أدخل استفسارك القانوني:", key="legal_query")
+        if query and st.button("Submit" if lang_code == "en" else "إرسال", key="submit_legal_query"):
             process_query(query, summary_type, context=None, lang_code=lang_code)
-        else:
-            st.warning("Please enter a query before submitting.")
-
-    if query_type == 'Query from document':
+    else:
         uploaded_file = st.file_uploader("Upload a document" if lang_code == "en" else "قم بتحميل وثيقة", type=["docx", "pdf", "txt"], key="file_uploader")
         if uploaded_file:
             document_text = process_uploaded_file(uploaded_file, lang_code)
             if document_text:
                 suggested_questions = generate_suggested_questions(document_text, lang_code)
                 handle_document_queries(document_text, suggested_questions, summary_type, lang_code)
+
 def fetch_information_from_websites(query):
     urls = ["https://qanoon.om/", "https://www.oman.om"]
     headers = {"User-Agent": "Mozilla/5.0"}
@@ -329,26 +329,45 @@ def fetch_information_from_websites(query):
             print(f"Error fetching from {url}: {e}")
     return None
 
-
-
-
-
 def process_query(query, summary_type, context=None, lang_code="en"):
-    if summary_type == "Brief":
-        # Provide a concise yet comprehensive summary
-        response = f"Quick summary of '{query}': Key insights and actionable recommendations based on the latest legal precedents."
-    elif summary_type == "Detailed":
-        # Include detailed insights and analysis
-        response = f"Detailed analysis of '{query}': Discusses legal implications, related case law, and strategic considerations in depth."
-    elif summary_type == "Comprehensive":
-        # Offer the most thorough analysis possible
-        response = f"Comprehensive review of '{query}': Covers all aspects including historical context, current applications, and future implications, ensuring a full understanding of the topic."
+    with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
+        try:
+            # First, try to fetch information from the specified websites
+            web_info = fetch_information_from_websites(query)
+            if web_info:
+                st.markdown("### Response:")
+                st.markdown(format_response(web_info))
+                return
 
-    # Ensure the response ends with a period, making it a complete sentence
-    if not response.endswith('.'):
-        response += '.'
+            # If no information is found on the websites, proceed with the usual processing
+            context_chunks = split_text_into_chunks(context, max_tokens=2000) if context else ["No additional context provided."]
+            
+            responses = []
+            for chunk in context_chunks:
+                prompt = {
+                    "en": f"Provide a {summary_type.lower()} summary of the following legal query. Avoid ambiguity and ensure the response is certain:\n\nQuery: {query}\n\nContext: {chunk}",
+                    "ar": f"قدم ملخصًا {summary_type.lower()} للاستفسار القانوني التالي. تجنب الغموض وتأكد من أن الإجابة مؤكدة:\n\nالاستفسار: {query}\n\nالسياق: {chunk}"
+                }
+                
+                response = openai.ChatCompletion.create(
+                    model="gpt-4o",
+                    messages=[
+                        {"role": "system", "content": "You are Astraea, which is a greece word for justice, you are an expert legal advisor. Provide a clear, direct, and certain answer to the given query, including guidance and relevant legal precedents, statutes, or case law to support the analysis. If there are specific legal risks or potential issues, please flag them and suggest mitigating strategies."},
+                        {"role": "user", "content": prompt[lang_code]}
+                    ],
+                    max_tokens=150 if summary_type == "Brief" else 300 if summary_type == "Detailed" else 600,
+                    temperature=0.7
+                )
+                
+                responses.append(response.choices[0].message['content'].strip())
+            
+            # Combine the responses from all chunks
+            final_response = "\n\n".join(responses)
+            st.markdown("### Response:")
+            st.markdown(format_response(final_response))
+        except Exception as e:
+            st.error(f"An error occurred: {str(e)}")
 
-    st.write(response)
 def handle_document_queries(document_text, suggested_questions, summary_type, lang_code):
     st.success("Document uploaded successfully!" if lang_code == "en" else "تم تحميل الوثيقة بنجاح!")
 
