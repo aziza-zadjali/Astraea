@@ -197,19 +197,25 @@ def main():
         # Load and resize the team.png image while maintaining aspect ratio
         team_image = Image.open("team.png")
         team_width, team_height = team_image.size
-        new_team_height = team_height // 2
+        new_team_height = team_height // 3  # Make the image smaller
         new_team_width = int((new_team_height / team_height) * team_width)
         resized_team_image = team_image.resize((new_team_width, new_team_height))
         
+        # Encode the image to base64 to display it in HTML
+        buffered = BytesIO()
+        resized_team_image.save(buffered, format="PNG")
+        img_str = base64.b64encode(buffered.getvalue()).decode()
+
         # Center the team image and make it 50% of the column width
         st.markdown(
             f"""
             <div style="display: flex; justify-content: center;">
-                <img src="data:image/png;base64,{team_image}" style="width: 50%;">
+                <img src="data:image/png;base64,{img_str}" style="width: 50%;">
             </div>
             """,
             unsafe_allow_html=True
         )
+
 
         # Add testimonial section
         st.markdown(
