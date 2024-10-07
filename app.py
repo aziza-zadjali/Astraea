@@ -281,9 +281,8 @@ def main():
             grade_legal_document(lang_code)
         with tabs[5]:
             predictive_analysis_ui()
-def legal_query_assistant(lang_code):
 
-    
+def legal_query_assistant(lang_code):
     st.header("Legal Query Assistant" if lang_code == "en" else "مساعد الاستفسارات القانونية")
 
     # Move the query type selection to the top and align vertically
@@ -293,17 +292,28 @@ def legal_query_assistant(lang_code):
         key="query_type"
     )
 
+    # Define a variable to hold query input outside of conditionals
+    query = None
+
     if query_type in ['Enter your own query', 'أدخل استفسارك الخاص']:
         query = st.text_input("Enter your legal query:" if lang_code == "en" else "أدخل استفسارك القانوني:", key="legal_query")
-        if query and st.button("Submit" if lang_code == "en" else "إرسال", key="submit_legal_query"):
+
+    # Place the submit button outside the conditional block
+    if st.button("Submit" if lang_code == "en" else "إرسال", key="submit_legal_query"):
+        if query:  # Check if there is a query entered before processing
             process_query(query, context=None, lang_code=lang_code)
-    else:
+        else:
+            st.warning("Please enter a query to proceed.")
+
+    # Handling file uploads separately
+    if query_type == 'Query from document':
         uploaded_file = st.file_uploader("Upload a document" if lang_code == "en" else "قم بتحميل وثيقة", type=["docx", "pdf", "txt"], key="file_uploader")
         if uploaded_file:
             document_text = process_uploaded_file(uploaded_file, lang_code)
             if document_text:
                 suggested_questions = generate_suggested_questions(document_text, lang_code)
                 handle_document_queries(document_text, suggested_questions, lang_code)
+
 
 def process_uploaded_file(uploaded_file, lang_code):
     file_type = uploaded_file.type
