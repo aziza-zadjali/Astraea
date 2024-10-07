@@ -4,7 +4,7 @@ import re
 from typing import Dict, Any
 from utils.document_processing import read_docx, read_pdf, read_txt, preprocess_arabic_text, format_response
 from utils.legal_advice import get_legal_advice, generate_suggested_questions
-from utils.oman_laws import get_oman_laws, read_oman_law
+from utils.oman_laws import get_oman_law
 from deep_translator import GoogleTranslator
 from fpdf import FPDF
 import openai
@@ -78,6 +78,35 @@ def main():
             margin-top: 0.5em;
             font-size: 1.1em;
             color: #333;
+        }
+        /* Team Section */
+        #team {
+            background-color: #f9f9f9;
+            padding: 2em;
+            margin: 2em auto;
+            max-width: 800px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        #team h2 {
+            color: #008080;
+            margin-bottom: 1em;
+        }
+        .team-member {
+            margin-bottom: 1em;
+            padding: 1em;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+        .team-member h3 {
+            margin-top: 0.5em;
+            font-size: 1.1em;
+            color: #333;
+        }
+        .team-member p {
+            margin: 0.5em 0;
+            font-size: 1em;
+            color: #666;
         }
         /* Footer Section */
         footer {
@@ -202,14 +231,14 @@ def main():
                         <p>AI/ML Solutions</p>
                     </div>
                     <div class="team-member">
-                        <h3>Ibtihaj Al Bahri</h3>
-                        <p>Business</p>
+                        <h3>Muadh Al Subhi</h3>
+                        <p>Data and UI/UX</p>
                     </div>
                 </div>
                 <div style="display: flex; justify-content: center; gap: 2em;">
                     <div class="team-member">
-                        <h3>Muadh Al Subhi</h3>
-                        <p>Data and UI/UX</p>
+                        <h3>Ibtihaj Al Bahri</h3>
+                        <p>Business</p>
                     </div>
                     <div class="team-member">
                         <h3>Uzair Saif Udeen</h3>
@@ -220,6 +249,8 @@ def main():
             """,
             unsafe_allow_html=True
         )
+
+
 
         # Add testimonial section
         st.markdown(
