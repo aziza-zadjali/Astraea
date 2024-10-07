@@ -229,6 +229,7 @@ def main():
             if st.button("Return to Landing Page", key="return_button"):
                 st.session_state.show_main_app = False
 
+
         # Main content with tabs
         language = st.selectbox("Choose Language / اختر اللغة", ["English", "العربية"], key="language_select", label_visibility="collapsed")
         lang_code = "en" if language == "English" else "ar"
