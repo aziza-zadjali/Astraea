@@ -8,8 +8,6 @@ from utils.oman_laws import get_oman_laws, read_oman_law
 from deep_translator import GoogleTranslator
 from fpdf import FPDF
 import openai
-import requests
-from bs4 import BeautifulSoup
 
 # Assuming you have a directory for templates
 TEMPLATE_DIR = "templates"
@@ -51,32 +49,6 @@ def main():
             top: 10px;
             left: 10px;
             z-index: 1000;
-        }
-        /* Hide the streamlit icon */
-        .viewerBadge_Link__qRIco {
-            display: none;
-        }
-        /* Testimonial Section */
-        #testimonials {
-            background-color: #fff;
-            padding: 2em;
-            margin: 2em auto;
-            max-width: 800px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        #testimonials h2 {
-            text-align: center;
-            margin-bottom: 1em;
-        }
-        .testimonial {
-            margin-bottom: 1em;
-            padding: 1em;
-            border-bottom: 1px solid #ddd;
-        }
-        .testimonial h3 {
-            margin-top: 0.5em;
-            font-size: 1.1em;
-            color: #333;
         }
         </style>
     """
@@ -142,24 +114,6 @@ def main():
         # Add the 'Our Team' comment and team.png image after the "Get Started" button
         st.markdown("<h3 style='text-align:center;'>Our Team</h3>", unsafe_allow_html=True)
         st.image("team.png", use_column_width=True)
-
-        # Add testimonial section
-        st.markdown(
-            """
-            <section id="testimonials">
-                <h2>What Our Clients Say</h2>
-                <div class="testimonial">
-                    <p>"خانة الاستفسار تعمل بشكل جيد. إن إنشاء المستندات الآلي ومراجعة الوثائق يوفران الكثير من الوقت ويزيدان من الإنتاجية والدقة بشكل ملحوظ."</p>
-                    <h3>- Client Name</h3>
-                </div>
-                <div class="testimonial">
-                    <p>"The inquiry section works very well. Automated document creation and document review are significant time-savers that noticeably increase productivity and accuracy."</p>
-                    <h3>- Client Name</h3>
-                </div>
-            </section>
-            """,
-            unsafe_allow_html=True
-        )
 
     if st.session_state.show_main_app:
         # Main app (initially hidden)
@@ -284,81 +238,33 @@ def legal_query_assistant(lang_code):
         key="query_type"
     )
 
-    # Add a radio button for selecting the summary type
-    summary_type = st.radio(
-        "Please confirm the response type" if lang_code == "en" else "يرجى تأكيد نوع الملخص",
-        ("Brief", "Detailed", "Comprehensive") if lang_code == "en" else ("موجز", "مفصل", "شامل"),
-        key="summary_type"
-    )
-
     if query_type in ['Enter your own query', 'أدخل استفسارك الخاص']:
         query = st.text_input("Enter your legal query:" if lang_code == "en" else "أدخل استفسارك القانوني:", key="legal_query")
         if query and st.button("Submit" if lang_code == "en" else "إرسال", key="submit_legal_query"):
-            process_query(query, summary_type, context=None, lang_code=lang_code)
+            process_query(query, context=None, lang_code=lang_code)
     else:
         uploaded_file = st.file_uploader("Upload a document" if lang_code == "en" else "قم بتحميل وثيقة", type=["docx", "pdf", "txt"], key="file_uploader")
         if uploaded_file:
             document_text = process_uploaded_file(uploaded_file, lang_code)
             if document_text:
                 suggested_questions = generate_suggested_questions(document_text, lang_code)
-                handle_document_queries(document_text, suggested_questions, summary_type, lang_code)
+                handle_document_queries(document_text, suggested_questions, lang_code)
 
-def fetch_information_from_websites(query):
-    urls = ["https://qanoon.om/", "https://www.oman.om"]
-    headers = {"User-Agent": "Mozilla/5.0"}
-    for url in urls:
-        try:
-            response = requests.get(url, headers=headers)
-            if response.status_code == 200:
-                soup = BeautifulSoup(response.content, "html.parser")
-                # Implement specific logic to search for the query in the website's content
-                # This is a placeholder for demonstration purposes
-                if query.lower() in soup.text.lower():
-                    return f"Information found on {url}: {query}"
-        except Exception as e:
-            print(f"Error fetching from {url}: {e}")
-    return None
+def process_uploaded_file(uploaded_file, lang_code):
+    file_type = uploaded_file.type
+    spinner_text = "Reading document..." if lang_code == "en" else "جاري قراءة الوثيقة..."
+    with st.spinner(spinner_text):
+        if file_type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+            return read_docx(uploaded_file)
+        elif file_type == "application/pdf":
+            return read_pdf(uploaded_file)
+        elif file_type == "text/plain":
+            return read_txt(uploaded_file)
+        else:
+            st.error("Unsupported file type." if lang_code == "en" else "نوع الملف غير مدعوم.")
+            return None
 
-def process_query(query, summary_type, context=None, lang_code="en"):
-    with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
-        try:
-            # First, try to fetch information from the specified websites
-            web_info = fetch_information_from_websites(query)
-            if web_info:
-                st.markdown("### Response:")
-                st.markdown(format_response(web_info))
-                return
-
-            # If no information is found on the websites, proceed with the usual processing
-            context_chunks = split_text_into_chunks(context, max_tokens=2000) if context else ["No additional context provided."]
-            
-            responses = []
-            for chunk in context_chunks:
-                prompt = {
-                    "en": f"Provide a {summary_type.lower()} summary of the following legal query. Avoid ambiguity and ensure the response is certain:\n\nQuery: {query}\n\nContext: {chunk}",
-                    "ar": f"قدم ملخصًا {summary_type.lower()} للاستفسار القانوني التالي. تجنب الغموض وتأكد من أن الإجابة مؤكدة:\n\nالاستفسار: {query}\n\nالسياق: {chunk}"
-                }
-                
-                response = openai.ChatCompletion.create(
-                    model="gpt-4o",
-                    messages=[
-                        {"role": "system", "content": "You are Astraea, which is a greece word for justice, you are an expert legal advisor. Provide a clear, direct, and certain answer to the given query, including guidance and relevant legal precedents, statutes, or case law to support the analysis. If there are specific legal risks or potential issues, please flag them and suggest mitigating strategies."},
-                        {"role": "user", "content": prompt[lang_code]}
-                    ],
-                    max_tokens=150 if summary_type == "Brief" else 300 if summary_type == "Detailed" else 600,
-                    temperature=0.7
-                )
-                
-                responses.append(response.choices[0].message['content'].strip())
-            
-            # Combine the responses from all chunks
-            final_response = "\n\n".join(responses)
-            st.markdown("### Response:")
-            st.markdown(format_response(final_response))
-        except Exception as e:
-            st.error(f"An error occurred: {str(e)}")
-
-def handle_document_queries(document_text, suggested_questions, summary_type, lang_code):
+def handle_document_queries(document_text, suggested_questions, lang_code):
     st.success("Document uploaded successfully!" if lang_code == "en" else "تم تحميل الوثيقة بنجاح!")
 
     # Suggested questions section
@@ -368,7 +274,7 @@ def handle_document_queries(document_text, suggested_questions, summary_type, la
     submit_suggested = st.button("Submit Suggested Question" if lang_code == "en" else "إرسال السؤال المقترح", key="submit_suggested_query")
 
     if selected_question and submit_suggested:
-        process_query(selected_question, summary_type, document_text, lang_code)
+        process_query(selected_question, document_text, lang_code)
 
     st.markdown("---")
 
@@ -378,7 +284,7 @@ def handle_document_queries(document_text, suggested_questions, summary_type, la
     submit_custom = st.button("Submit Custom Query" if lang_code == "en" else "إرسال الاستفسار الخاص", key="submit_custom_query")
 
     if custom_query and submit_custom:
-        process_query(custom_query, summary_type, document_text, lang_code)
+        process_query(custom_query, document_text, lang_code)
 
 def oman_laws_feature(lang_code):
     st.header("Oman Laws" if lang_code == "en" else "قوانين عمان")
@@ -402,7 +308,7 @@ def oman_laws_feature(lang_code):
                 submit_suggested = st.button("Submit Suggested Question" if lang_code == "en" else "إرسال السؤال المقترح", key="submit_oman_law_suggested_query")
                 
                 if selected_question and submit_suggested:
-                    concise_answer = get_concise_law_answer(selected_question, law_text, summary_type, lang_code)
+                    concise_answer = get_concise_law_answer(selected_question, law_text, lang_code)
                     st.markdown("### Answer:")
                     st.markdown(concise_answer)
 
@@ -414,7 +320,7 @@ def oman_laws_feature(lang_code):
                 submit_custom = st.button("Submit Custom Query" if lang_code == "en" else "إرسال الاستفسار الخاص", key="submit_oman_law_custom_query")
                 
                 if custom_query and submit_custom:
-                    concise_answer = get_concise_law_answer(custom_query, law_text, summary_type, lang_code)
+                    concise_answer = get_concise_law_answer(custom_query, law_text, lang_code)
                     st.markdown("### Answer:")
                     st.markdown(concise_answer)
             else:
@@ -422,10 +328,10 @@ def oman_laws_feature(lang_code):
     else:
         st.error("No laws found in the database directory." if lang_code == "en" else "لم يتم العثور على قوانين في دليل قاعدة البيانات.")
 
-def get_concise_law_answer(query, law_text, summary_type, lang_code):
+def get_concise_law_answer(query, law_text, lang_code):
     prompt = {
-        "en": f"Provide a {summary_type.lower()} summary of the following query about Oman law. Focus on the most relevant information and limit the response to 2-3 sentences:\n\nQuery: {query}\n\nLaw text: {law_text[:3000]}...",
-        "ar": f"قدم ملخصًا {summary_type.lower()} للاستفسار التالي حول قانون عمان. ركز على المعلومات الأكثر صلة وحدد الإجابة في 2-3 جمل:\n\nالاستفسار: {query}\n\nنص القانون: {law_text[:3000]}..."
+        "en": f"Provide a concise answer to the following query about Oman law. Focus on the most relevant information and limit the response to 2-3 sentences:\n\nQuery: {query}\n\nLaw text: {law_text[:3000]}...",
+        "ar": f"قدم إجابة موجزة للاستفسار التالي حول قانون عمان. ركز على المعلومات الأكثر صلة وحدد الإجابة في 2-3 جمل:\n\nالاستفسار: {query}\n\nنص القانون: {law_text[:3000]}..."
     }
     
     response = openai.ChatCompletion.create(
@@ -434,7 +340,7 @@ def get_concise_law_answer(query, law_text, summary_type, lang_code):
             {"role": "system", "content": "You are a concise legal advisor specializing in Oman law."},
             {"role": "user", "content": prompt[lang_code]}
         ],
-        max_tokens=150 if summary_type == "Brief" else 300 if summary_type == "Detailed" else 600,
+        max_tokens=150,
         temperature=0.7
     )
     
@@ -505,6 +411,59 @@ def fill_template(template_content, inputs):
     for placeholder, value in inputs.items():
         template_content = template_content.replace(f"{{{placeholder}}}", value)
     return template_content
+
+def process_query(query, context=None, lang_code="en"):
+    with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
+        try:
+            # Split the context into smaller chunks if it exceeds the token limit
+            context_chunks = split_text_into_chunks(context, max_tokens=2000) if context else ["No additional context provided."]
+            
+            responses = []
+            for chunk in context_chunks:
+                prompt = {
+                    "en": f"Provide a clear and direct answer to the following legal query. Avoid ambiguity and ensure the response is certain:\n\nQuery: {query}\n\nContext: {chunk}",
+                    "ar": f"قدم إجابة واضحة ومباشرة للاستفسار القانوني التالي. تجنب الغموض وتأكد من أن الإجابة مؤكدة:\n\nالاستفسار: {query}\n\nالسياق: {chunk}"
+                }
+                
+                response = openai.ChatCompletion.create(
+                    model="gpt-4o",
+                    messages=[
+                        {"role": "system", "content": "You are an expert legal advisor. Provide a clear, direct, and certain answer to the given query."},
+                        {"role": "user", "content": prompt[lang_code]}
+                    ],
+                    max_tokens=1000,
+                    temperature=0.7
+                )
+                
+                responses.append(response.choices[0].message['content'].strip())
+            
+            # Combine the responses from all chunks
+            final_response = "\n\n".join(responses)
+            st.markdown("### Response:")
+            st.markdown(format_response(final_response))
+        except Exception as e:
+            st.error(f"An error occurred: {str(e)}")
+
+def split_text_into_chunks(text, max_tokens=2000):
+    # Split the text into chunks of max_tokens length
+    words = text.split()
+    chunks = []
+    current_chunk = []
+    current_length = 0
+    
+    for word in words:
+        current_length += len(word) + 1  # +1 for the space
+        if current_length > max_tokens:
+            chunks.append(" ".join(current_chunk))
+            current_chunk = [word]
+            current_length = len(word) + 1
+        else:
+            current_chunk.append(word)
+    
+    if current_chunk:
+        chunks.append(" ".join(current_chunk))
+    
+    return chunks
 
 def grade_legal_document(lang_code):
     st.header("Grade Legal Document" if lang_code == "en" else "تقييم الوثيقة القانونية")
