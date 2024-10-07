@@ -150,6 +150,17 @@ def main():
         if st.button("Get Started", key="get_started_button"):
             st.session_state.show_main_app = True
 
+        # Add the 'Our Team' comment and team.png image after the "Get Started" button
+        st.markdown("<h3 style='text-align:center;'>Our Team</h3>", unsafe_allow_html=True)
+        
+       # Load and resize the team.png image while maintaining aspect ratio
+        team_image = Image.open("team.png")
+        team_width, team_height = team_image.size
+        new_team_height = team_height // 2
+        new_team_width = int((new_team_height / team_height) * team_width)
+        resized_team_image = team_image.resize((new_team_width, new_team_height))
+        
+        st.image(resized_team_image, use_column_width=True)
 
         # Add testimonial section
         st.markdown(
@@ -282,16 +293,17 @@ def main():
         with tabs[5]:
             predictive_analysis_ui()
 
-
 def legal_query_assistant(lang_code):
     st.header("Legal Query Assistant" if lang_code == "en" else "مساعد الاستفسارات القانونية")
 
+    # Move the query type selection to the top and align vertically
     query_type = st.radio(
         "Choose query type" if lang_code == "en" else "اختر نوع الاستفسار",
         ('Enter your own query', 'Query from document') if lang_code == "en" else ('أدخل استفسارك الخاص', 'استفسر من وثيقة'),
         key="query_type"
     )
 
+    # Add a radio button for selecting the summary type
     summary_type = st.radio(
         "Please confirm the response type" if lang_code == "en" else "يرجى تأكيد نوع الملخص",
         ("Brief", "Detailed", "Comprehensive") if lang_code == "en" else ("موجز", "مفصل", "شامل"),
@@ -309,6 +321,7 @@ def legal_query_assistant(lang_code):
             if document_text:
                 suggested_questions = generate_suggested_questions(document_text, lang_code)
                 handle_document_queries(document_text, suggested_questions, summary_type, lang_code)
+
 def fetch_information_from_websites(query):
     urls = ["https://qanoon.om/", "https://www.oman.om"]
     headers = {"User-Agent": "Mozilla/5.0"}
