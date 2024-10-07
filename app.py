@@ -301,14 +301,46 @@ def legal_query_assistant(lang_code):
     if query_type in ['Enter your own query', 'أدخل استفسارك الخاص']:
         query = st.text_input("Enter your legal query:" if lang_code == "en" else "أدخل استفسارك القانوني:", key="legal_query")
         if query and st.button("Submit" if lang_code == "en" else "إرسال", key="submit_legal_query"):
-            process_query(query, summary_type, context=None, lang_code=lang_code)
+            
+    # This should integrate with your existing query processing logic.
+    # Simulating a response based on summary type for illustration.
+    if summary_type == "Brief":
+        response = "This is a brief response to the query."
+    elif summary_type == "Detailed":
+        response = "This is a detailed response to the query, providing more insights and extended analysis."
+    elif summary_type == "Comprehensive":
+        response = "This is a comprehensive response to the query, including all possible details, insights, and extended analysis to cover all aspects thoroughly."
+    
+    # Ensuring the response is a complete sentence
+    if not response.endswith('.'):
+        response += '.'
+
+    st.write(response)
+    
     else:
         uploaded_file = st.file_uploader("Upload a document" if lang_code == "en" else "قم بتحميل وثيقة", type=["docx", "pdf", "txt"], key="file_uploader")
         if uploaded_file:
             document_text = process_uploaded_file(uploaded_file, lang_code)
             if document_text:
                 suggested_questions = generate_suggested_questions(document_text, lang_code)
-                handle_document_queries(document_text, suggested_questions, summary_type, lang_code)
+                
+        # Simulate processing each suggested question
+        responses = []
+        for question in suggested_questions:
+            if summary_type == "Brief":
+                response = f"Brief response for {question}."
+            elif summary_type == "Detailed":
+                response = f"Detailed response for {question}, providing more insights."
+            elif summary_type == "Comprehensive":
+                response = f"Comprehensive response for {question}, including all details and insights."
+            
+            if not response.endswith('.'):
+                response += '.'
+            responses.append(response)
+
+        for response in responses:
+            st.write(response)
+        
 def fetch_information_from_websites(query):
     urls = ["https://qanoon.om/", "https://www.oman.om"]
     headers = {"User-Agent": "Mozilla/5.0"}
@@ -364,7 +396,24 @@ def process_query(query, summary_type, context=None, lang_code="en"):
         except Exception as e:
             st.error(f"An error occurred: {str(e)}")
 
-def handle_document_queries(document_text, suggested_questions, summary_type, lang_code):
+def 
+        # Simulate processing each suggested question
+        responses = []
+        for question in suggested_questions:
+            if summary_type == "Brief":
+                response = f"Brief response for {question}."
+            elif summary_type == "Detailed":
+                response = f"Detailed response for {question}, providing more insights."
+            elif summary_type == "Comprehensive":
+                response = f"Comprehensive response for {question}, including all details and insights."
+            
+            if not response.endswith('.'):
+                response += '.'
+            responses.append(response)
+
+        for response in responses:
+            st.write(response)
+        :
     st.success("Document uploaded successfully!" if lang_code == "en" else "تم تحميل الوثيقة بنجاح!")
 
     # Suggested questions section
