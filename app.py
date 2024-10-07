@@ -1,4 +1,8 @@
 import streamlit as st
+
+
+st.title('Welcome to Astraea - Your AI Legal Assistant')
+
 import os
 import re
 from typing import Dict, Any
@@ -667,3 +671,6 @@ def predictive_analysis_ui():
 
 if __name__ == "__main__":
     main()
+
+if st.button('Submit'):
+    # Legal query function here
