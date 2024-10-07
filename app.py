@@ -120,6 +120,17 @@ def main():
     # Add logo to the top left corner using Streamlit's image function
     st.image("logo.png", width=100)
 
+    # Add the "Welcome to Astraea" heading above the poster image
+    st.markdown(
+        """
+        <div style="text-align: center; padding: 50px 0;">
+            <h1 style="color: #008080; font-size: 3em;">Welcome to Astraea</h1>
+            <h2 style="color: #424242; font-size: 1.5em;">Your AI-Powered Legal Assistant</h2>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
     # Load the image and resize it to make the length 50% shorter
     image = Image.open("poster.jpeg")
     width, height = image.size
@@ -169,8 +180,6 @@ def main():
         st.markdown(
             """
             <div class="landing-page" style="text-align: center; padding: 50px 0;">
-                <h1 style="color: #008080; font-size: 3em;">Welcome to Astraea</h1>
-                <h2 style="color: #424242; font-size: 1.5em;">Your AI-Powered Legal Assistant</h2>
                 <p style="font-size: 1.2em; max-width: 600px; margin: 20px auto; color: #424242;">
                     Astraea is here to simplify your legal queries. Get instant answers, 
                     explore Omani laws, and receive personalized legal advice.
@@ -228,6 +237,7 @@ def main():
         with return_button_col:
             if st.button("Return to Landing Page", key="return_button"):
                 st.session_state.show_main_app = False
+
 
 
         # Main content with tabs
