@@ -8,6 +8,10 @@ from utils.oman_laws import get_oman_laws, read_oman_law
 from deep_translator import GoogleTranslator
 from fpdf import FPDF
 import openai
+import requests
+from bs4 import BeautifulSoup
+from PIL import Image
+
 
 # Assuming you have a directory for templates
 TEMPLATE_DIR = "templates"
@@ -50,6 +54,32 @@ def main():
             left: 10px;
             z-index: 1000;
         }
+        /* Hide the streamlit icon */
+        .viewerBadge_Link__qRIco {
+            display: none;
+        }
+        /* Testimonial Section */
+        #testimonials {
+            background-color: #fff;
+            padding: 2em;
+            margin: 2em auto;
+            max-width: 800px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        #testimonials h2 {
+            text-align: center;
+            margin-bottom: 1em;
+        }
+        .testimonial {
+            margin-bottom: 1em;
+            padding: 1em;
+            border-bottom: 1px solid #ddd;
+        }
+        .testimonial h3 {
+            margin-top: 0.5em;
+            font-size: 1.1em;
+            color: #333;
+        }
         </style>
     """
     
@@ -57,6 +87,15 @@ def main():
 
     # Add logo to the top left corner using Streamlit's image function
     st.image("logo.png", width=100)
+
+    # Load the image and resize it to make the length 50% shorter
+    image = Image.open("poster.jpeg")
+    width, height = image.size
+    new_height = height // 3
+    resized_image = image.resize((width, new_height))
+
+    # Add the resized image at the top of the landing page
+    st.image(resized_image, use_column_width=True)
 
     # Fixed position for language selection icon
     st.markdown(
@@ -111,9 +150,24 @@ def main():
         if st.button("Get Started", key="get_started_button"):
             st.session_state.show_main_app = True
 
-        # # Add the 'Our Team' comment and team.png image after the "Get Started" button
-        # st.markdown("<h3 style='text-align:center;'>Our Team</h3>", unsafe_allow_html=True)
-        # st.image("team.png", use_column_width=True)
+
+        # Add testimonial section
+        st.markdown(
+            """
+            <section id="testimonials">
+                <h2>What Our Clients Say</h2>
+                <div class="testimonial">
+                    <p>"خانة الاستفسار تعمل بشكل جيد. إن إنشاء المستندات الآلي ومراجعة الوثائق يوفران الكثير من الوقت ويزيدان من الإنتاجية والدقة بشكل ملحوظ."</p>
+                    <h3>- مكتب محمد الشقصي للمحاماة والاستشارات القانونية</h3>
+                </div>
+                <div class="testimonial">
+                    <p>"The inquiry section works very well. Automated document creation and document review are significant time-savers that noticeably increase productivity and accuracy."</p>
+                    <h3>- MOHD AL-SHAQSI ADV AND LEGAL CONSULTANTS</h3>
+                </div>
+            </section>
+            """,
+            unsafe_allow_html=True
+        )
 
     if st.session_state.show_main_app:
         # Main app (initially hidden)
@@ -227,8 +281,9 @@ def main():
             grade_legal_document(lang_code)
         with tabs[5]:
             predictive_analysis_ui()
-
 def legal_query_assistant(lang_code):
+
+    
     st.header("Legal Query Assistant" if lang_code == "en" else "مساعد الاستفسارات القانونية")
 
     # Move the query type selection to the top and align vertically
