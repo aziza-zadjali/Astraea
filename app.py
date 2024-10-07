@@ -272,7 +272,7 @@ def main():
         with tabs[0]:
             legal_query_assistant(lang_code)
         with tabs[1]:
-            oman_laws_feature(lang_code)
+            oman_laws_feature(lang_code, summary_type)
         with tabs[2]:
             legal_translation_service(lang_code)
         with tabs[3]:
@@ -390,7 +390,8 @@ def handle_document_queries(document_text, suggested_questions, summary_type, la
     if custom_query and submit_custom:
         process_query(custom_query, summary_type, document_text, lang_code)
 
-def oman_laws_feature(lang_code):
+def oman_laws_feature(lang_code, summary_type):
+
     st.header("Oman Laws" if lang_code == "en" else "قوانين عمان")
     laws = get_oman_laws()
     
