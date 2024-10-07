@@ -16,7 +16,6 @@ from PIL import Image
 # Assuming you have a directory for templates
 TEMPLATE_DIR = "templates"
 
-
 def main():
     st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
 
@@ -26,21 +25,64 @@ def main():
 
     # Add custom CSS to hide the icons and style the button
     hide_streamlit_style = """
-    <style>
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    .stButton>button {
-        background-color: #4CAF50;
-        color: white;
-        padding: 14px 20px;
-        margin: 8px 0;
-        border: none;
-        cursor: pointer;
-        width: 100%;
-        opacity: 0.9;
-    }
-    </style>
+        <style>
+        #MainMenu {visibility: hidden;}
+        footer {visibility: hidden;}
+        .stApp [data-testid="stToolbar"] {visibility: hidden;}
+        .stButton>button {
+            background-color: #008080;
+            color: white !important;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1.2em;
+            border-radius: 5px;
+            cursor: pointer;
+            display: block;
+            margin: 0 auto;
+        }
+        .stButton>button:hover { color: white !important;
+            background-color: #006666;
+        }
+        .return-button-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .logo-container {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 1000;
+        }
+        /* Hide the streamlit icon */
+        .viewerBadge_Link__qRIco {
+            display: none;
+        }
+        /* Testimonial Section */
+        #testimonials {
+            background-color: #fff;
+            padding: 2em;
+            margin: 2em auto;
+            max-width: 800px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        #testimonials h2 {
+            text-align: center;
+            margin-bottom: 1em;
+        }
+        .testimonial {
+            margin-bottom: 1em;
+            padding: 1em;
+            border-bottom: 1px solid #ddd;
+        }
+        .testimonial h3 {
+            margin-top: 0.5em;
+            font-size: 1.1em;
+            color: #333;
+        }
+        </style>
     """
+    
     st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
     # Add logo to the top left corner using Streamlit's image function
@@ -58,13 +100,14 @@ def main():
     # Fixed position for language selection icon
     st.markdown(
         """
-        <div style='position: fixed; top: 10px; right: 10px; z-index: 1000;'>
-            <select onchange="window.location.href=this.value">
-                <option value="#">🌐</option>
-                <option value="?lang=en">English</option>
-                <option value="?lang=ar">العربية</option>
-            </select>
-        </div>
+        <style>
+        .language-selector {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+        }
+        </style>
         """,
         unsafe_allow_html=True
     )
@@ -72,64 +115,70 @@ def main():
     # Language selection icon with dropdown
     st.markdown(
         """
-        <h1 style='text-align: center;'>Welcome to Astraea</h1>
-        <p style='text-align: center;'>
-        Astraea is here to simplify your legal queries. Get instant answers, explore Omani laws, and receive personalized legal advice.
-        </p>
+        <div class="language-selector">
+            <select id="language-select" onchange="changeLanguage()">
+                <option value="en">🇬🇧 English</option>
+                <option value="ar">🇴🇲 Arabic</option>
+            </select>
+        </div>
+        <script>
+        function changeLanguage() {
+            var select = document.getElementById("language-select");
+            var selectedLanguage = select.options[select.selectedIndex].value;
+            // Implement language change logic here
+        }
+        </script>
         """,
         unsafe_allow_html=True
     )
 
-    if st.button("Get Started", key="get_started_button"):
-        st.session_state.show_main_app = True
+    if not st.session_state.show_main_app:
+        # Landing page
+        st.markdown(
+            """
+            <div class="landing-page" style="text-align: center; padding: 50px 0;">
+                <h1 style="color: #008080; font-size: 3em;">Welcome to Astraea</h1>
+                <h2 style="color: #424242; font-size: 1.5em;">Your AI-Powered Legal Assistant</h2>
+                <p style="font-size: 1.2em; max-width: 600px; margin: 20px auto; color: #424242;">
+                    Astraea is here to simplify your legal queries. Get instant answers, 
+                    explore Omani laws, and receive personalized legal advice.
+                </p>
+            """,
+            unsafe_allow_html=True
+        )
 
-    # Add the 'Our Team' section
-    st.markdown("<h2 style='text-align: center;'>Our Team</h2>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center;'>Our dedicated team brings together diverse expertise to deliver Astraea's innovative legal solutions:</p>", unsafe_allow_html=True)
+        if st.button("Get Started", key="get_started_button"):
+            st.session_state.show_main_app = True
 
-    col1, col2 = st.columns(2)
+        # Add the 'Our Team' comment and team.png image after the "Get Started" button
+        st.markdown("<h3 style='text-align:center;'>Our Team</h3>", unsafe_allow_html=True)
+        
+       # Load and resize the team.png image while maintaining aspect ratio
+        team_image = Image.open("team.png")
+        team_width, team_height = team_image.size
+        new_team_height = team_height // 2
+        new_team_width = int((new_team_height / team_height) * team_width)
+        resized_team_image = team_image.resize((new_team_width, new_team_height))
+        
+        st.image(resized_team_image, use_column_width=True)
 
-    with col1:
-        st.markdown("""
-        <div class="team-section">
-            <div class="team-member">
-                <div class="team-member-name">Aziza Al Zadjali</div>
-                <div class="team-member-role">AI/ML Solutions</div>
-            </div>
-            <div class="team-member">
-                <div class="team-member-name">Ibtihaj Al Bahri</div>
-                <div class="team-member-role">Business</div>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-
-    with col2:
-        st.markdown("""
-        <div class="team-section">
-            <div class="team-member">
-                <div class="team-member-name">Muadh Al Subhi</div>
-                <div class="team-member-role">Data and UI/UX</div>
-            </div>
-            <div class="team-member">
-                <div class="team-member-name">Uzair Saif Udeen</div>
-                <div class="team-member-role">Software Developer</div>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-
-    # Add the testimonials
-    st.markdown("""
-    <div style='text-align: center; margin-top: 2rem;'>
-        <h2>What Our Users Say</h2>
-        <blockquote>
-            "خانة الاستفسار تعمل بشكل جيد. إن إنشاء المستندات الآلي ومراجعة الوثائق يوفران الكثير من الوقت ويزيدان من الإنتاجية والدقة بشكل ملحوظ."
-        </blockquote>
-        <blockquote>
-            "The inquiry section works very well. Automated document creation and document review are significant time-savers that noticeably increase productivity and accuracy."
-        </blockquote>
-    </div>
-    """, unsafe_allow_html=True)
-
+        # Add testimonial section
+        st.markdown(
+            """
+            <section id="testimonials">
+                <h2>What Our Clients Say</h2>
+                <div class="testimonial">
+                    <p>"خانة الاستفسار تعمل بشكل جيد. إن إنشاء المستندات الآلي ومراجعة الوثائق يوفران الكثير من الوقت ويزيدان من الإنتاجية والدقة بشكل ملحوظ."</p>
+                    <h3>- مكتب محمد الشقصي للمحاماة والاستشارات القانونية</h3>
+                </div>
+                <div class="testimonial">
+                    <p>"The inquiry section works very well. Automated document creation and document review are significant time-savers that noticeably increase productivity and accuracy."</p>
+                    <h3>- MOHD AL-SHAQSI ADV AND LEGAL CONSULTANTS</h3>
+                </div>
+            </section>
+            """,
+            unsafe_allow_html=True
+        )
 
     if st.session_state.show_main_app:
         # Main app (initially hidden)
