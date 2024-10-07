@@ -332,15 +332,19 @@ def fetch_information_from_websites(query):
 
 
 
+
 def process_query(query, summary_type, context=None, lang_code="en"):
     if summary_type == "Brief":
-        response = f"Key outcome of '{query}': essential actions advised based on current legislation."
+        # Provide a concise yet comprehensive summary
+        response = f"Quick summary of '{query}': Key insights and actionable recommendations based on the latest legal precedents."
     elif summary_type == "Detailed":
-        response = f"Analysis of '{query}' offers a deeper look into legal implications, relevant cases, and actionable insights, providing a broad perspective on potential outcomes."
+        # Include detailed insights and analysis
+        response = f"Detailed analysis of '{query}': Discusses legal implications, related case law, and strategic considerations in depth."
     elif summary_type == "Comprehensive":
-        response = f"A thorough examination of '{query}' reveals detailed legal implications, case comparisons, historical context, and comprehensive recommendations for future actions, ensuring a full understanding of all nuances."
+        # Offer the most thorough analysis possible
+        response = f"Comprehensive review of '{query}': Covers all aspects including historical context, current applications, and future implications, ensuring a full understanding of the topic."
 
-    # Ensure the response is a complete sentence
+    # Ensure the response ends with a period, making it a complete sentence
     if not response.endswith('.'):
         response += '.'
 
