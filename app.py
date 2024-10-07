@@ -195,7 +195,7 @@ def main():
         st.markdown(
             """
             <section id="team">
-                <h2>Our Team</h2>
+                <h2>The Team</h2>
                 <div style="display: flex; justify-content: center; gap: 2em;">
                     <div class="team-member">
                         <h3>Aziza Al Zadjali</h3>
