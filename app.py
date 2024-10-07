@@ -355,7 +355,7 @@ def process_query(query, summary_type, context=None, lang_code="en"):
                         {"role": "system", "content": "You are Astraea, which is a greece word for justice, you are an expert legal advisor. Provide a clear, direct, and certain answer to the given query, including guidance and relevant legal precedents, statutes, or case law to support the analysis. If there are specific legal risks or potential issues, please flag them and suggest mitigating strategies."},
                         {"role": "user", "content": prompt[lang_code]}
                     ],
-                    max_tokens=150 if summary_type == "Brief" else 300 if summary_type == "Detailed" else 600,
+                    # max_tokens=150 if summary_type == "Brief" else 300 if summary_type == "Detailed" else 600,
                     temperature=0.7
                 )
                 
