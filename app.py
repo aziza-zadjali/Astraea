@@ -299,21 +299,20 @@ def legal_query_assistant(lang_code):
         key="summary_type"
     )
 
-    
+    query_type = st.radio(
 if query_type in ['Enter your own query', 'أدخل استفسارك الخاص']:
-    query = st.text_input("Enter your legal query:" if lang_code == "en" else "أدخل استفسارك القانوني:", key="legal_query")
-    if st.button("Submit" if lang_code == "en" else "إرسال", key="submit_legal_query"):  # Button always visible
-        if query:  # Check if query is not empty before processing
+        query = st.text_input("Enter your legal query:" if lang_code == "en" else "أدخل استفسارك القانوني:", key="legal_query")
+        if st.button("Submit" if lang_code == "en" else "إرسال", key="submit_legal_query"):
+        if query:
             process_query(query, summary_type, context=None, lang_code=lang_code)
-        else:
-            st.warning("Please enter a query before submitting.")  # Warning if query is empty
-else:
-    uploaded_file = st.file_uploader("Upload a document" if lang_code == "en" else "قم بتحميل وثيقة", type=["docx", "pdf", "txt"], key="file_uploader")
-    if uploaded_file:
-        document_text = process_uploaded_file(uploaded_file, lang_code)
-        if document_text:
-            suggested_questions = generate_suggested_questions(document_text, lang_code)
-            handle_document_queries(document_text, suggested_questions, summary_type, lang_code)
+    else:
+        uploaded_file = st.file_uploader("Upload a document" if lang_code == "en" else "قم بتحميل وثيقة", type=["docx", "pdf", "txt"], key="file_uploader")
+        if uploaded_file:
+            document_text = process_uploaded_file(uploaded_file, lang_code)
+            if document_text:
+                suggested_questions = generate_suggested_questions(document_text, lang_code)
+                handle_document_queries(document_text, suggested_questions, summary_type, lang_code)
+
 def fetch_information_from_websites(query):
     urls = ["https://qanoon.om/", "https://www.oman.om"]
     headers = {"User-Agent": "Mozilla/5.0"}
