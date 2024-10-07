@@ -163,44 +163,6 @@ def main():
         st.image(resized_team_image, use_column_width=True)
         import streamlit as st
     
-        # Footer
-        footer = """
-        <style>
-        footer {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            background-color: #f1f1f1;
-            text-align: center;
-            padding: 10px;
-            font-size: 14px;
-            color: #333;
-        }
-        footer a {
-            color: #007bff;
-            text-decoration: none;
-            margin: 0 10px;
-        }
-        footer a:hover {
-            text-decoration: underline;
-        }
-        </style>
-        <footer>
-            <p>© 2024 Your Company Name. All rights reserved.</p>
-            <p>
-                <a href="mailto:contact@yourcompany.com">Contact Us</a> |
-                <a href="/privacy-policy">Privacy Policy</a> |
-                <a href="/terms-of-service">Terms of Service</a>
-            </p>
-            <p>
-                <a href="https://www.facebook.com/yourcompany" target="_blank">Facebook</a> |
-                <a href="https://www.twitter.com/yourcompany" target="_blank">Twitter</a> |
-                <a href="https://www.linkedin.com/company/yourcompany" target="_blank">LinkedIn</a>
-            </p>
-        </footer>
-        """
-        
-        st.markdown(footer, unsafe_allow_html=True)
 
         # Add testimonial section
         st.markdown(
