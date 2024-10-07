@@ -267,7 +267,8 @@ def main():
         }
 
         # Create tabs using the appropriate language
-        tabs = st.tabs(tab_labels[lang_code])
+        summary_type = st.radio('Choose the response type:', ('Brief', 'Detailed', 'Comprehensive'), key='summary_type')
+    tabs = st.tabs(tab_labels[lang_code])
 
         with tabs[0]:
             legal_query_assistant(lang_code)
@@ -390,8 +391,7 @@ def handle_document_queries(document_text, suggested_questions, summary_type, la
     if custom_query and submit_custom:
         process_query(custom_query, summary_type, document_text, lang_code)
 
-def oman_laws_feature(lang_code, summary_type):
-
+def oman_laws_feature(lang_code):
     st.header("Oman Laws" if lang_code == "en" else "قوانين عمان")
     laws = get_oman_laws()
     
