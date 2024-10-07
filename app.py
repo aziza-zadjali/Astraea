@@ -299,18 +299,21 @@ def legal_query_assistant(lang_code):
         key="summary_type"
     )
 
-    if query_type in ['Enter your own query', 'أدخل استفسارك الخاص']:
-        query = st.text_input("Enter your legal query:" if lang_code == "en" else "أدخل استفسارك القانوني:", key="legal_query")
-        if st.button("Submit" if lang_code == "en" else "إرسال", key="submit_legal_query"):
-        if query:
+if query_type in ['Enter your own query', 'أدخل استفسارك الخاص']:
+    query = st.text_input("Enter your legal query:" if lang_code == "en" else "أدخل استفسارك القانوني:", key="legal_query")
+    # Move the button outside the 'if query' condition to make it always visible
+    if st.button("Submit" if lang_code == "en" else "إرسال", key="submit_legal_query"):
+        if query:  # Check if the query is not empty before processing
             process_query(query, summary_type, context=None, lang_code=lang_code)
-    else:
-        uploaded_file = st.file_uploader("Upload a document" if lang_code == "en" else "قم بتحميل وثيقة", type=["docx", "pdf", "txt"], key="file_uploader")
-        if uploaded_file:
-            document_text = process_uploaded_file(uploaded_file, lang_code)
-            if document_text:
-                suggested_questions = generate_suggested_questions(document_text, lang_code)
-                handle_document_queries(document_text, suggested_questions, summary_type, lang_code)
+        else:
+            st.warning("Please enter a query before submitting.")
+else:
+    uploaded_file = st.file_uploader("Upload a document" if lang_code == "en" else "قم بتحميل وثيقة", type=["docx", "pdf", "txt"], key="file_uploader")
+    if uploaded_file:
+        document_text = process_uploaded_file(uploaded_file, lang_code)
+        if document_text:
+            suggested_questions = generate_suggested_questions(document_text, lang_code)
+            handle_document_queries(document_text, suggested_questions, summary_type, lang_code)
 
 def fetch_information_from_websites(query):
     urls = ["https://qanoon.om/", "https://www.oman.om"]
