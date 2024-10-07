@@ -299,11 +299,14 @@ def legal_query_assistant(lang_code):
         key="summary_type"
     )
 
-    if query_type in ['Enter your own query', 'أدخل استفسارك الخاص']:
-        query = st.text_input("Enter your legal query:" if lang_code == "en" else "أدخل استفسارك القانوني:", key="legal_query")
-        if query and st.button("Submit" if lang_code == "en" else "إرسال", key="submit_legal_query"):
+    query = st.text_input("Enter your legal query:" if lang_code == "en" else "أدخل استفسارك القانوني:", key="legal_query")
+    if st.button("Submit" if lang_code == "en" else "إرسال", key="submit_legal_query"):
+        if query:
             process_query(query, summary_type, context=None, lang_code=lang_code)
-    else:
+        else:
+            st.warning("Please enter a query before submitting.")
+
+    if query_type == 'Query from document':
         uploaded_file = st.file_uploader("Upload a document" if lang_code == "en" else "قم بتحميل وثيقة", type=["docx", "pdf", "txt"], key="file_uploader")
         if uploaded_file:
             document_text = process_uploaded_file(uploaded_file, lang_code)
