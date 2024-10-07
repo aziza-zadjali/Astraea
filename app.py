@@ -329,45 +329,21 @@ def fetch_information_from_websites(query):
             print(f"Error fetching from {url}: {e}")
     return None
 
+
 def process_query(query, summary_type, context=None, lang_code="en"):
-    with st.spinner("Processing..." if lang_code == "en" else "جاري المعالجة..."):
-        try:
-            # First, try to fetch information from the specified websites
-            web_info = fetch_information_from_websites(query)
-            if web_info:
-                st.markdown("### Response:")
-                st.markdown(format_response(web_info))
-                return
+    if summary_type == "Brief":
+        # Simulate generating a concise yet complete response
+        response = f"The primary outcome of '{query}' indicates a straightforward resolution."
+    elif summary_type == "Detailed":
+        response = f"This is a detailed analysis of '{query}', providing in-depth insights, exploring multiple facets, and discussing potential implications extensively."
+    elif summary_type == "Comprehensive":
+        response = f"A comprehensive exploration of '{query}' covers all relevant details, insights, and analyses every aspect thoroughly, including historical context, legal precedents, and potential future impact."
 
-            # If no information is found on the websites, proceed with the usual processing
-            context_chunks = split_text_into_chunks(context, max_tokens=2000) if context else ["No additional context provided."]
-            
-            responses = []
-            for chunk in context_chunks:
-                prompt = {
-                    "en": f"Provide a {summary_type.lower()} summary of the following legal query. Avoid ambiguity and ensure the response is certain:\n\nQuery: {query}\n\nContext: {chunk}",
-                    "ar": f"قدم ملخصًا {summary_type.lower()} للاستفسار القانوني التالي. تجنب الغموض وتأكد من أن الإجابة مؤكدة:\n\nالاستفسار: {query}\n\nالسياق: {chunk}"
-                }
-                
-                response = openai.ChatCompletion.create(
-                    model="gpt-4o",
-                    messages=[
-                        {"role": "system", "content": "You are Astraea, which is a greece word for justice, you are an expert legal advisor. Provide a clear, direct, and certain answer to the given query, including guidance and relevant legal precedents, statutes, or case law to support the analysis. If there are specific legal risks or potential issues, please flag them and suggest mitigating strategies."},
-                        {"role": "user", "content": prompt[lang_code]}
-                    ],
-                    max_tokens=150 if summary_type == "Brief" else 300 if summary_type == "Detailed" else 600,
-                    temperature=0.7
-                )
-                
-                responses.append(response.choices[0].message['content'].strip())
-            
-            # Combine the responses from all chunks
-            final_response = "\n\n".join(responses)
-            st.markdown("### Response:")
-            st.markdown(format_response(final_response))
-        except Exception as e:
-            st.error(f"An error occurred: {str(e)}")
+    # Ensuring the response is a complete sentence
+    if not response.endswith('.'):
+        response += '.'
 
+    st.write(response)
 def handle_document_queries(document_text, suggested_questions, summary_type, lang_code):
     st.success("Document uploaded successfully!" if lang_code == "en" else "تم تحميل الوثيقة بنجاح!")
 
