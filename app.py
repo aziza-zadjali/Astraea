@@ -149,53 +149,18 @@ def main():
 
         if st.button("Get Started", key="get_started_button"):
             st.session_state.show_main_app = True
-        st.markdown("""
-        <style>
-        .team-section {
-            text-align: center;
-            padding: 2rem 0;
-            background-color: #f8f9fa;
-            border-radius: 10px;
-            margin: 2rem 0;
-        }
-        .team-member {
-            margin-bottom: 1rem;
-        }
-        .team-member-name {
-            font-weight: bold;
-            font-size: 1.1rem;
-            color: #333;
-        }
-        .team-member-role {
-            font-style: italic;
-            color: #666;
-        }
-        </style>
-        """, unsafe_allow_html=True)
-        st.markdown("""
+
+        # Add the 'Our Team' comment and team.png image after the "Get Started" button
+        st.markdown("<h3 style='text-align:center;'>Our Team</h3>", unsafe_allow_html=True)
         
-        st.markdown("""
-<div class="team-section">
-    <h2>Our Team</h2>
-    <p>Our dedicated team brings together diverse expertise to deliver Astraea's innovative legal solutions:</p>
-    <div class="team-member">
-        <div class="team-member-name">Aziza Al Zadjali</div>
-        <div class="team-member-role">AI/ML Solutions</div>
-    </div>
-    <div class="team-member">
-        <div class="team-member-name">Ibtihaj Al Bahri</div>
-        <div class="team-member-role">Business</div>
-    </div>
-    <div class="team-member">
-        <div class="team-member-name">Muadh Al Subhi</div>
-        <div class="team-member-role">Data and UI/UX</div>
-    </div>
-    <div class="team-member">
-        <div class="team-member-name">Uzair Saif Udeen</div>
-        <div class="team-member-role">Software Developer</div>
-    </div>
-</div>
-""", unsafe_allow_html=True)
+       # Load and resize the team.png image while maintaining aspect ratio
+        team_image = Image.open("team.png")
+        team_width, team_height = team_image.size
+        new_team_height = team_height // 2
+        new_team_width = int((new_team_height / team_height) * team_width)
+        resized_team_image = team_image.resize((new_team_width, new_team_height))
+        
+        st.image(resized_team_image, use_column_width=True)
 
         # Add testimonial section
         st.markdown(
