@@ -161,8 +161,6 @@ def main():
         resized_team_image = team_image.resize((new_team_width, new_team_height))
         
         st.image(resized_team_image, use_column_width=True)
-        import streamlit as st
-    
 
         # Add testimonial section
         st.markdown(
@@ -203,7 +201,6 @@ def main():
         language = st.selectbox("Choose Language / اختر اللغة", ["English", "العربية"], key="language_select", label_visibility="collapsed")
         lang_code = "en" if language == "English" else "ar"
 
-        
         # Inject custom CSS for RTL layout, font sizes, and tab styling
         st.markdown(
             f"""
