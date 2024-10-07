@@ -149,19 +149,53 @@ def main():
 
         if st.button("Get Started", key="get_started_button"):
             st.session_state.show_main_app = True
-
         st.markdown("""
-        ## The Team
+        <style>
+        .team-section {
+            text-align: center;
+            padding: 2rem 0;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            margin: 2rem 0;
+        }
+        .team-member {
+            margin-bottom: 1rem;
+        }
+        .team-member-name {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #333;
+        }
+        .team-member-role {
+            font-style: italic;
+            color: #666;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+        st.markdown("""
         
-        Our dedicated team brings together diverse expertise to deliver Astraea's innovative legal solutions:
-        
-        - **Aziza Al Zadjali**: AI/ML Solutions
-        - **Ibtihaj Al Bahri**: Business
-        - **Muadh Al Subhi**: Data and UI/UX
-        - **Uzair Saif Udeen**: Software Developer
-        
-        Together, we're committed to simplifying legal queries and enhancing access to legal information in Oman.
-        """)
+        st.markdown("""
+<div class="team-section">
+    <h2>Our Team</h2>
+    <p>Our dedicated team brings together diverse expertise to deliver Astraea's innovative legal solutions:</p>
+    <div class="team-member">
+        <div class="team-member-name">Aziza Al Zadjali</div>
+        <div class="team-member-role">AI/ML Solutions</div>
+    </div>
+    <div class="team-member">
+        <div class="team-member-name">Ibtihaj Al Bahri</div>
+        <div class="team-member-role">Business</div>
+    </div>
+    <div class="team-member">
+        <div class="team-member-name">Muadh Al Subhi</div>
+        <div class="team-member-role">Data and UI/UX</div>
+    </div>
+    <div class="team-member">
+        <div class="team-member-name">Uzair Saif Udeen</div>
+        <div class="team-member-role">Software Developer</div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
         # Add testimonial section
         st.markdown(
