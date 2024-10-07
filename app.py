@@ -191,9 +191,31 @@ def main():
         if st.button("Get Started", key="get_started_button"):
             st.session_state.show_main_app = True
 
-       # Add the 'Our Team' comment and team.png image after the "Get Started" button
-        st.markdown("<h3 style='text-align:center;'>Our Team</h3>", unsafe_allow_html=True)
-        
+         # Add the 'Our Team' section after the "Get Started" button
+        st.markdown(
+            """
+            <section id="team">
+                <h2>Our Team</h2>
+                <div class="team-member">
+                    <h3>Aziza Al Zadjali</h3>
+                    <p>AI/ML Solutions</p>
+                </div>
+                <div class="team-member">
+                    <h3>Ibtihaj Al Bahri</h3>
+                    <p>Business</p>
+                </div>
+                <div class="team-member">
+                    <h3>Muadh Al Subhi</h3>
+                    <p>Data and UI/UX</p>
+                </div>
+                <div class="team-member">
+                    <h3>Uzair Saif Udeen</h3>
+                    <p>Software Developer</p>
+                </div>
+            </section>
+            """,
+            unsafe_allow_html=True
+        )
  
 
         # Add testimonial section
