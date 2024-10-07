@@ -267,13 +267,12 @@ def main():
         }
 
         # Create tabs using the appropriate language
-        summary_type = st.radio('Choose the response type:', ('Brief', 'Detailed', 'Comprehensive'), key='summary_type')
-    tabs = st.tabs(tab_labels[lang_code])
+        tabs = st.tabs(tab_labels[lang_code])
 
         with tabs[0]:
             legal_query_assistant(lang_code)
         with tabs[1]:
-            oman_laws_feature(lang_code, summary_type)
+            oman_laws_feature(lang_code)
         with tabs[2]:
             legal_translation_service(lang_code)
         with tabs[3]:
