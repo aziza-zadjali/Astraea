@@ -410,7 +410,7 @@ def oman_laws_feature(lang_code):
                 submit_suggested = st.button("Submit Suggested Question" if lang_code == "en" else "إرسال السؤال المقترح", key="submit_oman_law_suggested_query")
                 
                 if selected_question and submit_suggested:
-                    concise_answer = get_concise_law_answer(selected_question, law_text, summary_type, lang_code)
+                    concise_answer = get_concise_law_answer(selected_question, law_text, summary_type if "summary_type" in locals() else "Detailed", lang_code)
                     st.markdown("### Answer:")
                     st.markdown(concise_answer)
 
