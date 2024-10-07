@@ -11,7 +11,6 @@ import openai
 import requests
 from bs4 import BeautifulSoup
 from PIL import Image
-st.title('Welcome to Astraea - Your AI Legal Assistant')
 
 
 # Assuming you have a directory for templates
