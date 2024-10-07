@@ -201,7 +201,7 @@ def main():
         new_team_width = int((new_team_height / team_height) * team_width)
         resized_team_image = team_image.resize((new_team_width, new_team_height))
         
-        st.image(resized_team_image, use_column_width=True)
+        st.image(resized_team_image, width=st.columns([1, 1]).width)
 
         # Add testimonial section
         st.markdown(
