@@ -12,6 +12,7 @@ import requests
 from bs4 import BeautifulSoup
 from PIL import Image
 
+
 # Assuming you have a directory for templates
 TEMPLATE_DIR = "templates"
 
@@ -79,39 +80,6 @@ def main():
             font-size: 1.1em;
             color: #333;
         }
-        /* Footer Section */
-        footer {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            background-color: #f1f1f1;
-            text-align: center;
-            padding: 10px;
-            font-size: 14px;
-            color: #333;
-        }
-        footer a {
-            color: #007bff;
-            text-decoration: none;
-            margin: 0 10px;
-        }
-        footer a:hover {
-            text-decoration: underline;
-        }
-        </style>
-        <footer>
-            <p>© 2024 Your Company Name. All rights reserved.</p>
-            <p>
-                <a href="mailto:contact@yourcompany.com">Contact Us</a> |
-                <a href="/privacy-policy">Privacy Policy</a> |
-                <a href="/terms-of-service">Terms of Service</a>
-            </p>
-            <p>
-                <a href="https://www.facebook.com/yourcompany" target="_blank">Facebook</a> |
-                <a href="https://www.twitter.com/yourcompany" target="_blank">Twitter</a> |
-                <a href="https://www.linkedin.com/company/yourcompany" target="_blank">LinkedIn</a>
-            </p>
-        </footer>
         </style>
     """
     
@@ -119,17 +87,6 @@ def main():
 
     # Add logo to the top left corner using Streamlit's image function
     st.image("logo.png", width=100)
-
-    # Add the "Welcome to Astraea" heading above the poster image
-    st.markdown(
-        """
-        <div style="text-align: center; padding: 50px 0;">
-            <h1 style="color: #008080; font-size: 3em;">Welcome to Astraea</h1>
-            <h2 style="color: #424242; font-size: 1.5em;">Your AI-Powered Legal Assistant</h2>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
 
     # Load the image and resize it to make the length 50% shorter
     image = Image.open("poster.jpeg")
@@ -180,6 +137,8 @@ def main():
         st.markdown(
             """
             <div class="landing-page" style="text-align: center; padding: 50px 0;">
+                <h1 style="color: #008080; font-size: 3em;">Welcome to Astraea</h1>
+                <h2 style="color: #424242; font-size: 1.5em;">Your AI-Powered Legal Assistant</h2>
                 <p style="font-size: 1.2em; max-width: 600px; margin: 20px auto; color: #424242;">
                     Astraea is here to simplify your legal queries. Get instant answers, 
                     explore Omani laws, and receive personalized legal advice.
@@ -191,10 +150,17 @@ def main():
         if st.button("Get Started", key="get_started_button"):
             st.session_state.show_main_app = True
 
-       # Add the 'Our Team' comment and team.png image after the "Get Started" button
+        # Add the 'Our Team' comment and team.png image after the "Get Started" button
         st.markdown("<h3 style='text-align:center;'>Our Team</h3>", unsafe_allow_html=True)
         
- 
+       # Load and resize the team.png image while maintaining aspect ratio
+        team_image = Image.open("team.png")
+        team_width, team_height = team_image.size
+        new_team_height = team_height // 2
+        new_team_width = int((new_team_height / team_height) * team_width)
+        resized_team_image = team_image.resize((new_team_width, new_team_height))
+        
+        st.image(resized_team_image, use_column_width=True)
 
         # Add testimonial section
         st.markdown(
@@ -226,14 +192,10 @@ def main():
         )
 
         # Move the "Return to Landing Page" button to the top center using Streamlit built-in button
-        return_button_col = st.columns([1, 2, 1])
+        return_button_col = st.columns([1, 2, 1])[1]
         with return_button_col:
             if st.button("Return to Landing Page", key="return_button"):
                 st.session_state.show_main_app = False
-
-
-
-        
 
         # Main content with tabs
         language = st.selectbox("Choose Language / اختر اللغة", ["English", "العربية"], key="language_select", label_visibility="collapsed")
