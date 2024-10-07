@@ -10,8 +10,6 @@ from fpdf import FPDF
 import openai
 import requests
 from bs4 import BeautifulSoup
-from PIL import Image
-
 
 # Assuming you have a directory for templates
 TEMPLATE_DIR = "templates"
@@ -88,15 +86,6 @@ def main():
     # Add logo to the top left corner using Streamlit's image function
     st.image("logo.png", width=100)
 
-    # Load the image and resize it to make the length 50% shorter
-    image = Image.open("poster.jpeg")
-    width, height = image.size
-    new_height = height // 3
-    resized_image = image.resize((width, new_height))
-
-    # Add the resized image at the top of the landing page
-    st.image(resized_image, use_column_width=True)
-
     # Fixed position for language selection icon
     st.markdown(
         """
@@ -152,13 +141,7 @@ def main():
 
         # Add the 'Our Team' comment and team.png image after the "Get Started" button
         st.markdown("<h3 style='text-align:center;'>Our Team</h3>", unsafe_allow_html=True)
-        # Load and resize the team.png image
-        team_image = Image.open("team.png")
-        team_width, team_height = team_image.size
-        new_team_height = team_height * 0.7
-        resized_team_image = team_image.resize((team_width, new_team_height))
-        
-        st.image(resized_team_image, use_column_width=True)
+        st.image("team.png", use_column_width=True)
 
         # Add testimonial section
         st.markdown(
@@ -167,11 +150,11 @@ def main():
                 <h2>What Our Clients Say</h2>
                 <div class="testimonial">
                     <p>"خانة الاستفسار تعمل بشكل جيد. إن إنشاء المستندات الآلي ومراجعة الوثائق يوفران الكثير من الوقت ويزيدان من الإنتاجية والدقة بشكل ملحوظ."</p>
-                    <h3>- مكتب محمد الشقصي للمحاماة والاستشارات القانونية</h3>
+                    <h3>- Client Name</h3>
                 </div>
                 <div class="testimonial">
                     <p>"The inquiry section works very well. Automated document creation and document review are significant time-savers that noticeably increase productivity and accuracy."</p>
-                    <h3>- MOHD AL-SHAQSI ADV AND LEGAL CONSULTANTS</h3>
+                    <h3>- Client Name</h3>
                 </div>
             </section>
             """,
