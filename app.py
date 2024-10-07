@@ -18,6 +18,7 @@ TEMPLATE_DIR = "templates"
 
 def main():
     st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
+    st.title('Welcome to Astraea - Your AI Legal Assistant')
 
     # Initialize session state for landing page
     if "show_main_app" not in st.session_state:
