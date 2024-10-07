@@ -16,20 +16,7 @@ from PIL import Image
 # Assuming you have a directory for templates
 TEMPLATE_DIR = "templates"
 
-
 def main():
-    # Assuming language code is set earlier in the app based on user preference
-    lang_code = 'en'
-
-    # Define summary_type based on user input
-    summary_type = st.radio(
-        "Choose the response type:",
-        ('Brief', 'Detailed', 'Comprehensive'),
-        key='summary_type'
-    )
-
-    # Continue with the rest of the main function
-    
     st.set_page_config(page_title="Astraea - Legal Query Assistant", layout="wide")
 
     # Initialize session state for landing page
@@ -285,7 +272,7 @@ def main():
         with tabs[0]:
             legal_query_assistant(lang_code)
         with tabs[1]:
-            oman_laws_feature(lang_code, summary_type)
+            oman_laws_feature(lang_code)
         with tabs[2]:
             legal_translation_service(lang_code)
         with tabs[3]:
@@ -296,18 +283,15 @@ def main():
             predictive_analysis_ui()
 
 
-
 def legal_query_assistant(lang_code):
     st.header("Legal Query Assistant" if lang_code == "en" else "مساعد الاستفسارات القانونية")
 
-    # Move the query type selection to the top and align vertically
     query_type = st.radio(
         "Choose query type" if lang_code == "en" else "اختر نوع الاستفسار",
         ('Enter your own query', 'Query from document') if lang_code == "en" else ('أدخل استفسارك الخاص', 'استفسر من وثيقة'),
         key="query_type"
     )
 
-    # Add a radio button for selecting the summary type
     summary_type = st.radio(
         "Please confirm the response type" if lang_code == "en" else "يرجى تأكيد نوع الملخص",
         ("Brief", "Detailed", "Comprehensive") if lang_code == "en" else ("موجز", "مفصل", "شامل"),
@@ -325,7 +309,6 @@ def legal_query_assistant(lang_code):
             if document_text:
                 suggested_questions = generate_suggested_questions(document_text, lang_code)
                 handle_document_queries(document_text, suggested_questions, summary_type, lang_code)
-
 def fetch_information_from_websites(query):
     urls = ["https://qanoon.om/", "https://www.oman.om"]
     headers = {"User-Agent": "Mozilla/5.0"}
@@ -368,7 +351,7 @@ def process_query(query, summary_type, context=None, lang_code="en"):
                         {"role": "system", "content": "You are Astraea, which is a greece word for justice, you are an expert legal advisor. Provide a clear, direct, and certain answer to the given query, including guidance and relevant legal precedents, statutes, or case law to support the analysis. If there are specific legal risks or potential issues, please flag them and suggest mitigating strategies."},
                         {"role": "user", "content": prompt[lang_code]}
                     ],
-                    # max_tokens=150 if summary_type == "Brief" else 300 if summary_type == "Detailed" else 600,
+                    max_tokens=150 if summary_type == "Brief" else 300 if summary_type == "Detailed" else 600,
                     temperature=0.7
                 )
                 
@@ -403,7 +386,7 @@ def handle_document_queries(document_text, suggested_questions, summary_type, la
     if custom_query and submit_custom:
         process_query(custom_query, summary_type, document_text, lang_code)
 
-def oman_laws_feature(lang_code, summary_type):
+def oman_laws_feature(lang_code):
     st.header("Oman Laws" if lang_code == "en" else "قوانين عمان")
     laws = get_oman_laws()
     
