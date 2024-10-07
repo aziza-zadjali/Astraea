@@ -150,6 +150,15 @@ def main():
         if st.button("Get Started", key="get_started_button"):
             st.session_state.show_main_app = True
 
+        # Add the 'Our Team' comment and team.png image after the "Get Started" button
+        st.markdown("<h3 style='text-align:center;'>Our Team</h3>", unsafe_allow_html=True)
+        # Load and resize the team.png image
+        team_image = Image.open("team.png")
+        team_width, team_height = team_image.size
+        new_team_height = team_height * 0.7
+        resized_team_image = team_image.resize((team_width, new_team_height))
+        
+        st.image(resized_team_image, use_column_width=True)
 
         # Add testimonial section
         st.markdown(
@@ -410,7 +419,7 @@ def oman_laws_feature(lang_code):
                 submit_suggested = st.button("Submit Suggested Question" if lang_code == "en" else "إرسال السؤال المقترح", key="submit_oman_law_suggested_query")
                 
                 if selected_question and submit_suggested:
-                    concise_answer = get_concise_law_answer(selected_question, law_text, summary_type if "summary_type" in locals() else "Detailed", lang_code)
+                    concise_answer = get_concise_law_answer(selected_question, law_text, summary_type, lang_code)
                     st.markdown("### Answer:")
                     st.markdown(concise_answer)
 
