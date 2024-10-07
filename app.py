@@ -282,29 +282,23 @@ def main():
         with tabs[5]:
             predictive_analysis_ui()
 
+
 def legal_query_assistant(lang_code):
     st.header("Legal Query Assistant" if lang_code == "en" else "مساعد الاستفسارات القانونية")
 
-    # Move the query type selection to the top and align vertically
     query_type = st.radio(
         "Choose query type" if lang_code == "en" else "اختر نوع الاستفسار",
         ('Enter your own query', 'Query from document') if lang_code == "en" else ('أدخل استفسارك الخاص', 'استفسر من وثيقة'),
         key="query_type"
     )
 
-    # Add a radio button for selecting the summary type
-    summary_type = st.radio(
-        "Please confirm the response type" if lang_code == "en" else "يرجى تأكيد نوع الملخص",
-        ("Brief", "Detailed", "Comprehensive") if lang_code == "en" else ("موجز", "مفصل", "شامل"),
-        key="summary_type"
-    )
-
-    query_type = st.radio(
-if query_type in ['Enter your own query', 'أدخل استفسارك الخاص']:
+    if query_type in ['Enter your own query', 'أدخل استفسارك الخاص']:
         query = st.text_input("Enter your legal query:" if lang_code == "en" else "أدخل استفسارك القانوني:", key="legal_query")
         if st.button("Submit" if lang_code == "en" else "إرسال", key="submit_legal_query"):
-        if query:
-            process_query(query, summary_type, context=None, lang_code=lang_code)
+            if query:
+                process_query(query, summary_type, context=None, lang_code=lang_code)
+            else:
+                st.warning("Please enter a query before submitting.")
     else:
         uploaded_file = st.file_uploader("Upload a document" if lang_code == "en" else "قم بتحميل وثيقة", type=["docx", "pdf", "txt"], key="file_uploader")
         if uploaded_file:
@@ -312,7 +306,6 @@ if query_type in ['Enter your own query', 'أدخل استفسارك الخاص'
             if document_text:
                 suggested_questions = generate_suggested_questions(document_text, lang_code)
                 handle_document_queries(document_text, suggested_questions, summary_type, lang_code)
-
 def fetch_information_from_websites(query):
     urls = ["https://qanoon.om/", "https://www.oman.om"]
     headers = {"User-Agent": "Mozilla/5.0"}
