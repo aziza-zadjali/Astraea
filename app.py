@@ -191,18 +191,25 @@ def main():
         if st.button("Get Started", key="get_started_button"):
             st.session_state.show_main_app = True
 
-        # Add the 'Our Team' comment and team.png image after the "Get Started" button
+       # Add the 'Our Team' comment and team.png image after the "Get Started" button
         st.markdown("<h3 style='text-align:center;'>Our Team</h3>", unsafe_allow_html=True)
         
-
-       # Load and resize the team.png image while maintaining aspect ratio
+        # Load and resize the team.png image while maintaining aspect ratio
         team_image = Image.open("team.png")
         team_width, team_height = team_image.size
         new_team_height = team_height // 2
         new_team_width = int((new_team_height / team_height) * team_width)
         resized_team_image = team_image.resize((new_team_width, new_team_height))
         
-        st.image(resized_team_image, use_column_width=True)
+        # Center the team image and make it 50% of the column width
+        st.markdown(
+            f"""
+            <div style="display: flex; justify-content: center;">
+                <img src="data:image/png;base64,{team_image}" style="width: 50%;">
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
         # Add testimonial section
         st.markdown(
